@@ -12,6 +12,7 @@ runs:
         run: |
           sudo apt-get install spell
           sudo apt-get install util-linux
+        shell: bash
       - name: Check spelling
         run: |
           PATH=$PATH:$GITHUB_ACTION_PATH/tools
@@ -25,3 +26,4 @@ runs:
               exit 1
             fi
           done
+        shell: bash
