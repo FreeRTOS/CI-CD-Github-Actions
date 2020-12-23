@@ -15,7 +15,6 @@ runs:
         shell: bash
       - name: Check spelling
         run: |
-          PATH=$PATH:$GITHUB_ACTION_PATH/tools
           cd ${{ inputs.path }}
           for lexfile in `find ./ -name lexicon.txt`
           do dir=${lexfile%/lexicon.txt}
