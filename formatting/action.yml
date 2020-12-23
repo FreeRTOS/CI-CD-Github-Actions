@@ -1,8 +1,8 @@
 name: 'formatting'
 description: 'CI formatting check'
 inputs:
-  path-to-repo:
-    description: 'Path to repository folder'
+  path:
+    description: 'Path to repository folder to run formatting check for.'
     required: false
     default: ./
 runs:
@@ -10,10 +10,15 @@ runs:
   steps: 
       - name: Install Uncrustify
         run: sudo apt-get install uncrustify
+        shell: bash
       - name: Run Uncrustify
-        run: find . -iname "*.[hc]" -exec uncrustify --check -c tools/uncrustify.cfg {} +
+        run: |
+          cd ${{ inputs.path }}
+          find . -iname "*.[hc]" -exec uncrustify --check -c tools/uncrustify.cfg {} +
+        shell: bash
       - name: Check For Trailing Whitespace
         run: |
+          cd ${{ inputs.path }}
           set +e
           grep --exclude="README.md" -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
@@ -22,8 +27,10 @@ runs:
           else
             exit 0
           fi
+        shell: bash
       - name: Check for CRLF
         run: |
+          cd ${{ inputs.path }}
           set +e
           find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
           if [ "$?" = "0" ]; then
@@ -32,3 +39,4 @@ runs:
           else
             exit 0
           fi
+        shell: bash

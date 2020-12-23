@@ -6,6 +6,19 @@ on:
 
 
 jobs:
+  test-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/coreMQTT
+          ref: main
+          path: coreMQTT
+      - name: Test formatting check action
+        uses: ./formatting
+        with:
+          path: coreMQTT
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
