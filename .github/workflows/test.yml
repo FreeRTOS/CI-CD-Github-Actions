@@ -1,0 +1,24 @@
+name: Release automation
+
+on:
+  push:
+    branches: ["**"]
+
+
+jobs:
+  test-format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Test formatting check action
+        uses: ./formatting
+        with:
+          repo-to-clone: FreeRTOS/coreMQTT
+  test-complexity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Test complexity check action
+        uses: ./complexity
+        with:
+          repo-to-clone: FreeRTOS/coreMQTT
