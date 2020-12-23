@@ -1,25 +1,19 @@
 name: 'complexity'
 description: 'CI complexity check'
 inputs:
-  repo-to-clone:
-    description: 'Repository to clone for complexity check (Eg. FreeRTOS/coreMQTT)'
-    required: true
-  branch:
-    description: 'Branch of repository to use (Eg. main)'
-    required: true
-    default: main
+  path:
+    description: 'Path to repository folder to run complexity check in.'
+    required: false
+    default: ./
 runs:
   using: "composite"
   steps: 
-      - uses: actions/checkout@v2
-        with:
-          repository: ${{ inputs.repo-to-clone }}
-          ref: ${{ inputs.branch }}
       - name: Setup
         run: sudo apt-get install complexity
         shell: bash
       - name: Complexity
         run: |
+          cd ${{ inputs.path }}
           find source/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=8
         shell: bash
