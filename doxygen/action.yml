@@ -1,0 +1,22 @@
+name: 'doxygen'
+description: 'CI doxygen build check'
+inputs:
+  path:
+    description: 'Path to repository folder to run doxygen generation in.'
+    required: false
+    default: ./
+runs:
+  using: "composite"
+  steps:
+    - name: Install Doxygen
+      run: |
+        cd ${{ inputs.path }}
+        wget -qO- "http://doxygen.nl/files/doxygen-1.8.20.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
+        sudo apt-get install -y libclang-9-dev
+      shell: bash
+    - name: Run Doxygen And Verify Stdout Is Empty
+      run: |
+        cd ${{ inputs.path }}
+        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
+        if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
+      shell: bash

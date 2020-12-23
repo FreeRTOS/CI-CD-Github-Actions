@@ -1,0 +1,27 @@
+name: 'spellings'
+description: 'CI spellings check'
+inputs:
+  path:
+    description: 'Path to repository folder to check spellings in.'
+    required: false
+    default: ./
+runs:
+  using: "composite"
+  steps:
+      - name: Install spell
+        run: |
+          sudo apt-get install spell
+          sudo apt-get install util-linux
+      - name: Check spelling
+        run: |
+          PATH=$PATH:$GITHUB_ACTION_PATH/tools
+          cd ${{ inputs.path }}
+          for lexfile in `find ./ -name lexicon.txt`
+          do dir=${lexfile%/lexicon.txt}
+            echo $dir
+            find-unknown-comment-words --directory $dir
+            if [ $? -ne "0" ]
+            then
+              exit 1
+            fi
+          done

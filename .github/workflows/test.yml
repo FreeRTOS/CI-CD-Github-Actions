@@ -32,3 +32,16 @@ jobs:
         uses: ./complexity
         with:
           path: coreMQTT
+  test-doxygen-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/coreMQTT
+          ref: main
+          path: coreMQTT
+      - name: Test doxygen build action
+        uses: ./doxygen
+        with:
+          path: coreMQTT
