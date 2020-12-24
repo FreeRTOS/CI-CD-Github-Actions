@@ -58,3 +58,38 @@ jobs:
         uses: ./spellings
         with:
           path: coreMQTT
+  test-coverage-cop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/coreMQTT
+          ref: main
+          path: coreMQTT
+      - name: Build
+        run: |
+          sudo apt-get install -y lcov
+          cmake -S ./coreMQTT/test -B build/ \
+          -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_CLONE_SUBMODULES=ON \
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
+          make -C build/ all
+      - name: Test
+        run: |
+          cd build/
+          ctest -E system --output-on-failure
+          cd ..
+      - name: Run Coverage
+        run: |
+          make -C build/ coverage
+          declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
+          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+      - name: Test coverage cop action
+        uses: ./coverage-cop
+        with:
+          path: ./build/coverage.info
+          branch-min-coverage: 100
+          line-min-coverage: 99
