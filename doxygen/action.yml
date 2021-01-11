@@ -11,7 +11,7 @@ runs:
     - name: Install Doxygen
       run: |
         cd ${{ inputs.path }}
-        wget -qO- "http://doxygen.nl/files/doxygen-1.8.20.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
+        wget -qO- "http://doxygen.nl/files/doxygen-1.9.1.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
         sudo apt-get install -y libclang-9-dev
       shell: bash
     - name: Run Doxygen And Verify Stdout Is Empty
