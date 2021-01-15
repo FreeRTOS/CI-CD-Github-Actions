@@ -42,11 +42,8 @@ def parse_make_output(output, values, key):
     It assumes the Berkley output format:
     text       data     bss     dec     hex filename
 
-    Returns a dict of the following format:
-    {
-        'file_name':'size',
-        'file_name':'size'
-    }
+    Values is defaultdict mapping filenames to dicts
+    This adds each file's size to the dict in its entry under the provided key.
     '''
     output = output.splitlines()
 
