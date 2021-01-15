@@ -41,7 +41,7 @@ def parse_make_output(output, values, key):
     '''
     output expects the output of the makefile, which ends in a call to
     arm-none-eabi-size
-    The otuput of size is expected to be the Berkley output format:
+    The output of size is expected to be the Berkley output format:
     text       data     bss     dec     hex filename
 
     values is an input defaultdict which maps filenames to dicts of opt level
