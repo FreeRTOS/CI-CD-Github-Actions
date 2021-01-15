@@ -11,9 +11,9 @@ __THIS_FILE_PATH__ = os.path.dirname(os.path.abspath(__file__))
 
 
 def make(sources, includes, flags, opt):
-    args = ['make', '-B', '-f', __THIS_FILE_PATH__ + '/makefile']
+    args = ['make', '-B', '-f', os.path.join(__THIS_FILE_PATH__, 'makefile')]
 
-    cflags = f'-O{opt} -I "{__THIS_FILE_PATH__ + "/config_files"}"'
+    cflags = f'-O{opt} -I "{os.path.join(__THIS_FILE_PATH__, "config_files")}"'
     for inc_dir in includes.splitlines():
         cflags += ' -I "'+os.path.abspath(inc_dir)+'"'
     for flag in flags.splitlines():
@@ -39,11 +39,15 @@ def convert_size_to_kb(byte_size):
 
 def parse_make_output(output, values, key):
     '''
-    It assumes the Berkley output format:
+    output expects the output of the makefile, which ends in a call to
+    arm-none-eabi-size
+    The otuput of size is expected to be the Berkley output format:
     text       data     bss     dec     hex filename
 
-    Values is defaultdict mapping filenames to dicts
-    This adds each file's size to the dict in its entry under the provided key.
+    values is an input defaultdict which maps filenames to dicts of opt level
+    to sizes.
+    This function adds each file's size to the file's dict with the key
+    provided by the key parameter.
     '''
     output = output.splitlines()
 
@@ -59,12 +63,14 @@ def parse_make_output(output, values, key):
     for line in output:
         parts = line.split()
 
+        # parts[5] is the filename
         filename = os.path.basename(parts[5])
         filename = str(filename.replace('.o','.c').strip())
 
         if "3rdparty" in parts[5]:
             filename += " (third-party utility)"
 
+        # parts[0] is the text size
         text_size = parts[0].strip()
         text_size_in_kb = convert_size_to_kb(text_size)
 
