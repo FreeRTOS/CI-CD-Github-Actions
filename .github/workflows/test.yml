@@ -3,7 +3,9 @@ name: Test actions
 on:
   push:
     branches: ["**"]
-
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   test-format-check:
