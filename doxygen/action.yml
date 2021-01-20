@@ -6,7 +6,7 @@ inputs:
     required: false
     default: ./
   doxygen_link:
-    description: 'Link to doxygen tar.gz to use 9 (default version 1.8.20).'
+    description: 'Link to doxygen tar.gz to use (default version 1.8.20).'
     required: false
     default: "https://sourceforge.net/projects/doxygen/files/rel-1.8.20/doxygen-1.8.20.linux.bin.tar.gz"
 runs:
