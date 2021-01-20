@@ -14,7 +14,7 @@ runs:
       - name: Run Uncrustify
         run: |
           cd ${{ inputs.path }}
-          find . -iname "*.[hc]" -exec uncrustify --check -c $GITHUB_ACTION_PATH/uncrustify.cfg {} +
+          find . -iname "*.[hc]" -exec uncrustify --check -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C {} +
         shell: bash
       - name: Check For Trailing Whitespace
         run: |
