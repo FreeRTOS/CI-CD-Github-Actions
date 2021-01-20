@@ -118,3 +118,8 @@ jobs:
             source/interface
           compiler_flags: |
             MQTT_DO_NOT_USE_CUSTOM_CONFIG
+      - name: Upload table
+        uses: actions/upload-artifact@v2
+        with:
+          name: size_table
+          path: size_table.html
