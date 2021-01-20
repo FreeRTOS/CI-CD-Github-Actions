@@ -11,7 +11,7 @@ jobs:
   test-format-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -24,7 +24,7 @@ jobs:
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -37,7 +37,7 @@ jobs:
   test-doxygen-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -50,7 +50,7 @@ jobs:
   test-spell-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -63,7 +63,7 @@ jobs:
   test-coverage-cop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -98,7 +98,7 @@ jobs:
   test-memory-statistics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
