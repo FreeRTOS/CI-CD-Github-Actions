@@ -12,8 +12,8 @@ runs:
         run: sudo apt-get install complexity
         shell: bash
       - name: Complexity
+        working-directory: ${{ inputs.path }}
         run: |
-          cd ${{ inputs.path }}
           find source/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=8
         shell: bash

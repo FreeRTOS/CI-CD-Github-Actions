@@ -12,13 +12,13 @@ runs:
         run: sudo apt-get install uncrustify
         shell: bash
       - name: Run Uncrustify
+        working-directory: ${{ inputs.path }}
         run: |
-          cd ${{ inputs.path }}
           find . -iname "*.[hc]" -exec uncrustify --check -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C {} +
         shell: bash
       - name: Check For Trailing Whitespace
+        working-directory: ${{ inputs.path }}
         run: |
-          cd ${{ inputs.path }}
           set +e
           grep --exclude="README.md" -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
@@ -29,8 +29,8 @@ runs:
           fi
         shell: bash
       - name: Check for CRLF
+        working-directory: ${{ inputs.path }}
         run: |
-          cd ${{ inputs.path }}
           set +e
           find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
           if [ "$?" = "0" ]; then
