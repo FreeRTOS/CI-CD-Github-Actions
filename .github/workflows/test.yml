@@ -122,4 +122,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: size_table
-          path: size_table.html
+          path: coreMQTT/size_table.html
+          if-no-files-found: error
