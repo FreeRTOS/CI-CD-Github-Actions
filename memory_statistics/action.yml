@@ -5,19 +5,9 @@ inputs:
     description: 'Path to library directory.'
     required: false
     default: ./
-  lib_name:
-    description: 'Library name for table header.'
+  config:
+    description: 'Configuration json file for memory estimation.'
     required: true
-  src:
-    description: 'Files to measure size of, newline delimited.'
-    required: true
-  include:
-    description: 'Include directories, newline delimited.'
-    required: true
-  compiler_flags:
-    description: 'Extra compiler flags, newline delimited.'
-    required: false
-    default: ''
   output:
     description: 'File to write generated table to.'
     required: false
@@ -37,9 +27,6 @@ runs:
       working-directory: ${{ inputs.path }}
       run: >-
           ${{ github.action_path }}/memory_statistics.py
-          --name "${{ inputs.lib_name }}"
-          --sources "${{ inputs.src }}"
-          --includes "${{ inputs.include }}"
-          --flags "${{ inputs.compiler_flags }}"
+          --config "${{ inputs.config }}"
           --output "${{ inputs.output }}"
       shell: bash
