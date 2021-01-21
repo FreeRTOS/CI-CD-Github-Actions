@@ -11,7 +11,7 @@ jobs:
   test-format-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -24,7 +24,7 @@ jobs:
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -37,7 +37,7 @@ jobs:
   test-doxygen-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -50,7 +50,7 @@ jobs:
   test-spell-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -63,7 +63,7 @@ jobs:
   test-coverage-cop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
           repository: FreeRTOS/coreMQTT
@@ -95,3 +95,32 @@ jobs:
           path: ./build/coverage.info
           branch-min-coverage: 100
           line-min-coverage: 99
+  test-memory-statistics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/coreMQTT
+          ref: main
+          path: coreMQTT
+      - name: Test memory statistics action
+        uses: ./memory_statistics
+        with:
+          path: coreMQTT
+          lib_name: coreMQTT
+          src: |
+            source/core_mqtt.c
+            source/core_mqtt_state.c
+            source/core_mqtt_serializer.c
+          include: |
+            source/include
+            source/interface
+          compiler_flags: |
+            MQTT_DO_NOT_USE_CUSTOM_CONFIG
+      - name: Upload table
+        uses: actions/upload-artifact@v2
+        with:
+          name: size_table
+          path: coreMQTT/size_table.html
+          if-no-files-found: error

@@ -23,7 +23,7 @@ inputs:
     required: false
     default: 'size_table.html'
   toolchain_link:
-    description: 'Link to ARM GCC tar.bz2 to use for compiling files.'
+    description: 'Link to ARM GCC tar.bz2 to use for compiling files (default version 9-2020-q2).'
     required: false
     default: "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A"
 runs:

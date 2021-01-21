@@ -5,18 +5,21 @@ inputs:
     description: 'Path to repository folder to run doxygen generation in.'
     required: false
     default: ./
+  doxygen_link:
+    description: 'Download link for doxygen tar.gz (default version 1.8.20).'
+    required: false
+    default: "https://sourceforge.net/projects/doxygen/files/rel-1.8.20/doxygen-1.8.20.linux.bin.tar.gz"
 runs:
   using: "composite"
   steps:
     - name: Install Doxygen
       run: |
-        cd ${{ inputs.path }}
-        wget -qO- "https://sourceforge.net/projects/doxygen/files/rel-1.8.20/doxygen-1.8.20.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
+        wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
         sudo apt-get install -y libclang-9-dev
       shell: bash
     - name: Run Doxygen And Verify Stdout Is Empty
+      working-directory: ${{ inputs.path }}
       run: |
-        cd ${{ inputs.path }}
         doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
         if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
       shell: bash
