@@ -40,13 +40,15 @@ def convert_size_to_kb(byte_size):
 
 
 def parse_make_output(output, values, key):
-    # output expects the output of the makefile, which ends in a call to
-    # arm-none-eabi-size The output of size is expected to be the Berkley
-    # output format: text data bss dec hex filename
-    #
-    # values is an input defaultdict which maps filenames to dicts of opt level
-    # to sizes. This function adds each file's size to the file's dict with the
-    # key provided by the key parameter.
+    '''
+    output expects the output of the makefile, which ends in a call to
+    arm-none-eabi-size The output of size is expected to be the Berkley output
+    format: text data bss dec hex filename
+
+    values is an input defaultdict which maps filenames to dicts of opt level
+    to sizes. This function adds each file's size to the file's dict with the
+    key provided by the key parameter.
+    '''
     output = output.splitlines()
 
     # Skip to size output
@@ -119,12 +121,13 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    # Config file should contain a json object with the following keys:
-    #   "lib_name": Name to use for the library in the table header
-    #   "src": Array of source paths to measure sizes of
-    #   "include": Array of include directories
-    #   "compiler_flags": (optional) Array of extra flags to use for compiling
-
+    '''
+    Config file should contain a json object with the following keys:
+      "lib_name": Name to use for the library in the table header
+      "src": Array of source paths to measure sizes of
+      "include": Array of include directories
+      "compiler_flags": (optional) Array of extra flags to use for compiling
+    '''
     with open(args['config']) as config_file:
         config = json.load(config_file)
 

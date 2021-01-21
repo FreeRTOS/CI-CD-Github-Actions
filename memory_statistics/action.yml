@@ -6,7 +6,7 @@ inputs:
     required: false
     default: ./
   config:
-    description: 'Configuration json file for memory estimation.'
+    description: 'JSON config file containing library information to be used for memory estimation.'
     required: true
   output:
     description: 'File to write generated table to.'
