@@ -5,23 +5,19 @@ inputs:
     description: 'Path to library directory.'
     required: false
     default: ./
-  lib_name:
-    description: 'Library name for table header.'
+  config:
+    description: 'JSON config file containing library information to be used for memory estimation.'
     required: true
-  src:
-    description: 'Files to measure size of, newline delimited.'
-    required: true
-  include:
-    description: 'Include directories, newline delimited.'
-    required: true
-  compiler_flags:
-    description: 'Extra compiler flags, newline delimited.'
-    required: false
-    default: ''
   output:
     description: 'File to write generated table to.'
     required: false
     default: 'size_table.html'
+  check_against:
+    description: >
+        Path to existing memory estimates file to compare with the memory estimates calculated by
+        the action. Action will fail if sizes do not match to indicate need for updating size.
+    required: false
+    default: ''
   toolchain_link:
     description: 'Link to ARM GCC tar.bz2 to use for compiling files (default version 9-2020-q2).'
     required: false
@@ -37,9 +33,18 @@ runs:
       working-directory: ${{ inputs.path }}
       run: >-
           ${{ github.action_path }}/memory_statistics.py
-          --name "${{ inputs.lib_name }}"
-          --sources "${{ inputs.src }}"
-          --includes "${{ inputs.include }}"
-          --flags "${{ inputs.compiler_flags }}"
+          --config "${{ inputs.config }}"
           --output "${{ inputs.output }}"
+      shell: bash
+    - name: Compare table
+      run: |
+          if [ -n "${{ inputs.check_against }}" ] ; then
+              if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
+                  exit 0
+              else
+                  echo "Size table does not match!"
+                  diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
+                  exit 1
+              fi
+          fi
       shell: bash
