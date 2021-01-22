@@ -12,6 +12,10 @@ inputs:
     description: 'File to write generated table to.'
     required: false
     default: 'size_table.html'
+  check_against:
+    description: 'If set, the generated table will be compared against the given file, failing if not the same.'
+    required: false
+    default: ''
   toolchain_link:
     description: 'Link to ARM GCC tar.bz2 to use for compiling files (default version 9-2020-q2).'
     required: false
@@ -29,4 +33,16 @@ runs:
           ${{ github.action_path }}/memory_statistics.py
           --config "${{ inputs.config }}"
           --output "${{ inputs.output }}"
+      shell: bash
+    - name: Compare table
+      run: |
+          if [ "x${{ inputs.check_against }}" != "x" ] ; then
+              if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
+                  exit 0
+              else
+                  echo "Size table does not match!"
+                  diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
+                  exit 1
+              fi
+          fi
       shell: bash
