@@ -13,7 +13,9 @@ inputs:
     required: false
     default: 'size_table.html'
   check_against:
-    description: 'If set, the generated table will be compared against the given file, failing if not the same.'
+    description: >
+        Path to existing memory estimates file to compare with the memory estimates calculated by
+        the action. Action will fail if sizes do not match to indicate need for updating size.
     required: false
     default: ''
   toolchain_link:
