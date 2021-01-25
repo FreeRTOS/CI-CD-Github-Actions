@@ -15,7 +15,7 @@ runs:
     - name: Install Doxygen
       run: |
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
-        sudo apt-get install -y libclang-9-dev
+        sudo apt-get install -y libclang-9-dev graphviz
       shell: bash
     - name: Run Doxygen And Verify Stdout Is Empty
       working-directory: ${{ inputs.path }}
