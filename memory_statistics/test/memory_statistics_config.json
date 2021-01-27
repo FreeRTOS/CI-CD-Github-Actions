@@ -1,0 +1,12 @@
+{
+    "lib_name": "Memory Statistics Test",
+    "src": [
+        "test.c"
+    ],
+    "include": [
+        "include"
+    ],
+    "compiler_flags": [
+        "TEST_FLAG"
+    ]
+}
