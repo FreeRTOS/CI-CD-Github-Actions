@@ -28,6 +28,8 @@ def make(sources, includes, flags, opt):
     (results, _) = proc.communicate()
     print(results)
 
+    # Run `make clean` to remove object files generated during previous make invocation.
+    # This is so that memory_statistics.py cleans up after itself when running it locally.
     args = ['make', '-f', os.path.join(__THIS_FILE_PATH__, 'makefile'), 'clean']
     args += ['SRCS=' + " ".join(sources)]
     proc = subprocess.Popen(args)
