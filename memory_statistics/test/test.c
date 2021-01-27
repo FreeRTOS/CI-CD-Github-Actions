@@ -1,11 +1,13 @@
 #include "stdint.h"
 
-// Test include directories added from memory_statistics config.
-// This header is in ./include which is in the test config's includes.
+// Test include directories added from supplied memory_statistics config.
+// This header is in ./include which is in the config for testing the
+// memory_statistics action.
 #include "test_header.h"
 
-// Test compiler flags added from memory_statististics config.
-// TEST_FLAG is set in the test config's compiler_flags array.
+// Test compiler flags added from supplied memory_statistics config.
+// TEST_FLAG is in the compiler_flags array of the config for testing the
+// memory_statistics action.
 #ifdef TEST_FLAG
 
 // This should add 10340 bytes to the .text section.
