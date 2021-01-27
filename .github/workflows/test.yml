@@ -103,6 +103,6 @@ jobs:
         uses: ./memory_statistics
         with:
           path: memory_statistics/test
-          config: memory_statistics_config.json
-          output: size_table_new.html
-          check_against: size_table_expected.html
+          config: ./memory_statistics_config.json
+          output: ./size_table_new.html
+          check_against: ./size_table_expected.html
