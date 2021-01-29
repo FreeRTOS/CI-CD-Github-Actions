@@ -99,19 +99,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: FreeRTOS/coreMQTT
-          ref: main
-          path: coreMQTT
       - name: Test memory statistics action
         uses: ./memory_statistics
         with:
-          path: coreMQTT
-          config: ../.github/coreMQTT_memory_statistics_config.json
-      - name: Upload table
-        uses: actions/upload-artifact@v2
-        with:
-          name: size_table
-          path: coreMQTT/size_table.html
-          if-no-files-found: error
+          path: memory_statistics/test
+          config: ./memory_statistics_config.json
+          output: ./size_table_new.html
+          check_against: ./size_table_expected.html

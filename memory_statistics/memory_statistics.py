@@ -15,7 +15,7 @@ __THIS_FILE_PATH__ = os.path.dirname(os.path.abspath(__file__))
 def make(sources, includes, flags, opt):
     args = ['make', '-B', '-f', os.path.join(__THIS_FILE_PATH__, 'makefile')]
 
-    cflags = f'-O{opt} -I "{os.path.join(__THIS_FILE_PATH__, "config_files")}"'
+    cflags = f'-O{opt}'
     for inc_dir in includes:
         cflags += ' -I "'+os.path.abspath(inc_dir)+'"'
     for flag in flags:
@@ -27,6 +27,12 @@ def make(sources, includes, flags, opt):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
     (results, _) = proc.communicate()
     print(results)
+
+    # Run `make clean` to remove object files generated during previous make invocation.
+    # This is so that memory_statistics.py cleans up after itself when running it locally.
+    args = ['make', '-f', os.path.join(__THIS_FILE_PATH__, 'makefile'), 'clean']
+    args += ['SRCS=' + " ".join(sources)]
+    proc = subprocess.Popen(args)
 
     return results
 
