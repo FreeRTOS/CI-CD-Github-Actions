@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 import argparse
 import subprocess
 import json
@@ -129,6 +130,10 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
+
+    if not shutil.which("arm-none-eabi-gcc"):
+        print("ARM GCC not found. Please add the ARM GCC toolchain to your path.")
+        sys.exit(1)
 
     '''
     Config file should contain a json object with the following keys:
