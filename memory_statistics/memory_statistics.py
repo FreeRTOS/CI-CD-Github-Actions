@@ -82,9 +82,9 @@ def parse_make_output(output, values, key):
         # parts[1] is the data size
         data_size = int(parts[1].strip())
 
-        size_in_kb = convert_size_to_kb(text_size + data_size)
+        total_size_in_kb = convert_size_to_kb(text_size + data_size)
 
-        values[filename][key] = size_in_kb
+        values[filename][key] = total_size_in_kb
 
 
 def parse_to_table(o1_output, os_output, name):
