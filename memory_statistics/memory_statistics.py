@@ -38,7 +38,7 @@ def make(sources, includes, flags, opt):
 
 
 def convert_size_to_kb(byte_size):
-    kb_size = round(int(byte_size)/1024,1)
+    kb_size = round(byte_size/1024,1)
     if (kb_size == 0.0):
         return 0.1
     else:
@@ -77,10 +77,13 @@ def parse_make_output(output, values, key):
             filename += " (third-party utility)"
 
         # parts[0] is the text size
-        text_size = parts[0].strip()
-        text_size_in_kb = convert_size_to_kb(text_size)
+        text_size = int(parts[0].strip())
+        # parts[1] is the data size
+        data_size = int(parts[1].strip())
 
-        values[filename][key] = text_size_in_kb
+        size_in_kb = convert_size_to_kb(text_size + data_size)
+
+        values[filename][key] = size_in_kb
 
 
 def parse_to_table(o1_output, os_output, name):
