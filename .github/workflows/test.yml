@@ -93,8 +93,8 @@ jobs:
         uses: ./coverage-cop
         with:
           path: ./build/coverage.info
-          branch-min-coverage: 100
-          line-min-coverage: 99
+          branch-coverage-min: 70
+          line-coverage-min: 100
   test-memory-statistics:
     runs-on: ubuntu-latest
     steps:
