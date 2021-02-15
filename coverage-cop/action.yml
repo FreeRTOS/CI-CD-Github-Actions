@@ -28,7 +28,7 @@ runs:
           fi
           echo "Required branch coverage: ${{ inputs.branch-coverage-min }}"
           echo "Branch coverage: $BRANCH_COVERAGE"
-          if [[ $(echo "$BRANCH_COVERAGE < $${{ inputs.branch-coverage-min }}" | bc) -ne 0 ]]; then
+          if [[ $(echo "$BRANCH_COVERAGE < ${{ inputs.branch-coverage-min }}" | bc) -ne 0 ]]; then
             echo "Branch Coverage is too low."
             RESULT=1
           fi
