@@ -20,6 +20,7 @@ runs:
         shell: bash
       - name: Install lcov (if not present)
         run: sudo apt-get install lcov
+        shell: bash
       - name: Check coverage
         run: |
           LINE_COVERAGE=$(lcov --list ${{ inputs.path }} | tail -n 1 | cut -d '|' -f 2 | sed -n "s/\([^%]*\)%.*/\1/p")
