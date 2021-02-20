@@ -21,6 +21,8 @@ jobs:
         uses: ./formatting
         with:
           path: coreMQTT
+          exclude-files: lexicon.txt
+          exclude-dirs: build;docs
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
