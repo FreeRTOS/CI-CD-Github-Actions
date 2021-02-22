@@ -5,6 +5,14 @@ inputs:
     description: 'Path to repository folder to run formatting check for.'
     required: false
     default: ./
+  exclude-files:
+    description: 'List of comma-separated files to exclude from formatting check. Eg file1,file2'
+    required: false
+    default: ''
+  exclude-dirs:
+    description: 'List of comma-separated directories to exclude from formatting check. Eg docs,build'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps: 
@@ -20,7 +28,7 @@ runs:
         working-directory: ${{ inputs.path }}
         run: |
           set +e
-          grep --exclude="README.md" -rnI -e "[[:blank:]]$" .
+          grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},''} -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             echo "Files have trailing whitespace."
             exit 1
