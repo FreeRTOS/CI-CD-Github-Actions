@@ -28,11 +28,11 @@ runs:
     - name: Install python dependencies
       run: |
         sudo apt-get install -y python3-setuptools python3-pip
-        python3 -m pip install -r requirements.txt
+        python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
       shell: bash
     - name: Run link verifier script
       run: |
-        python3 verify-links.py --exclude-dirs ${{ github.events.input.exclude_dirs }}
+        python3 $GITHUB_ACTION_PATH/verify-links.py --exclude-dirs ${{ github.events.input.exclude_dirs }}
         if [ $? -ne "0" ]
         then
           exit 1
