@@ -108,3 +108,16 @@ jobs:
           config: ./memory_statistics_config.json
           output: ./size_table_new.html
           check_against: ./size_table_expected.html
+  test-link-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.10'
+      - name: Test link verifier action
+        uses: ./link-verifier
+        with:
+          path: ./
+          exclude_dirs: complexity
