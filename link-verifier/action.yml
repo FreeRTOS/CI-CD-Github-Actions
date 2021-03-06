@@ -1,0 +1,40 @@
+name: 'link-verifier'
+description: 'Verify links (URLs, anchors, and relative path hyperlinks)'
+inputs:
+  path:
+    description: 'Path to repository folder to run link verification on.'
+    required: false
+    default: ./
+  exclude_dirs:
+    description: 'Space-separated directory names to ignore. (Eg. cmock cmbc)'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Install pandoc
+      run: |
+        wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
+        sudo dpkg -i pandoc.deb
+        rm pandoc.deb
+      shell: bash
+    - name: Install gh
+      run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt update
+        sudo apt install -y gh
+      shell: bash
+    - name: Install python dependencies
+      run: |
+        sudo apt-get install -y python3-setuptools python3-pip
+        python3 -m pip install -r requirements.txt
+      shell: bash
+    - name: Run link verifier script
+      run: |
+        python3 verify-links.py --exclude-dirs ${{ github.events.input.exclude_dirs }}
+        if [ $? -ne "0" ]
+        then
+          exit 1
+        fi
+
