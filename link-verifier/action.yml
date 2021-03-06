@@ -5,7 +5,7 @@ inputs:
     description: 'Path to repository folder to run link verification on.'
     required: false
     default: ./
-  exclude_dirs:
+  exclude-dirs:
     description: 'Space-separated directory names to ignore. (Eg. cmock cmbc)'
     required: false
     default: ''
@@ -32,7 +32,7 @@ runs:
       shell: bash
     - name: Run link verifier script
       run: |
-        python3 $GITHUB_ACTION_PATH/verify-links.py --exclude-dirs ${{ github.events.input.exclude_dirs }}
+        python3 $GITHUB_ACTION_PATH/verify-links.py --exclude-dirs ${{ inputs.exclude-dirs }}
         if [ $? -ne "0" ]
         then
           exit 1

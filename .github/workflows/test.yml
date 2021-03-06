@@ -120,4 +120,4 @@ jobs:
         uses: ./link-verifier
         with:
           path: ./
-          exclude_dirs: complexity
+          exclude-dirs: complexity
