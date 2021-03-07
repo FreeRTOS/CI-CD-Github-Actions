@@ -30,7 +30,8 @@ Run the script with a list of space separated names of directories to exclude. O
 
 | Option | Argument | Description |
 | --- | --- | --- |
-| `-D`, `--exclude-dirs` | 1 or more space-separated directory names | List of directories to ignore. Directories should be separated by spaces. |
+| `-D`, `--exclude-dirs` | 1 or more comma-separated directory names | List of directories to ignore. Directories should be separated by commas. |
+| `-A`, `--allowlist-file` | Allowlist of URLs | Path to file containing list of URLs excused from link verification. |
 | `-n`, `--num-processes` | Integer | Number of threads to run in parallel when generating HTML files from Markdown. Each link is still tested serially, however. |
 | `-k`, `--keep` | *None* | Option to keep temporary HTML files instead of deleting them. Only useful for debugging. |
 | `-v`, `--verbose` | *None* | Increase verbosity to print all files and links tested, instead of only errors. |

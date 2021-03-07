@@ -296,6 +296,7 @@ def main():
                'Optional dependencies: pandoc (to support testing Markdown files), gh (To speed up checking GitHub links)'
     )
     parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
+    parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", nargs='+', help="Path to file containing list of allowed URLs.")
     parser.add_argument("-n", "--num-processes", action="store", type=int, default=4, help="Number of processes to run in parallel")
     parser.add_argument("-k", "--keep", action="store_true", default=False, help="Keep temporary files instead of deleting")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Print all links tested")
@@ -305,13 +306,12 @@ def main():
     broken_links = []
     file_list = []
     link_list = []
-    if args.exclude_dirs is None:
-        parser.error('List of exclude directories should be provided.')
-    
+
     # Obtain list of Markdown files from the repository (along with excluding passed directories).
-    cmd = f'(find . -type f -name \'*.md\' | grep -E -i -v \''
-    cmd += "|".join(args.exclude_dirs)
-    cmd += f'\' | tr \'\\n\' \' \' )'
+    cmd = f'(find . -type f -name \'*.md\' | '
+    if args.exclude_dirs is not None:
+        cmd += f'grep -E -i -v \'' + "|".join(args.exclude_dirs[0].split(',')) + f'\' | '
+    cmd += f'tr \'\\n\' \' \' )'
     process = subprocess.run(
         cmd,
         stdout=subprocess.PIPE,
@@ -327,11 +327,15 @@ def main():
     if args.verbose:
         print(file_list)
 
-    exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs ]
     # Obtain list of links across files in the repository (besides files in exclude list of directories passed).
-    cmd = f'(grep -e \'https\?://\' . -RIa --include=\'*.c\' --include=\'*.h\' --include=\'*.dox\' '
-    cmd += f'--exclude-dir=.git ' + " ".join(exclude_dirs_with_prefix) + ' | ' 
-    cmd += f'grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | grep -Fxvf tools/link-verifier/allowlist.txt | tr \'\n\' \' \')'
+    cmd = f'(grep -e \'https\?://\' . -RIa --include=\'*.c\' --include=\'*.h\' --include=\'*.dox\' --exclude-dir=.git '
+    if args.exclude_dirs is not None:
+        exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs[0].split(',') ]
+        cmd += " ".join(exclude_dirs_with_prefix)
+    cmd += f' | grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | '
+    if args.allowlist is not None:
+        cmd += f'grep -Fxvf ' + "".join(args.allowlist) + ' | '
+    cmd += f'tr \'\n\' \' \')'
     process = subprocess.run(
         cmd,
         stdout=subprocess.PIPE,

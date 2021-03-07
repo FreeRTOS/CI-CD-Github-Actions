@@ -6,7 +6,11 @@ inputs:
     required: false
     default: ./
   exclude-dirs:
-    description: 'Space-separated directory names to ignore. (Eg. cmock cmbc)'
+    description: 'Comma-separated list of directory names to ignore. (Eg. cmock cmbc)'
+    required: false
+    default: ''
+  allowlist-file:
+    description: 'Path to file containing allowlist of URLs.'
     required: false
     default: ''
 runs:
@@ -32,7 +36,15 @@ runs:
       shell: bash
     - name: Run link verifier script
       run: |
-        python3 $GITHUB_ACTION_PATH/verify-links.py --exclude-dirs ${{ inputs.exclude-dirs }}
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          args='--exclude-dirs='${{ inputs.exclude-dirs }}
+          args+=' '
+        fi
+        if [ -n "${{ inputs.allowlist-file }}" ]; then
+          args+='--allowlist-file='${{ inputs.allowlist-file }}
+        fi
+        echo $args
+        python3 $GITHUB_ACTION_PATH/verify-links.py $args
         if [ $? -ne "0" ]
         then
           exit 1
