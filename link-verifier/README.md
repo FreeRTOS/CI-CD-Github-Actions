@@ -4,7 +4,7 @@
 
 - Unix/Linux system
 - Python3
-- [pandoc](https://github.com/jgm/pandoc). Used to convert Markdown files to HTML, which are then searched.
+- [pandoc](https://github.com/jgm/aapandoc). Used to convert Markdown files to HTML, which are then searched.
 - [GitHub CLI](https://github.com/cli/cli). Optional, but recommended to speed up the testing of links involving GitHub issues and pull requests.
 - See [requirements.txt](requirements.txt) for versions of Python packages. This script uses beautfulsoup4, requests, and termcolor.
 
