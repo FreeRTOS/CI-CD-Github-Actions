@@ -43,6 +43,7 @@ runs:
         if [ -n "${{ inputs.allowlist-file }}" ]; then
           args+='--allowlist-file='${{ inputs.allowlist-file }}
         fi
+        echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py $args
         if [ $? -ne "0" ]
         then
