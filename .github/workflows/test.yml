@@ -121,3 +121,4 @@ jobs:
         with:
           path: ./
           exclude-dirs: complexity
+          include-file-types: *.c,*.html

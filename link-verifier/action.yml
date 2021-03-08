@@ -9,6 +9,9 @@ inputs:
     description: 'Comma-separated list of directory names to ignore. (Eg. cmock cmbc)'
     required: false
     default: ''
+  include-file-types: 'Comma-separated list of file type patters in repository to test.'
+    required: false
+    default: '*.c,*.h,*.dox'
   allowlist-file:
     description: 'Path to file containing allowlist of URLs.'
     required: false
@@ -38,6 +41,10 @@ runs:
       run: |
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           args='--exclude-dirs='${{ inputs.exclude-dirs }}
+          args+=' '
+        fi
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          args='--include-files='${{ inputs.include-file-types }}
           args+=' '
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
