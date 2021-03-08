@@ -23,14 +23,17 @@ The script will print URLs that were not accessible. For Markdown files, it will
 Run the script with a list of space separated names of directories to exclude. Optionally increase verbosity to print all links.
 
 ```bash
-./tools/link-verifier/verify-links.py -D third-party cmock  -v
+./tools/link-verifier/verify-links.py --files f file_to_test.txt --links https://mosquitto.org --exclude-dirs third-party,cmock --include-files *.c,*.h,*.dox -v
 ```
 
 ## Command Line Options
 
 | Option | Argument | Description |
 | --- | --- | --- |
-| `-D`, `--exclude-dirs` | 1 or more comma-separated directory names | List of directories to ignore. Directories should be separated by commas. |
+| `-F`, `--files` | 1 or more comma-separated filepaths | Filepaths to verify links. Filepaths may be absolute or relative. |
+| `-L`, `--links` | 1 or more comma-separated URLs | List of URLs to test. URLs should be separated by commas. |
+| `-D`, `--exclude-dirs` | 1 or more comma-separated directory names | List of directories to ignore for Markdown files and URL search. Directories should be separated by commas. |
+| `-I`, `--include-files` | 1 or more comma-separated file patterns | List of file patterns whose URLs will be tested. File Patterns should be separated by commas. |
 | `-A`, `--allowlist-file` | Allowlist of URLs | Path to file containing list of URLs excused from link verification. |
 | `-n`, `--num-processes` | Integer | Number of threads to run in parallel when generating HTML files from Markdown. Each link is still tested serially, however. |
 | `-k`, `--keep` | *None* | Option to keep temporary HTML files instead of deleting them. Only useful for debugging. |

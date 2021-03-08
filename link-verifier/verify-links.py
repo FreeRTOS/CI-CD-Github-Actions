@@ -295,7 +295,10 @@ def main():
         epilog='Requires beautifulsoup4, requests, and termcolor from PyPi. ' +
                'Optional dependencies: pandoc (to support testing Markdown files), gh (To speed up checking GitHub links)'
     )
+    parser.add_argument("-F", "--files", action="store", dest="files", nargs='+', help="List of files to test links in.")
+    parser.add_argument("-L", "--links", action="store", dest="links", nargs='+', help="List of links to test.")
     parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
+    parser.add_argument("-I", "--include-files", action="store", dest="include_files", nargs='+', help="List of file patterns to search for URLs.")
     parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", nargs='+', help="Path to file containing list of allowed URLs.")
     parser.add_argument("-n", "--num-processes", action="store", type=int, default=4, help="Number of processes to run in parallel")
     parser.add_argument("-k", "--keep", action="store_true", default=False, help="Keep temporary files instead of deleting")
@@ -306,6 +309,11 @@ def main():
     broken_links = []
     file_list = []
     link_list = []
+
+    # If any explicit files are passed, add them to file_list.
+    if args.files is not None:
+        for file in args.files[0].split(','):
+            file_list.append(file)
 
     # Obtain list of Markdown files from the repository (along with excluding passed directories).
     for root, dirs, files in os.walk("./"):
@@ -318,26 +326,34 @@ def main():
     if args.verbose:
         print(file_list)
 
-    # Obtain list of links across files in the repository (besides files in exclude list of directories passed).
-    cmd = f'(grep -e \'https\?://\' . -RIa --include=\'*.c\' --include=\'*.h\' --include=\'*.dox\' --exclude-dir=.git '
-    if args.exclude_dirs is not None:
-        exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs[0].split(',') ]
-        cmd += " ".join(exclude_dirs_with_prefix)
-    cmd += f' | grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | '
-    if args.allowlist is not None:
-        cmd += f'grep -Fxvf ' + "".join(args.allowlist) + ' | '
-    cmd += f'tr \'\n\' \' \')'
-    process = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        shell=True,
-        encoding="utf-8",
-        universal_newlines=True
-    )
-    if process.returncode == 0:
-        for link in process.stdout.split():
+    # If any explicit links are passed, add them to file_list.
+    if args.links is not None:
+        for link in args.links[0].split(','):
             link_list.append(link)
+
+    # Obtain list of links across files in the repository (besides files in exclude list of directories passed).
+    if args.include_files is not None:
+        cmd = f'(grep -e \'https\?://\' . -RIa '
+        include_files_with_prefix = [ '--include='+file_pattern for file_pattern in args.include_files[0].split(',') ]
+        cmd += " ".join(include_files_with_prefix) + ' '
+        if args.exclude_dirs is not None:
+            exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs[0].split(',') ]
+            cmd += " ".join(exclude_dirs_with_prefix)
+        cmd += f' | grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | '
+        if args.allowlist is not None:
+            cmd += f'grep -Fxvf ' + "".join(args.allowlist) + ' | '
+        cmd += f'tr \'\\n\' \' \')'
+        process = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True,
+            encoding="utf-8",
+            universal_newlines=True
+        )
+        if process.returncode == 0:
+            for link in process.stdout.split():
+                link_list.append(link)
 
     try:
         file_map = {}
