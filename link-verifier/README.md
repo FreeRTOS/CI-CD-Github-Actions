@@ -17,16 +17,19 @@ The script will print URLs that were not accessible. For Markdown files, it will
 
 ### Allowlist
 
-[allowlist.txt](allowlist.txt) contains a list of non-existant URLs used as placeholder examples in this repository. The script does not use it, but it can be used to filter out URLs before passing them in.
+An allow list file contains a list of non-existant URLs used as placeholder examples in a repository. The script does not use it, but it can be used to filter out URLs before passing them in.
 
 ### Example
 Run the script with a list of space separated names of directories to exclude. Optionally increase verbosity to print all links.
 
 ```bash
-./tools/link-verifier/verify-links.py --files f file_to_test.txt --links https://mosquitto.org --exclude-dirs third-party,cmock --include-files *.c,*.h,*.dox -v
+./tools/link-verifier/verify-links.py --exclude-dirs third-party,cmock --include-files *.c,*.h,*.dox -v
 ```
 
 ## Command Line Options
+
+The `--links` and `--include-files` options are mutually exclusive i.e. if the former is passed, then the script does not search for URLs in the repository, but if the latter is passed,
+then the script looks for URLs across the specified file type patterns in repository.
 
 | Option | Argument | Description |
 | --- | --- | --- |
