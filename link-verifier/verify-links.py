@@ -308,21 +308,12 @@ def main():
     link_list = []
 
     # Obtain list of Markdown files from the repository (along with excluding passed directories).
-    cmd = f'(find . -type f -name \'*.md\' | '
-    if args.exclude_dirs is not None:
-        cmd += f'grep -E -i -v \'' + "|".join(args.exclude_dirs[0].split(',')) + f'\' | '
-    cmd += f'tr \'\\n\' \' \' )'
-    process = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        shell=True,
-        encoding="utf-8",
-        universal_newlines=True
-    )
-    if process.returncode == 0:
-        for file in process.stdout.split():
-            file_list.append(file)
+    for root, dirs, files in os.walk("./"):
+        # Avoid exclude directories, if passed, from search.
+        if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs):
+            for file in files:
+                if file.endswith(".md"):
+                    file_list.append(os.path.join(root, file))
 
     if args.verbose:
         print(file_list)
