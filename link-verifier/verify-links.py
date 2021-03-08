@@ -295,10 +295,10 @@ def main():
         epilog='Requires beautifulsoup4, requests, and termcolor from PyPi. ' +
                'Optional dependencies: pandoc (to support testing Markdown files), gh (To speed up checking GitHub links)'
     )
-    parser.add_argument("-F", "--files", action="store", dest="files", nargs='+', help="List of files to test links in.")
-    parser.add_argument("-L", "--links", action="store", dest="links", nargs='+', help="List of links to test.")
-    parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
-    parser.add_argument("-I", "--include-files", action="store", dest="include_files", nargs='+', help="List of file patterns to search for URLs.")
+    parser.add_argument("-F", "--files", action="store", dest="files", help="List of files to test links in.")
+    parser.add_argument("-L", "--links", action="store", dest="links", help="List of links to test.")
+    parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", help="List of directories to ignore.")
+    parser.add_argument("-I", "--include-files", action="store", dest="include_files", help="List of file patterns to search for URLs.")
     parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", nargs='+', help="Path to file containing list of allowed URLs.")
     parser.add_argument("-n", "--num-processes", action="store", type=int, default=4, help="Number of processes to run in parallel")
     parser.add_argument("-k", "--keep", action="store_true", default=False, help="Keep temporary files instead of deleting")
@@ -312,14 +312,14 @@ def main():
 
     # If any explicit files are passed, add them to file_list.
     if args.files is not None:
-        for file in args.files[0].split(','):
+        for file in args.files.split(','):
             file_list.append(file)
-        file_list = [file for file in args.files[0].split(',')]
+        file_list = [file for file in args.files.split(',')]
     else:
         # Obtain list of Markdown files from the repository (along with excluding passed directories).
         for root, dirs, files in os.walk("./"):
             # Avoid exclude directories, if passed, from search.
-            if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs[0].split(',')):
+            if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs.split(',')):
                 file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
 
     if args.verbose:
@@ -327,15 +327,15 @@ def main():
 
     # If any explicit links are passed, add them to file_list.
     if args.links is not None:
-        link_list = [link for link in args.links[0].split(',')]
+        link_list = [link for link in args.links.split(',')]
     else:
         # Obtain list of links across files in the repository (besides files in exclude list of directories passed).
         if args.include_files is not None:
             cmd = f'(grep -e \'https\?://\' . -RIa '
-            include_files_with_prefix = [ '--include='+file_pattern for file_pattern in args.include_files[0].split(',') ]
+            include_files_with_prefix = [ '--include='+file_pattern for file_pattern in args.include_files.split(',') ]
             cmd += " ".join(include_files_with_prefix) + ' '
             if args.exclude_dirs is not None:
-                exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs[0].split(',') ]
+                exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs.split(',') ]
                 cmd += " ".join(exclude_dirs_with_prefix)
             cmd += f' | grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | '
             if args.allowlist is not None:
