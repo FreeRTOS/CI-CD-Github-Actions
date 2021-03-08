@@ -318,7 +318,7 @@ def main():
     # Obtain list of Markdown files from the repository (along with excluding passed directories).
     for root, dirs, files in os.walk("./"):
         # Avoid exclude directories, if passed, from search.
-        if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs):
+        if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs[0].split(',')):
             for file in files:
                 if file.endswith(".md"):
                     file_list.append(os.path.join(root, file))
