@@ -9,7 +9,8 @@ inputs:
     description: 'Space-separated list of directory names to ignore. (Eg. cmock cmbc)'
     required: false
     default: ''
-  include-file-types: 'Space-separated list of file type patters in repository to test. (Eg .c .h)'
+  include-file-types:
+    description: 'Space-separated list of file type patters in repository to test. (Eg .c .h)'
     required: false
     default: '.c .h .dox'
   allowlist-file:
