@@ -120,5 +120,5 @@ jobs:
         uses: ./link-verifier
         with:
           path: ./
-          exclude-dirs: complexity
-          include-file-types: .c,.html
+          exclude-dirs: complexity formatting
+          include-file-types: .c .html
