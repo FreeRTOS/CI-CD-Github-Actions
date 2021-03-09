@@ -319,7 +319,7 @@ def main():
         # Obtain list of Markdown files from the repository (along with excluding passed directories).
         for root, dirs, files in os.walk("./"):
             # Avoid exclude directories, if passed, from search.
-            if args.exclude_dirs is None or not any(exclude_dir in root for exclude_dir in args.exclude_dirs.split(',')):
+            if args.exclude_dirs is None or not any(exclude_dir.lower() in root.lower() for exclude_dir in args.exclude_dirs.split(',')):
                 file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
 
     if args.verbose:
@@ -328,30 +328,20 @@ def main():
     # If any explicit links are passed, add them to file_list.
     if args.links is not None:
         link_list = [link for link in args.links.split(',')]
-    else:
-        # Obtain list of links across files in the repository (besides files in exclude list of directories passed).
-        if args.include_files is not None:
-            cmd = f'(grep -e \'https\?://\' . -RIa '
-            include_files_with_prefix = [ '--include='+file_pattern for file_pattern in args.include_files.split(',') ]
-            cmd += " ".join(include_files_with_prefix) + ' '
-            if args.exclude_dirs is not None:
-                exclude_dirs_with_prefix = [ '--exclude-dir='+dir for dir in args.exclude_dirs.split(',') ]
-                cmd += " ".join(exclude_dirs_with_prefix)
-            cmd += f' | grep -IoE \'\\b(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\' | sort | uniq | '
-            if args.allowlist is not None:
-                cmd += f'grep -Fxvf ' + "".join(args.allowlist) + ' | '
-            cmd += f'tr \'\\n\' \' \')'
-            process = subprocess.run(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                shell=True,
-                encoding="utf-8",
-                universal_newlines=True
-            )
-            if process.returncode == 0:
-                for link in process.stdout.split():
-                    link_list.append(link)
+    elif args.include_files is not None:
+        for root, dirs, files in os.walk("./"):
+            # Avoid exclude directories, if passed, from search.
+            if args.exclude_dirs is None or not any(exclude_dir.lower() in root.lower() for exclude_dir in args.exclude_dirs.split(',')):
+                for file in files:
+                    if any( file.endswith(file_type) for file_type in args.include_files.split(',') ):
+                        target_open = open(os.path.join(root, file), 'r')
+                        print(os.path.join(root, file))
+                        text = target_open.read()
+                        urls = re.findall("((https?|ftp|file)://[-A-Za-z0-9\+&@#\./%\?=~_|!;,;]*[-A-Za-z0-9\+&@#/%=~_|])", text)
+                        if len(urls) > 0:
+                            for url in urls:
+                                if url[0] not in link_list:
+                                    link_list.append(url[0])
 
     try:
         file_map = {}
