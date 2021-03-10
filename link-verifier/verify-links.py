@@ -225,7 +225,6 @@ def test_url(url):
         # requests.exceptions.ConnectionError if URL does not exist, but we capture
         # all possible exceptions from trying the link to be safe.
         except Exception as e:
-            traceback.print_exc()
             is_broken = True
             status = 'Error'
     # Add result to cache so it won't be tested again.
@@ -298,6 +297,7 @@ def main():
     )
     parser.add_argument("-F", "--files", action="store", dest="files", nargs='+', help="List of files to test links in.")
     parser.add_argument("-L", "--links", action="store", dest="links", nargs='+', help="List of links to test.")
+    parser.add_argument("-M", "--test-markdown", action="store_true", default=False, help="Enable search of Markdown files for testing links.")
     parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
     parser.add_argument("-I", "--include-file-types", action="store", dest="include_files", nargs='+', help="List of file patterns to search for URLs.")
     parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", help="Path to file containing list of allowed URLs.")
@@ -312,12 +312,10 @@ def main():
     link_list = []
     exclude_dirs = [dir.lower() for dir in args.exclude_dirs] if args.exclude_dirs else []
 
-    print(exclude_dirs)
-
     # If any explicit files are passed, add them to file_list.
     if args.files is not None:
         file_list = args.files
-    else:
+    elif args.test_markdown:
         # Obtain list of Markdown files from the repository (along with excluding passed directories).
         for root, dirs, files in os.walk("./"):
             # Prune dirs to remove exclude directories, if passed as command line input, from search.
@@ -337,7 +335,6 @@ def main():
             for file in files:
                 if any(file.endswith(file_type) for file_type in args.include_files):
                     text = open(os.path.join(root, file), 'r').read()
-                    print(os.path.join(root, file))
                     urls = re.findall(URL_SEARCH_TERM, text)
                     for url in urls:
                         if url[0] not in link_list:
