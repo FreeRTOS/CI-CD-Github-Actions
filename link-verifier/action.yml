@@ -6,11 +6,11 @@ inputs:
     required: false
     default: ./
   exclude-dirs:
-    description: 'Space-separated list of directory names to ignore. (Eg. cmock cmbc)'
+    description: 'Comma-separated list of directory names to ignore. (Eg. cmock cmbc)'
     required: false
     default: ''
   include-file-types:
-    description: 'Space-separated list of file type patters in repository to test. (Eg .c .h)'
+    description: 'Comma-separated list of file type patters in repository to test. (Eg .c .h)'
     required: false
     default: '.c .h .dox'
   allowlist-file:
@@ -41,15 +41,16 @@ runs:
     - name: Run link verifier script
       run: |
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
-          args='--exclude-dirs='${{ inputs.exclude-dirs }}
+          args='--exclude-dirs='$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
           args+=' '
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          args='--include-file-types='${{ inputs.include-file-types }}
+          include_file_types_with_spaces=$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
+          args='--include-file-types='$(echo ${{ inputs.include-file-types }} | tr ',' ' ')
           args+=' '
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          args+='--allowlist-file='${{ inputs.allowlist-file }}
+          args+='--allowlist-file='$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
         fi
         python3 $GITHUB_ACTION_PATH/verify-links.py $args
         if [ $? -ne "0" ]
