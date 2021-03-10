@@ -52,7 +52,7 @@ runs:
           args+='--allowlist-file '$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
         fi
         echo $args
-        python3 $GITHUB_ACTION_PATH/verify-links.py $args
+        python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
         if [ $? -ne "0" ]
         then
           exit 1
