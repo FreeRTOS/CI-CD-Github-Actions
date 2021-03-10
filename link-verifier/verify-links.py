@@ -334,17 +334,18 @@ def main():
             dirs[:] = [dir for dir in dirs if dir.lower() not in exclude_dirs]
             for file in files:
                 if any(file.endswith(file_type) for file_type in args.include_files):
-                    text = open(os.path.join(root, file), 'r').read()
-                    urls = re.findall(URL_SEARCH_TERM, text)
-                    for url in urls:
-                        if url[0] not in link_list:
-                            link_list.append(url[0])
+                    with open(os.path.join(root, file), 'r') as f:
+                        text = f.read()
+                        urls = re.findall(URL_SEARCH_TERM, text)
+                        for url in urls:
+                            if url[0] not in link_list:
+                                link_list.append(url[0])
 
     # If allowlis file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
-        file = open(args.allowlist, 'r')
-        for link in file.read().strip('\n').split('\n'):
-            link_cache[link] = (False, 'Allowed')
+        with open(args.allowlist, 'r') as file:
+            for link in file.read().strip('\n').split('\n'):
+                link_cache[link] = (False, 'Allowed')
 
     try:
         file_map = {}
