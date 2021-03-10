@@ -15,7 +15,8 @@ import traceback
 
 MARKDOWN_SEARCH_TERM = r'\.md$'
 # Regex to find a URL
-URL_SEARCH_TERM = r'https?://'
+URL_SEARCH_TERM = r'((https?|ftp|file)://[-A-Za-z0-9\+&@#\./%\?=~_|!;,;]*[-A-Za-z0-9\+&@#/%=~_|])'
+HTTP_URL_SEARCH_TERM = r'https?://'
 # Some HTML tags that we choose to ignore
 IGNORED_LINK_SCHEMES = r'mailto:|ftp:|tel:'
 # Regexes to identify links to Github PRs or issues, which are very common in changelogs
@@ -76,7 +77,7 @@ class HtmlFile:
         issue_search = re.compile(ISSUE_SEARCH)
         for tag in soup.find_all('a'):
             link = tag.get('href')
-            if not re.search(URL_SEARCH_TERM, link, re.IGNORECASE):
+            if not re.search(HTTP_URL_SEARCH_TERM, link, re.IGNORECASE):
                 if not re.search(IGNORED_LINK_SCHEMES, link, re.IGNORECASE):
                     if link is not None and link not in self.internal_links:
                         self.internal_links.append(link)
@@ -334,7 +335,7 @@ def main():
                     if any(file.endswith(file_type) for file_type in args.include_files):
                         target_open = open(os.path.join(root, file), 'r')
                         text = target_open.read()
-                        urls = re.findall("((https?|ftp|file)://[-A-Za-z0-9\+&@#\./%\?=~_|!;,;]*[-A-Za-z0-9\+&@#/%=~_|])", text)
+                        urls = re.findall(URL_SEARCH_TERM, text)
                         if len(urls) > 0:
                             for url in urls:
                                 if url[0] not in link_list:
