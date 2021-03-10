@@ -300,7 +300,7 @@ def main():
     parser.add_argument("-L", "--links", action="store", dest="links", nargs='+', help="List of links to test.")
     parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
     parser.add_argument("-I", "--include-file-types", action="store", dest="include_files", nargs='+', help="List of file patterns to search for URLs.")
-    parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", nargs='+', help="Path to file containing list of allowed URLs.")
+    parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", help="Path to file containing list of allowed URLs.")
     parser.add_argument("-n", "--num-processes", action="store", type=int, default=4, help="Number of processes to run in parallel")
     parser.add_argument("-k", "--keep", action="store_true", default=False, help="Keep temporary files instead of deleting")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Print all links tested")
@@ -310,6 +310,9 @@ def main():
     broken_links = []
     file_list = []
     link_list = []
+    exclude_dirs = [dir.lower() for dir in args.exclude_dirs] if args.exclude_dirs else []
+
+    print(exclude_dirs)
 
     # If any explicit files are passed, add them to file_list.
     if args.files is not None:
@@ -317,9 +320,9 @@ def main():
     else:
         # Obtain list of Markdown files from the repository (along with excluding passed directories).
         for root, dirs, files in os.walk("./"):
-            # Avoid exclude directories, if passed, from search.
-            if args.exclude_dirs is None or not any(exclude_dir.lower() in root.lower() for exclude_dir in args.exclude_dirs):
-                file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
+            # Prune dirs to remove exclude directories, if passed as command line input, from search.
+            dirs[:] = [dir for dir in dirs if dir.lower() not in exclude_dirs]
+            file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
 
     if args.verbose:
         print(file_list)
@@ -330,15 +333,21 @@ def main():
     elif args.include_files is not None:
         for root, dirs, files in os.walk("./"):
             # Avoid exclude directories, if passed, from search.
-            if args.exclude_dirs is None or not any(exclude_dir.lower() in root.lower() for exclude_dir in args.exclude_dirs):
-                for file in files:
-                    if any(file.endswith(file_type) for file_type in args.include_files):
-                        target_open = open(os.path.join(root, file), 'r')
-                        text = target_open.read()
-                        urls = re.findall(URL_SEARCH_TERM, text)
-                        for url in urls:
-                            if url[0] not in link_list:
-                                link_list.append(url[0])
+            dirs[:] = [dir for dir in dirs if dir.lower() not in exclude_dirs]
+            for file in files:
+                if any(file.endswith(file_type) for file_type in args.include_files):
+                    text = open(os.path.join(root, file), 'r').read()
+                    print(os.path.join(root, file))
+                    urls = re.findall(URL_SEARCH_TERM, text)
+                    for url in urls:
+                        if url[0] not in link_list:
+                            link_list.append(url[0])
+
+    # If allowlis file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
+    if args.allowlist is not None:
+        file = open(args.allowlist, 'r')
+        for link in file.read().strip('\n').split('\n'):
+            link_cache[link] = (False, 'Allowed')
 
     try:
         file_map = {}
