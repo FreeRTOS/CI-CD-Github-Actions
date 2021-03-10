@@ -17,7 +17,7 @@ The script will print URLs that were not accessible. For Markdown files, it will
 
 ### Allowlist
 
-An allow list file contains a list of non-existant URLs used as placeholder examples in a repository. The script does not use it, but it can be used to filter out URLs before passing them in.
+An allow list file contains a list of non-existent URLs used as placeholder examples in a repository. The script does not use it, but it can be used to filter out URLs before passing them in.
 
 ### Example
 Run the script with a list of space separated names of directories to exclude. Optionally increase verbosity to print all links.
