@@ -336,10 +336,9 @@ def main():
                         target_open = open(os.path.join(root, file), 'r')
                         text = target_open.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
-                        if len(urls) > 0:
-                            for url in urls:
-                                if url[0] not in link_list:
-                                    link_list.append(url[0])
+                        for url in urls:
+                            if url[0] not in link_list:
+                                link_list.append(url[0])
 
     try:
         file_map = {}
