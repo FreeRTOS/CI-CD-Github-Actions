@@ -6,11 +6,11 @@ inputs:
     required: false
     default: ./
   exclude-dirs:
-    description: 'Comma-separated list of directory names to ignore. (Eg. cmock cmbc)'
+    description: 'Comma-separated list of directory names to ignore. (Eg. cmock, cmbc)'
     required: false
     default: ''
   include-file-types:
-    description: 'Comma-separated list of file type patters in repository to test. (Eg .c .h)'
+    description: 'Comma-separated list of file type patters in repository to test. (Eg .c, .h)'
     required: false
     default: '.c .h .dox'
   allowlist-file:
@@ -45,13 +45,13 @@ runs:
           args+=' '
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          include_file_types_with_spaces=$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
           args='--include-file-types='$(echo ${{ inputs.include-file-types }} | tr ',' ' ')
           args+=' '
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
           args+='--allowlist-file='$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
         fi
+        echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py $args
         if [ $? -ne "0" ]
         then
