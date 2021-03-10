@@ -323,7 +323,7 @@ def main():
     if args.verbose:
         print(file_list)
 
-    # If any explicit links are passed, add them to file_list.
+    # If any explicit links are passed, add them to link_list.
     if args.links is not None:
         link_list = args.links
     elif args.include_files is not None:
@@ -331,7 +331,7 @@ def main():
             # Avoid exclude directories, if passed, from search.
             if args.exclude_dirs is None or not any(exclude_dir.lower() in root.lower() for exclude_dir in args.exclude_dirs):
                 for file in files:
-                    if any( file.endswith(file_type) for file_type in args.include_files ):
+                    if any(file.endswith(file_type) for file_type in args.include_files):
                         target_open = open(os.path.join(root, file), 'r')
                         text = target_open.read()
                         urls = re.findall("((https?|ftp|file)://[-A-Za-z0-9\+&@#\./%\?=~_|!;,;]*[-A-Za-z0-9\+&@#/%=~_|])", text)
