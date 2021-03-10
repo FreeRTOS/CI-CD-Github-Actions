@@ -41,15 +41,15 @@ runs:
     - name: Run link verifier script
       run: |
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
-          args='--exclude-dirs='$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
+          args='--exclude-dirs '$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
           args+=' '
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          args='--include-file-types='$(echo ${{ inputs.include-file-types }} | tr ',' ' ')
+          args='--include-file-types '$(echo ${{ inputs.include-file-types }} | tr ',' ' ')
           args+=' '
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          args+='--allowlist-file='$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
+          args+='--allowlist-file '$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
         fi
         echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py $args
