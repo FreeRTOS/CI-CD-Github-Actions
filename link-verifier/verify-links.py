@@ -225,6 +225,7 @@ def test_url(url):
         # requests.exceptions.ConnectionError if URL does not exist, but we capture
         # all possible exceptions from trying the link to be safe.
         except Exception as e:
+            print(str(e))
             is_broken = True
             status = 'Error'
     # Add result to cache so it won't be tested again.
