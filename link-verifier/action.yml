@@ -25,6 +25,8 @@ runs:
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
         sudo dpkg -i pandoc.deb
         rm pandoc.deb
+        sudo apt install debsums
+        sudo debsums pandoc
       shell: bash
     - name: Install gh
       run: |
@@ -41,15 +43,19 @@ runs:
     - name: Run link verifier script
       run: |
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
-          args='--exclude-dirs '$(echo ${{ inputs.exclude-dirs }} | tr ',' ' ')
-          args+=' '
+          dirs=${{ inputs.exclude-dirs }}
+          dirs=${dirs//,/ }
+          args+=${dirs:+ --exclude-dirs $dirs}
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          args='--include-file-types '$(echo ${{ inputs.include-file-types }} | tr ',' ' ')
-          args+=' '
+          file_types=${{ inputs.exclude-file-types }}
+          file_types=${file_types//,/ }
+          args+=${dirs:+ --include-file-types $file_types}
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          args+='--allowlist-file '$(echo ${{ inputs.allowlist-file }} | tr ',' ' ')
+          allowlist_file=${{ inputs.allowlist-file }}
+          allowlist_file=${allowlist_file//,/ }
+          args+=${dirs:+ --allowlist-file $allowlist_file}
         fi
         echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args

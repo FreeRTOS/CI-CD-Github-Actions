@@ -15,7 +15,7 @@ import traceback
 
 MARKDOWN_SEARCH_TERM = r'\.md$'
 # Regex to find a URL
-URL_SEARCH_TERM = r'((https?|ftp|file)://[-A-Za-z0-9\+&@#\./%\?=~_|!;,;]*[-A-Za-z0-9\+&@#/%=~_|])'
+URL_SEARCH_TERM = r'(\b(https?|ftp|file)://[^\s\)\]\\"<>]+[^\s\)\.\]]\\"<>)'
 HTTP_URL_SEARCH_TERM = r'https?://'
 # Some HTML tags that we choose to ignore
 IGNORED_LINK_SCHEMES = r'mailto:|ftp:|tel:'
