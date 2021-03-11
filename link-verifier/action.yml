@@ -48,14 +48,14 @@ runs:
           args+=${dirs:+ --exclude-dirs $dirs}
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          file_types=${{ inputs.exclude-file-types }}
+          file_types=${{ inputs.include-file-types }}
           file_types=${file_types//,/ }
-          args+=${dirs:+ --include-file-types $file_types}
+          args+=${file_types:+ --include-file-types $file_types}
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
           allowlist_file=${{ inputs.allowlist-file }}
           allowlist_file=${allowlist_file//,/ }
-          args+=${dirs:+ --allowlist-file $allowlist_file}
+          args+=${allowlist_file:+ --allowlist-file $allowlist_file}
         fi
         echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
