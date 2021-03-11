@@ -296,7 +296,7 @@ def main():
         epilog='Requires beautifulsoup4, requests, and termcolor from PyPi. ' +
                'Optional dependencies: pandoc (to support testing Markdown files), gh (To speed up checking GitHub links)'
     )
-    parser.add_argument("-F", "--files", action="store", dest="files", nargs='+', help="List of files to test links in.")
+    parser.add_argument("-F", "--files", action="store", dest="files", nargs='+', help="List of Markdown files to test links in.")
     parser.add_argument("-L", "--links", action="store", dest="links", nargs='+', help="List of links to test.")
     parser.add_argument("-M", "--test-markdown", action="store_true", default=False, help="Enable search of Markdown files for testing links.")
     parser.add_argument("-D", "--exclude-dirs", action="store", dest="exclude_dirs", nargs='+', help="List of directories to ignore.")
@@ -342,7 +342,7 @@ def main():
                             if url[0] not in link_list:
                                 link_list.append(url[0])
 
-    # If allowlis file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
+    # If allowlist file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
         with open(args.allowlist, 'r') as file:
             for link in file.read().strip('\n').split('\n'):
