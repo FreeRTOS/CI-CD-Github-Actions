@@ -17,7 +17,7 @@ The script will print URLs that were not accessible. For Markdown files, it will
 
 ### Allowlist
 
-An allow list file contains a list of non-existent URLs used as placeholder examples in a repository. The script does not use it, but it can be used to filter out URLs before passing them in.
+An allow list file contains a list of non-existent URLs used as placeholder examples in a repository.
 
 ### Example
 Run the script with a list of space separated names of directories to exclude. Optionally increase verbosity to print all links.
@@ -33,7 +33,7 @@ OR Run the script with a list of files (and/or) links that you want to test spec
 
 ## Command Line Options
 
-The `--links` and `--include-file-types` options are mutually exclusive i.e. if the former is passed, then the script does not search for URLs in the repository, but if the latter is passed, then the script looks for URLs across the specified file type patterns in repository. If both options are passed, then `--link` will take precedence.
+The `--links` and `--include-file-types` options are mutually exclusive i.e. if the former is passed, then the script does not search for URLs in the repository, but if the latter is passed, then the script looks for URLs across the specified file type patterns in repository. If both options are passed, then `--links` will take precedence.
 The  `--files` and `--test-markdown`  options are mutually exclusive i.e. if the former is passed, then the script tests links only in the passed list of files, but if the
 latter is passed, then the script searches Markdown files and tests URLs, anchors and relative-file path in them. If both options are passed, then `--files` will take precedence.
 The `--exclude-dirs` option is only relevant to the `--test-markdown` and `--include-file-types` options.
