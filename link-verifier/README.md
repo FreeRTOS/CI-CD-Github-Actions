@@ -28,7 +28,7 @@ Run the script with a list of space separated names of directories to exclude. O
 OR Run the script with a list of files (and/or) links that you want to test specifically. 
 
 ```bash
-./links-verifier/verify-links.py --files README.md library.c library.h  --links https://mosquitto.org --verbose
+./links-verifier/verify-links.py --files README.md  --links https://mosquitto.org --verbose
 ```
 
 ## Command Line Options
