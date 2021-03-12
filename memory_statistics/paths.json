@@ -1,0 +1,26 @@
+{
+    "coreMQTT": {
+        "path": "FreeRTOS-Plus/Source/Application-Protocols/coreMQTT"
+    },
+    "coreHTTP": {
+        "path": "FreeRTOS-Plus/Source/Application-Protocols/coreHTTP"
+    },
+    "coreJSON": {
+        "path": "FreeRTOS-Plus/Source/coreJSON"
+    },
+    "corePKCS11": {
+        "path": "FreeRTOS-Plus/Source/corePKCS11"
+    },
+    "shadow": {
+        "path": "FreeRTOS-Plus/Source/AWS/device-shadow"
+    },
+    "jobs": {
+        "path": "FreeRTOS-Plus/Source/AWS/jobs"
+    },
+    "defender": {
+        "path": "FreeRTOS-Plus/Source/AWS/device-defender"
+    },
+    "backoffalgorithm": {
+        "path": "FreeRTOS-Plus/Source/Utilities/backoff_algorithm"
+    }
+}

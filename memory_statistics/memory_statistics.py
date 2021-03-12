@@ -86,55 +86,63 @@ def parse_make_output(output, values, key):
 
         values[filename][key] = total_size_in_kb
 
-
-def parse_to_table(o1_output, os_output, name):
+def parse_to_object(o1_output, os_output, name):
     sizes = defaultdict(dict)
     parse_make_output(o1_output, sizes, 'O1')
     parse_make_output(os_output, sizes, 'Os')
 
-    table  ='<table>\n'
-    table +='    <tr>\n'
-    table +='        <td colspan="3"><center><b>{}</b></center></td>\n'.format(__TABLE_HEADER__.format(name))
-    table +='    </tr>\n'
-    table +='    <tr>\n'
-    table +='        <td><b>File</b></td>\n'
-    table +='        <td><b><center>With -O1 Optimization</center></b></td>\n'
-    table +='        <td><b><center>With -Os Optimization</center></b></td>\n'
-    table +='    </tr>\n'
+    ret = {
+            "table_header": __TABLE_HEADER__.format(name),
+            "column_header": {
+                "files_column_header": "File",
+                "files_o1_header": "With -O1 Optimization",
+                "files_os_header": "With -Os Optimization",
+                },
+            "files": [],
+            "total": {
+                "total_header": "Total estimates",
+                "total_o1": '{:.1f}K'.format(sum(sizes[f]['O1'] for f in sizes)),
+                "total_os": '{:.1f}K'.format(sum(sizes[f]['Os'] for f in sizes)),
+                }
+            }
 
     for f in sizes:
+        ret["files"].append({
+            "file_name": f,
+            "o1_size": '{:.1f}K'.format(sizes[f]['O1']),
+            "os_size": '{:.1f}K'.format(sizes[f]['Os'])
+        })
+
+    return ret
+
+def generate_table_from_object(estimate):
+    table  ='<table>\n'
+    table +='    <tr>\n'
+    table +='        <td colspan="3"><center><b>{}</b></center></td>\n'.format(estimate['table_header'])
+    table +='    </tr>\n'
+    table +='    <tr>\n'
+    table +='        <td><b>{}</b></td>\n'.format(estimate['column_header']['files_column_header'])
+    table +='        <td><b><center>{}</center></b></td>\n'.format(estimate['column_header']['files_o1_header'])
+    table +='        <td><b><center>{}</center></b></td>\n'.format(estimate['column_header']['files_os_header'])
+    table +='    </tr>\n'
+
+    for f in estimate['files']:
         table +='    <tr>\n'
-        table +='        <td>{}</td>\n'.format(f)
-        table +='        <td><center>{:.1f}K</center></td>\n'.format(sizes[f]['O1'])
-        table +='        <td><center>{:.1f}K</center></td>\n'.format(sizes[f]['Os'])
+        table +='        <td>{}</td>\n'.format(f['file_name'])
+        table +='        <td><center>{}</center></td>\n'.format(f['o1_size'])
+        table +='        <td><center>{}</center></td>\n'.format(f['os_size'])
         table +='    </tr>\n'
 
     table +='    <tr>\n'
-    table +='        <td><b>Total estimates</b></td>\n'
-    table +='        <td><b><center>{:.1f}K</center></b></td>\n'.format(sum(sizes[f]['O1'] for f in sizes))
-    table +='        <td><b><center>{:.1f}K</center></b></td>\n'.format(sum(sizes[f]['Os'] for f in sizes))
+    table +='        <td><b>{}</b></td>\n'.format(estimate['total']['total_header'])
+    table +='        <td><b><center>{}</center></b></td>\n'.format(estimate['total']['total_o1'])
+    table +='        <td><b><center>{}</center></b></td>\n'.format(estimate['total']['total_os'])
     table +='    </tr>\n'
     table +='</table>\n'
 
     return table
 
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation.')
-    parser.add_argument('-o', '--output', default=None, help='File to save generated size table to.')
-
-    return vars(parser.parse_args())
-
-
-def main():
-    args = parse_arguments()
-
-    if not shutil.which("arm-none-eabi-gcc"):
-        print("ARM GCC not found. Please add the ARM GCC toolchain to your path.")
-        sys.exit(1)
-
+def validate_library_config(config):
     '''
     Config file should contain a json object with the following keys:
       "lib_name": Name to use for the library in the table header
@@ -142,9 +150,6 @@ def main():
       "include": Array of include directories
       "compiler_flags": (optional) Array of extra flags to use for compiling
     '''
-    with open(args['config']) as config_file:
-        config = json.load(config_file)
-
     if "lib_name" not in config:
         print("Error: Config file is missing \"lib_name\" key.")
         sys.exit(1)
@@ -160,16 +165,60 @@ def main():
     if "compiler_flags" not in config:
         config["compiler_flags"] = []
 
+def generate_library_estimates(config_path):
+    with open(config_path) as config_file:
+        config = json.load(config_file)
+
+    validate_library_config(config)
+
     o1_output = make(config['src'], config['include'], config['compiler_flags'], '1')
     os_output = make(config['src'], config['include'], config['compiler_flags'], 's')
 
-    table = parse_to_table(o1_output, os_output, config['lib_name'])
+    return parse_to_object(o1_output, os_output, config['lib_name'])
 
-    print(table)
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation.')
+    parser.add_argument('-o', '--output', default=None, help='File to save generated size table to.')
+    parser.add_argument('-j', '--json_report', action='store_true', help='Output a report for multiple libraries in JSON format.')
+
+    return vars(parser.parse_args())
+
+def main():
+    args = parse_arguments()
+
+    if not shutil.which("arm-none-eabi-gcc"):
+        print("ARM GCC not found. Please add the ARM GCC toolchain to your path.")
+        sys.exit(1)
+
+    if not args['json_report']:
+        lib_data = generate_library_estimates(args['config'])
+        doc = generate_table_from_object(lib_data)
+
+    else:
+        with open(args['config']) as paths_file:
+            libs = json.load(paths_file)
+
+        doc = {}
+        cwd = os.getcwd()
+
+        for lib in libs:
+            lib_path = libs[lib]['path']
+            config_path = os.path.abspath(libs[lib].get('config',
+                    os.path.join(lib_path, ".github/memory_statistics_config.json")))
+
+            os.chdir(lib_path)
+            doc[lib] = generate_library_estimates(config_path)
+            os.chdir(cwd)
+
+        doc = json.dumps(doc, sort_keys=False, indent=4)
+
+    print(doc)
 
     if args['output']:
         with open(args['output'], 'w') as output:
-            output.write(table)
+            output.write(doc)
 
 if __name__ == '__main__':
     main()
