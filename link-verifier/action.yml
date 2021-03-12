@@ -1,0 +1,67 @@
+name: 'link-verifier'
+description: 'Verify links (URLs, anchors, and relative path hyperlinks)'
+inputs:
+  path:
+    description: 'Path to repository folder to run link verification on.'
+    required: false
+    default: ./
+  exclude-dirs:
+    description: 'Comma-separated list of directory names to ignore. (Eg. cmock, cmbc)'
+    required: false
+    default: ''
+  include-file-types:
+    description: 'Comma-separated list of file type patters in repository to test. (Eg .c, .h)'
+    required: false
+    default: '.c .h .dox'
+  allowlist-file:
+    description: 'Path to file containing allowlist of URLs.'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - name: Install pandoc
+      run: |
+        wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
+        sudo dpkg -i pandoc.deb
+        rm pandoc.deb
+        sudo apt install debsums
+        sudo debsums pandoc
+      shell: bash
+    - name: Install gh
+      run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt update
+        sudo apt install -y gh
+      shell: bash
+    - name: Install python dependencies
+      run: |
+        sudo apt-get install -y python3-setuptools python3-pip
+        python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
+      shell: bash
+    - name: Run link verifier script
+      run: |
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          dirs=${{ inputs.exclude-dirs }}
+          dirs=${dirs//,/ }
+          args+=${dirs:+ --exclude-dirs $dirs}
+        fi
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          file_types=${{ inputs.include-file-types }}
+          file_types=${file_types//,/ }
+          args+=${file_types:+ --include-file-types $file_types}
+        fi
+        if [ -n "${{ inputs.allowlist-file }}" ]; then
+          allowlist_file=${{ inputs.allowlist-file }}
+          allowlist_file=${allowlist_file//,/ }
+          args+=${allowlist_file:+ --allowlist-file $allowlist_file}
+        fi
+        echo $args
+        python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
+        if [ $? -ne "0" ]
+        then
+          exit 1
+        fi
+      shell: bash
+
