@@ -86,6 +86,8 @@ def parse_make_output(output, values, key):
 
         values[filename][key] = total_size_in_kb
 
+# This outputs an object that maps to the report JSON format, and can be passed to 
+# generate_table_from_object() for library HTML format.
 def parse_to_object(o1_output, os_output, name):
     sizes = defaultdict(dict)
     parse_make_output(o1_output, sizes, 'O1')
@@ -179,9 +181,11 @@ def generate_library_estimates(config_path):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation.')
+    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation. ' + 
+                        'This is the library config file, unless --json_report is used, ' +
+                        'in which case it is the report paths config.')
     parser.add_argument('-o', '--output', default=None, help='File to save generated size table to.')
-    parser.add_argument('-j', '--json_report', action='store_true', help='Output a report for multiple libraries in JSON format.')
+    parser.add_argument('-j', '--json_report', action='store_true', help='Output a report for multiple libraries in JSON format instead.')
 
     return vars(parser.parse_args())
 
@@ -193,18 +197,24 @@ def main():
         sys.exit(1)
 
     if not args['json_report']:
+        # Generate HTML file for a library. The config parameter is the library config path.
+        # See test/memory_statistics_config.json for an example. 
         lib_data = generate_library_estimates(args['config'])
         doc = generate_table_from_object(lib_data)
 
     else:
+        # Generate a JSON report for the given libraries. The config parameter is the path to the report paths config.
+        # See paths.json for a paths config for the FreeRTOS repository. 
         with open(args['config']) as paths_file:
             libs = json.load(paths_file)
 
         doc = {}
         cwd = os.getcwd()
-
+        # Generate memory data for each library in paths config.
         for lib in libs:
             lib_path = libs[lib]['path']
+            # If the library entry in the paths config has a config key, use that as the libary config path.
+            # If not, use .github/memory_statistics_config.json in the library directory as a default.
             config_path = os.path.abspath(libs[lib].get('config',
                     os.path.join(lib_path, ".github/memory_statistics_config.json")))
 
