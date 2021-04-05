@@ -6,11 +6,11 @@ inputs:
     required: false
     default: ./
   exclude-files:
-    description: 'List of comma-separated files to exclude from formatting check. Eg file1,file2'
+    description: 'List of comma-separated files to exclude from trailing whitespace check. Eg file1,file2'
     required: false
     default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from formatting check. Eg docs,build'
+    description: 'List of comma-separated directories to exclude from trailing whitespace formatting check. Eg docs,build'
     required: false
     default: ''
 runs:
