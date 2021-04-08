@@ -83,7 +83,8 @@ fi
 
 TMPFILE=${0##*/}-$USER-$RANDOM
 unknowns=( "not-used" )     # get around empty array with nounset
-extract-comments `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \)` |
+# Symlinks will be ignored in this spell check. `-type f` switch in `find` command will ignore symlinks.
+extract-comments `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
     tr [:upper:] [:lower:] |
     grep -o -E '[a-zA-Z]+' |
     ablexicon -l $LEXICON > $TMPFILE
@@ -103,7 +104,8 @@ do
         continue
     fi
 
-    for file in `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \)`
+    # Symlinks will be ignored in this spell check. `-type f` switch in `find` command will ignore symlinks.
+    for file in `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f`
     do
         if [[ $file == *"third_party"*  || $file == *"CMock"* ]]
         then
