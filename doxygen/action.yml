@@ -5,10 +5,19 @@ inputs:
     description: 'Path to repository folder to run doxygen generation in.'
     required: false
     default: ./
+  libs_parent_dir_path:
+    description: 'Comma-separated list of parent directory path of libraries. Path should be relative to repository root.'
+    required: false
+    default: ./
   doxygen_link:
     description: 'Download link for doxygen tar.gz (default version 1.8.20).'
     required: false
     default: "https://sourceforge.net/projects/doxygen/files/rel-1.8.20/doxygen-1.8.20.linux.bin.tar.gz"
+  generate_zip:
+    description: 'Flag to indicate whether a ZIP output should be created.'
+    required: false
+    default: 'false'
+  
 runs:
   using: "composite"
   steps:
@@ -20,6 +29,10 @@ runs:
     - name: Run Doxygen And Verify Stdout Is Empty
       working-directory: ${{ inputs.path }}
       run: |
-        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
-        if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
+        if [[ ${{ inputs.generate_zip }} == "true" ]]; then
+          python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ${{ inputs.path }} --library-directories ${{ inputs.libs_parent_dir_path }} --zip
+        else
+          doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
+          if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
+        fi
       shell: bash
