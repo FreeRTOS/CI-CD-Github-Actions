@@ -46,6 +46,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: aws/aws-iot-device-sdk-embedded-C
+          submodules: recursive
           ref: main
           path: aws-iot-device-sdk-embedded-C
       - name: Test doxygen build action
