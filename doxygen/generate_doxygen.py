@@ -33,8 +33,9 @@ def get_lib_paths(root, lib_parent_dirs):
     Get all of the paths, relative to the root, to the libraries for which doxygen
     output has to be generated.
     """
-    libs_classifications = ["AWS", "Application-Protocols", "."]
     abs_lib_paths = []
+    print("Root: %s", root)
+    print(lib_parent_dirs)
 
     for lib_parent_dir in lib_parent_dirs:
         abs_lib_path_dir = os.path.join(root, lib_parent_dir)

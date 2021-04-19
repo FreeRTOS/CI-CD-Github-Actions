@@ -30,6 +30,8 @@ runs:
       working-directory: ${{ inputs.path }}
       run: |
         if [[ ${{ inputs.generate_zip }} == "true" ]]; then
+          echo ${{ inputs.path }}
+          echo ${{ inputs.libs_parent_dir_path }}
           python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ${{ inputs.path }} --library-directories ${{ inputs.libs_parent_dir_path }} --zip
         else
           doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
