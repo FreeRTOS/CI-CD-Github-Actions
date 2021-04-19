@@ -43,6 +43,8 @@ def get_lib_paths(root, lib_parent_dirs):
         # Determine if it is a library path by checking if the directory contains "docs/doxygen"
         abs_lib_paths += [os.path.join(abs_lib_path_dir, dir) for dir in lib_path_dirs if os.path.exists(os.path.join(abs_lib_path_dir, dir, "docs", "doxygen"))]
 
+    print('Printing path of libraries')
+    print(abs_lib_paths)
     return abs_lib_paths
 
 
