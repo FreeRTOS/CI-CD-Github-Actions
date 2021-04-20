@@ -1,5 +1,5 @@
 name: 'doxygen'
-description: 'CI doxygen build check'
+description: 'Check doxygen build and optionally, generate ZIP'
 inputs:
   path:
     description: 'Path to repository folder to run doxygen generation in.'
@@ -26,13 +26,16 @@ runs:
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
         sudo apt-get install -y libclang-9-dev graphviz
       shell: bash
-    - name: Run Doxygen And Verify Stdout Is Empty
+    - name: If specified, generate doxygen ZIP output
+      if: ${{ inputs.generate_zip }} == "true"
       working-directory: ${{ inputs.path }}
       run: |
-        if [[ ${{ inputs.generate_zip }} == "true" ]]; then
-          python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ./ --library-directories ${{ inputs.libs_parent_dir_path }} --zip
-        else
+        python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ./ --library-directories ${{ inputs.libs_parent_dir_path }} --zip
+      shell: bash
+    - name: Check doxygen build and verify stdout is empty.
+      if: ${{ inputs.generate_zip }} == "false"
+      working-directory: ${{ inputs.path }}
+      run: |
           doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
           if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
-        fi
       shell: bash
