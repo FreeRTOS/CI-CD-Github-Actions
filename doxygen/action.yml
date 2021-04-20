@@ -30,8 +30,6 @@ runs:
       working-directory: ${{ inputs.path }}
       run: |
         if [[ ${{ inputs.generate_zip }} == "true" ]]; then
-          ls libraries/standard
-          ls libraries/aws
           python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ./ --library-directories ${{ inputs.libs_parent_dir_path }} --zip
         else
           doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
