@@ -2,6 +2,9 @@
     "coreMQTT": {
         "path": "FreeRTOS-Plus/Source/Application-Protocols/coreMQTT"
     },
+    "coreMQTTAgent": {
+        "path": "FreeRTOS-Plus/Source/Application-Protocols/coreMQTT-Agent"
+    },
     "coreHTTP": {
         "path": "FreeRTOS-Plus/Source/Application-Protocols/coreHTTP"
     },
