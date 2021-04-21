@@ -25,5 +25,8 @@
     },
     "backoffalgorithm": {
         "path": "FreeRTOS-Plus/Source/Utilities/backoff_algorithm"
+    },
+    "ota": {
+        "path": "FreeRTOS-Plus/Source/AWS/ota"
     }
 }
