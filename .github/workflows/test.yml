@@ -36,7 +36,26 @@ jobs:
         uses: ./complexity
         with:
           path: coreMQTT
-  test-doxygen-check:
+  test-doxygen-zip-check:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.10'
+      - uses: actions/checkout@v2
+        with:
+          repository: aws/aws-iot-device-sdk-embedded-C
+          submodules: recursive
+          ref: main
+          path: aws-iot-device-sdk-embedded-C
+      - name: Test doxygen build action
+        uses: ./doxygen
+        with:
+          path: ./aws-iot-device-sdk-embedded-C
+          libs_parent_dir_path: libraries/standard,libraries/aws
+          generate_zip: true
+  test-doxygen-non-zip-check:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
