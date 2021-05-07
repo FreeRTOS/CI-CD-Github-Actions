@@ -82,14 +82,28 @@ then
 fi
 
 TMPFILE=${0##*/}-$USER-$RANDOM
+echo $TMPFILE
+
 unknowns=( "not-used" )     # get around empty array with nounset
 # Symlinks will be ignored in this spell check. `-type f` switch in `find` command will ignore symlinks.
-extract-comments `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
+echo "Running extract comments"
+# `grep -ril "copyright (c) [0-9][0-9][0-9][0-9] amazon.com" | grep "\.[ch]"` |
+# `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
+
+extract-comments  `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
     tr [:upper:] [:lower:] |
     grep -o -E '[a-zA-Z]+' |
     ablexicon -l $LEXICON > $TMPFILE
+
+echo "Done with ablexicon. Reading array."
+echo "Done with ablexicon. Reading array."
+echo "Done with ablexicon. Reading array."
+echo "Done with ablexicon. Reading array."
+
 readarray -O 1 -t unknowns < $TMPFILE
 rm -f $TMPFILE
+
+echo "Adding the words to a list."
 
 for word in "${unknowns[@]}"
 do

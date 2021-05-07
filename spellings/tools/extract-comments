@@ -39,3 +39,5 @@ do
     nl -ba $1 | awk '/\/\// {print $0}; /\/\*/ {comment=1}; {if(comment) print $0}; /\*\// {comment=0}'
     shift
 done
+
+exit 0
