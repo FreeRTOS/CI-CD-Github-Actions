@@ -60,37 +60,29 @@ then
     echo "Invalid input file"
     usage
 fi
-#
-# Read the lexicon into an array
-#
-readarray -t lexicon < $LEXICON""
-lexicon_size="${#lexicon[@]}"
 
 #
-# Search for all input words in the dictionary
-# and sort the output
+# Search for all input words, sort them removing duplicate words in
+# the process and then find them in the dictionary.
 #
-for word in `cat $INFILE"" | spell | sort -u`
+for word in `cat $INFILE"" | sort -u | spell`
 do
     #
     # Search for each remaining word in the lexicon
     #
-    found="false"
-    i="0"
-    while [[ "$i" -lt "$lexicon_size" ]] && [ "$found" == "false" ]
-    do
-        if [ "${lexicon[i]}" == "$word" ]
-        then
-            found="true"
-        fi
-        i=$((i+1))
-    done
-    if [ $found"" == "false" ]
+    if [ $LEXICON"" != /dev/null ]
     then
-        #
-        # The word is neither in the dictionary nor the lexicon, send
-        # it to stdout.
-        #
+        if ! grep -w -q "$word" $LEXICON""
+        then
+            #
+            # The word is neither in the dictionary nor the lexicon, send
+            # it to stdout.
+            #
+            echo $word
+        fi
+    else
+        # if the lexicon is /dev/null i.e. it is not provided by the user,
+        # then we should just echo the word.
         echo $word
     fi
 done
