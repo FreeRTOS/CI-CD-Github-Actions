@@ -60,11 +60,6 @@ then
     echo "Invalid input file"
     usage
 fi
-#
-# Read the lexicon into an array
-#
-readarray -t lexicon < $LEXICON""
-lexicon_size="${#lexicon[@]}"
 
 #
 # Search for all input words, sort them removing duplicate words in
