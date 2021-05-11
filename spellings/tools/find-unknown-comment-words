@@ -87,7 +87,7 @@ unknowns=( "not-used" )     # get around empty array with nounset
 # Symlinks will be ignored in this spell check. `-type f` switch in `find` command will ignore symlinks.
 
 # Ignore errors here.
-set +e
+# set +e
 
 extract-comments  `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
     tr [:upper:] [:lower:] |
@@ -95,7 +95,7 @@ extract-comments  `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` 
     ablexicon -l $LEXICON > $TMPFILE
 
 # Reset the error exit.
-set -e
+# set -e
 
 readarray -O 1 -t unknowns < $TMPFILE
 rm -f $TMPFILE
