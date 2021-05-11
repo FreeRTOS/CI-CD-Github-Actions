@@ -88,8 +88,8 @@ unknowns=( "not-used" )     # get around empty array with nounset
 
 # Ignore errors here.
 set +e
-# `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
-extract-comments  `grep -ril "copyright (c) [0-9][0-9][0-9][0-9] amazon.com" | grep "\.[ch]"` |
+
+extract-comments  `find $DIRNAME \( -iname \*.[ch] -o -iname \*.dox \) -type f` |
     tr [:upper:] [:lower:] |
     grep -o -E '[a-zA-Z]+' |
     ablexicon -l $LEXICON > $TMPFILE
