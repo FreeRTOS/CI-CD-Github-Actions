@@ -91,5 +91,3 @@ do
         echo $word
     fi
 done
-
-exit 0
