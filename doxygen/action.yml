@@ -24,7 +24,7 @@ runs:
     - name: Install Doxygen
       run: |
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
-        sudo apt-get install -y libclang-9-dev graphviz
+        sudo apt-get install -y libclang-9-dev libclang-cpp9 graphviz
       shell: bash
     - name: Verify Doxygen build and Generate ZIP (if specified)
       working-directory: ${{ inputs.path }}
