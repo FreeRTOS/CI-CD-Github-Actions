@@ -70,12 +70,8 @@ def parse_make_output(output, values, key):
     for line in output:
         parts = line.split()
 
-        # parts[5] is the filename
-        filename = os.path.basename(parts[5])
-        filename = str(filename.replace('.o','.c').strip())
-
-        if "3rdparty" in parts[5]:
-            filename += " (third-party utility)"
+        # parts[5] is the filename of the object
+        filename = str(parts[5].replace('.o','.c').strip())
 
         # parts[0] is the text size
         text_size = int(parts[0].strip())
@@ -88,7 +84,7 @@ def parse_make_output(output, values, key):
 
 # This outputs an object that maps to the report JSON format, and can be passed to 
 # generate_table_from_object() for library HTML format.
-def parse_to_object(o1_output, os_output, name):
+def parse_to_object(o1_output, os_output, name, filename_map):
     sizes = defaultdict(dict)
     parse_make_output(o1_output, sizes, 'O1')
     parse_make_output(os_output, sizes, 'Os')
@@ -110,7 +106,7 @@ def parse_to_object(o1_output, os_output, name):
 
     for f in sizes:
         ret["files"].append({
-            "file_name": f,
+            "file_name": filename_map[f],
             "o1_size": '{:.1f}K'.format(sizes[f]['O1']),
             "os_size": '{:.1f}K'.format(sizes[f]['Os'])
         })
@@ -167,16 +163,28 @@ def validate_library_config(config):
     if "compiler_flags" not in config:
         config["compiler_flags"] = []
 
+def parse_src_input_to_file_name_map(src):
+    ret = {}
+    for s in src:
+        if isinstance(s, str):
+            ret[s] = os.path.basename(s)
+        else:
+            ret[s['name']] = f"{os.path.basename(s['name'])} ({s['tag']})"
+    return ret
+
 def generate_library_estimates(config_path):
     with open(config_path) as config_file:
         config = json.load(config_file)
 
+    source_map = parse_src_input_to_file_name_map(config['src'])
+    sources = list(source_map.keys())
+
     validate_library_config(config)
 
-    o1_output = make(config['src'], config['include'], config['compiler_flags'], '1')
-    os_output = make(config['src'], config['include'], config['compiler_flags'], 's')
+    o1_output = make(sources, config['include'], config['compiler_flags'], '1')
+    os_output = make(sources, config['include'], config['compiler_flags'], 's')
 
-    return parse_to_object(o1_output, os_output, config['lib_name'])
+    return parse_to_object(o1_output, os_output, config['lib_name'], source_map)
 
 def parse_arguments():
     parser = argparse.ArgumentParser()

@@ -1,7 +1,8 @@
 {
     "lib_name": "Memory Statistics Test",
     "src": [
-        "test.c"
+        "test.c",
+        {"name": "testdir/empty.c", "tag": "tagged"}
     ],
     "include": [
         "include"
