@@ -169,7 +169,7 @@ def parse_src_input_to_file_name_map(src):
         if isinstance(s, str):
             ret[s] = os.path.basename(s)
         else:
-            ret[s['name']] = f"{os.path.basename(s['name'])} ({s['tag']})"
+            ret[s['file']] = f"{os.path.basename(s['file'])} ({s['tag']})"
     return ret
 
 def generate_library_estimates(config_path):
