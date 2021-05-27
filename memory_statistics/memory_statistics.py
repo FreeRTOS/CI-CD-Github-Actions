@@ -163,13 +163,23 @@ def validate_library_config(config):
     if "compiler_flags" not in config:
         config["compiler_flags"] = []
 
+# This takes the src array from the library config and converts it into a
+# dictionary which maps provided file paths to the display names used in the
+# output documents
 def parse_src_input_to_file_name_map(src):
     ret = {}
     for s in src:
         if isinstance(s, str):
+            # If the element is just a string, we use it as the path and display
+            # just the filename.
             ret[s] = os.path.basename(s)
         else:
-            ret[s['file']] = f"{os.path.basename(s['file'])} ({s['tag']})"
+            # If it is an object, the path should be in the 'file' key.
+            name = os.path.basename(s['file'])
+            # If a tag is specified, it follows the filename in parenthesis
+            if 'tag' in s:
+                name += f" ({s['tag']})"
+            ret[s['file']] = name
     return ret
 
 def generate_library_estimates(config_path):
