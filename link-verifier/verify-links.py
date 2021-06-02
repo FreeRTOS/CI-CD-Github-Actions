@@ -338,6 +338,8 @@ def main():
                     f_path = os.path.join(root, file)
                     print("Processing File: {}".format(f_path))
                     with open(f_path, 'r', encoding="utf8", errors='ignore') as f:
+                        # errors='ignore' argument Suppresses UnicodeDecodeError
+                        # when reading invalid UTF-8 characters.
                         text = f.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
