@@ -335,7 +335,9 @@ def main():
             dirs[:] = [dir for dir in dirs if dir.lower() not in exclude_dirs]
             for file in files:
                 if any(file.endswith(file_type) for file_type in args.include_files):
-                    with open(os.path.join(root, file), 'r') as f:
+                    f_path = os.path.join(root, file)
+                    print("Processing File: {}".format(f_path))
+                    with open(f_path, 'r', encoding="utf8", errors='ignore') as f:
                         text = f.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
