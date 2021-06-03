@@ -17,9 +17,14 @@ inputs:
     description: 'Path to file containing allowlist of URLs.'
     required: false
     default: ''
+  user-agent:
+    description: 'User agent string to use when making http requests.'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps:
+
     - name: Install pandoc
       run: |
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
@@ -56,6 +61,10 @@ runs:
           allowlist_file=${{ inputs.allowlist-file }}
           allowlist_file=${allowlist_file//,/ }
           args+=${allowlist_file:+ --allowlist-file $allowlist_file}
+        fi
+        if [ -n "${{ inputs.user-agent }}" ]; then
+          user_agent=${{ inputs.user-agent }}
+          args+=${allowlist_file:+ --user-agent $user_agent}
         fi
         echo $args
         python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
