@@ -45,7 +45,7 @@ The `--links` and `--include-file-types` options are mutually exclusive i.e. if 
 The  `--files` and `--test-markdown`  options are mutually exclusive i.e. if the former is passed, then the script tests links only in the passed list of files, but if the
 latter is passed, then the script searches Markdown files and tests URLs, anchors and relative-file path in them. If both options are passed, then `--files` will take precedence.
 The `--exclude-dirs` option is only relevant to the `--test-markdown` and `--include-file-types` options.
-The `--user-agent` option allows specifying a specific user agent string to be used when making http requests.
+The `--user-agent` option allows specifying a specific user agent string to be used when making HTTP requests.
 
 | Option | Argument | Description |
 | --- | --- | --- |
