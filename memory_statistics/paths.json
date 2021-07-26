@@ -14,6 +14,9 @@
     "corePKCS11": {
         "path": "FreeRTOS-Plus/Source/corePKCS11"
     },
+    "coreSNTP": {
+        "path": "FreeRTOS-Plus/Source/Application-Protocols/coreSNTP"
+    },
     "shadow": {
         "path": "FreeRTOS-Plus/Source/AWS/device-shadow"
     },
