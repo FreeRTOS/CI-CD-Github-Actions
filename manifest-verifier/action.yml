@@ -1,0 +1,31 @@
+name: 'verify-manifest'
+description: 'Verifies manifest.yml against missing submodule entires and stale version information'
+inputs:
+  path:
+    description: 'Path to repository folder containing manifest.yml to verify.'
+    required: false
+    default: ./
+  exclude-submodules:
+    description: 'List of comma-separated relative path to submodules that should not be present in manifest.yml. Eg libraries/thirdparty/tinycbor,libraries/thirdparty/mbedtls'
+    required: false
+    default: ''
+  fail-on-incorrect-version: 
+    description: 'Boolean flag to indicate if verification should fail if any submodule version in manifest.yml file is incorrect or stale.'
+    required: false
+    default: 'false'
+runs:
+  using: "composite"
+  steps: 
+      - name: Install dependencies
+        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        shell: bash
+      - name: Run verifier script
+        working-directory: ${{ inputs.path }}
+        run: |
+          if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
+            echo 'Value of flag is ${{ inputs.fail-on-incorrect-version }}' 
+            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
+          else
+            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }}
+          fi
+        shell: bash
