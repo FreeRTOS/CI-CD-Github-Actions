@@ -148,7 +148,7 @@ jobs:
       - name: Setup python environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7.x'
+          python-version: '3.x'
       - name: Checkout the FreeRTOS/FreeRTOS repository for testing action on.
         uses: actions/checkout@v2
         with:
