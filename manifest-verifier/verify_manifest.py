@@ -63,8 +63,10 @@ if __name__ == '__main__':
     parser.add_argument('--ignore-submodule-path',
                         type=str,
                         required=None,
-                        default=os.getcwd(),
                         help='Comma-separated list of submodules path to ignore.')
+    parser.add_argument('--fail-on-incorrect-versions',
+                        action='store_true',
+                        help='Flag to indicate script to fail for incorrect submodules versions in manifest.yml')
 
     args = parser.parse_args()
 
@@ -107,7 +109,7 @@ if __name__ == '__main__':
             print('manifest.yml does not have correct commit ID for', submodule_name,'manifest Commit=(',manifest_commit, submodule.head.commit,') Actual Commit=',submodules_info_from_git[relative_path])
             mismatch_flag = True
         
-    if mismatch_flag:
+    if mismatch_flag and args.fail_on_incorrect_versions:
         sys.exit(1)
 
     print('\nmanifest.yml file has been verified!')
