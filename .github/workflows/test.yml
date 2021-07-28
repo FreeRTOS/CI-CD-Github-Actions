@@ -161,4 +161,5 @@ jobs:
         with:
           path: ./FreeRTOS
           exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
+          fail-on-incorrect-version: true
 
