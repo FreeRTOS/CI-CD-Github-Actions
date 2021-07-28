@@ -37,7 +37,7 @@ jobs:
         with:
           path: coreMQTT
   test-doxygen-zip-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -56,7 +56,7 @@ jobs:
           libs_parent_dir_path: libraries/standard,libraries/aws
           generate_zip: true
   test-doxygen-non-zip-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
@@ -141,3 +141,24 @@ jobs:
           path: ./
           exclude-dirs: complexity,formatting
           include-file-types: .c,.html
+  test-manifest-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.x'
+      - name: Checkout the FreeRTOS/FreeRTOS repository for testing action on.
+        uses: actions/checkout@v2
+        with:
+          repository: FreeRTOS/FreeRTOS
+          ref: '202107.00'
+          path: FreeRTOS
+          submodules: recursive      
+      - name: Test manifest verifier
+        uses: ./manifest-verifier
+        with:
+          path: ./FreeRTOS
+          exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
+
