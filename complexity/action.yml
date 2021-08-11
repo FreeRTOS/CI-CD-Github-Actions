@@ -5,6 +5,10 @@ inputs:
     description: 'Path to repository folder to run complexity check in.'
     required: false
     default: ./
+  source_path:
+    description: 'Path to the folder in the repository containing the source code.'
+    required: false
+    default: source
 runs:
   using: "composite"
   steps: 
@@ -14,6 +18,6 @@ runs:
       - name: Complexity
         working-directory: ${{ inputs.path }}
         run: |
-          find source/ -iname '*.c' |\
+          find ${{ inputs.source_path }}/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=8
         shell: bash
