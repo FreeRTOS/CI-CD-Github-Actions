@@ -29,7 +29,7 @@ runs:
         working-directory: ${{ inputs.path }}
         run: |
           set +e
-          grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},''} -rnI -e "[[:blank:]]$" .
+          grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             echo "Files have trailing whitespace."
             exit 1
