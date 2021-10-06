@@ -1,8 +1,8 @@
 name: 'doxygen-generation'
 description: 'Generate doxygen documentation and push to gh-pages branch'
 inputs:
-  branch:
-    description: ''
+  ref:
+    description: 'Reference (e.g. branch or tag) to the commit for generating doxygen'
     required: false
     default: 'main'
 runs:
@@ -12,7 +12,7 @@ runs:
       uses: actions/checkout@v2
       with:
         path: doxygen_source
-        ref: ${{ inputs.branch }}
+        ref: ${{ inputs.ref }}
 
     - name: Install Doxygen
       shell: bash
@@ -53,8 +53,8 @@ runs:
     - name: Replace previous doxygen documentation
       shell: bash
       run: |
-        rm -rf doxygen_store/${{ inputs.branch }}
-        mv doxygen_source/docs/doxygen/output/html doxygen_store/${{ inputs.branch }}
+        rm -rf doxygen_store/${{ inputs.ref }}
+        mv doxygen_source/docs/doxygen/output/html doxygen_store/${{ inputs.ref }}
 
     - name: Commit new doxygen
       working-directory: ./doxygen_store
@@ -62,8 +62,8 @@ runs:
       run: |
         git config --global user.name ${{ github.actor }}
         git config --global user.email ${{ github.actor }}@users.noreply.github.com
-        commit_id=$(git rev-parse ${{ inputs.branch }})
-        git add ${{ inputs.branch }}
+        commit_id=$(git rev-parse ${{ inputs.ref }})
+        git add ${{ inputs.ref }}
         # Allowing empty commit in case the doxygen for new commit is identical to previous.
         git commit --allow-empty -m "Doxygen for ${commit_id}"
         git push origin gh-pages
