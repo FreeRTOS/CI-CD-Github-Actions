@@ -1,0 +1,69 @@
+name: 'doxygen-generation'
+description: 'Generate doxygen documentation and push to gh-pages branch'
+inputs:
+  branch:
+    description: ''
+    required: false
+    default: 'main'
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout the repo for generating doxygen
+      uses: actions/checkout@v2
+      with:
+        path: doxygen_source
+        ref: ${{ inputs.branch }}
+
+    - name: Install Doxygen
+      shell: bash
+      run: |
+        wget -qO- "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
+        sudo apt-get install -y libclang-9-dev libclang-cpp9 graphviz
+
+    - name: Generate doxygen
+      working-directory: ./doxygen_source
+      shell: bash
+      run: |
+        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
+        if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
+
+    - name: Checkout the repo for storing doxygen
+      uses: actions/checkout@v2
+      with:
+        path: doxygen_store
+
+    - name: Switch to gh-pages branch
+      working-directory: ./doxygen_store
+      shell: bash
+      run: |
+        # Check if the gh-pages branch exists. If not, create it.
+        branch_exist=$(git ls-remote --heads origin gh-pages)
+        if [ -z ${branch_exist} ]; then
+          git config --global user.name ${{ github.actor }}
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+          git checkout --orphan gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Created gh-pages branch"
+          git push origin gh-pages
+        fi
+        # Switch to gh-pages branch
+        git fetch
+        git checkout gh-pages
+
+    - name: Replace previous doxygen documentation
+      shell: bash
+      run: |
+        rm -rf doxygen_store/${{ inputs.branch }}
+        mv doxygen_source/docs/doxygen/output/html doxygen_store/${{ inputs.branch }}
+
+    - name: Commit new doxygen
+      working-directory: ./doxygen_store
+      shell: bash
+      run: |
+        git config --global user.name ${{ github.actor }}
+        git config --global user.email ${{ github.actor }}@users.noreply.github.com
+        commit_id=$(git rev-parse ${{ inputs.branch }})
+        git add ${{ inputs.branch }}
+        # Allowing empty commit in case the doxygen for new commit is identical to previous.
+        git commit --allow-empty -m "Doxygen for ${commit_id}"
+        git push origin gh-pages
