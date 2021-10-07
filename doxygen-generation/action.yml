@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         wget -O doxygen.tgz "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz"
-        if [ $? -ne 0 ]; exit 1; fi
+        if [ $? -ne 0 ]; then exit 1; fi
         sudo tar --strip-components=1 -xzf doxygen.tgz -C /usr/local
         sudo apt-get install -y libclang-9-dev libclang-cpp9 graphviz
 
@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: |
         doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
-        if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
+        if [ "$(wc -c < doxyoutput.txt | bc)" = "0" ]; then exit 0; else exit 1; fi
 
     - name: Checkout the repo for storing doxygen
       uses: actions/checkout@v2
