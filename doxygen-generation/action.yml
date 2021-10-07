@@ -17,7 +17,9 @@ runs:
     - name: Install Doxygen
       shell: bash
       run: |
-        wget -qO- "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz" | sudo tar --strip-components=1 -xz -C /usr/local
+        wget -O doxygen.tgz "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz"
+        if [ $? -ne 0 ]; exit 1; fi
+        sudo tar --strip-components=1 -xzf doxygen.tgz -C /usr/local
         sudo apt-get install -y libclang-9-dev libclang-cpp9 graphviz
 
     - name: Generate doxygen
@@ -64,6 +66,9 @@ runs:
         git config --global user.email ${{ github.actor }}@users.noreply.github.com
         commit_id=$(git rev-parse ${{ inputs.ref }})
         git add ${{ inputs.ref }}
-        # Allowing empty commit in case the doxygen for new commit is identical to previous.
-        git commit --allow-empty -m "Doxygen for ${commit_id}"
-        git push origin gh-pages
+        # Only commit if doxygen is changed.
+        changed=$(git diff-index HEAD)
+        if [ -n "$changed" ]; then
+          git commit -m "Doxygen for ${commit_id}"
+          git push origin gh-pages
+        fi
