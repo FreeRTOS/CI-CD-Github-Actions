@@ -5,6 +5,10 @@ inputs:
     description: 'Reference (e.g. branch or tag) to the commit for generating doxygen'
     required: false
     default: 'main'
+  add_release:
+    description: 'Add ref to releases listed in the index page.'
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -58,6 +62,35 @@ runs:
         rm -rf doxygen_store/${{ inputs.ref }}
         mv doxygen_source/docs/doxygen/output/html doxygen_store/${{ inputs.ref }}
 
+    - name: Update template files
+      working-directory: ./doxygen_store/
+      shell: bash
+      run: |
+        cp -r $GITHUB_ACTION_PATH/template/* .
+
+    - name: Ensure fields of doc_config.json exist
+      working-directory: ./doxygen_store/
+      shell: bash
+      run: |
+        sudo apt-get install -y jq
+        if [ ! -d "_data" ]; then
+          mkdir _data
+          echo "{}" > _data/doc_config.json
+        fi
+        doc_title=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
+        jq '.name//="'$doc_title'"' _data/doc_config.json |
+        jq '.releases//=[]' |
+        jq '.branches//=["main"]' > tmp.json
+        mv tmp.json _data/doc_config.json
+
+    - name: Add to release list
+      if: inputs.add_release != 'false'
+      working-directory: ./doxygen_store/_data
+      shell: bash
+      run: |
+        jq '.releases|=if index("${{ inputs.ref }}") then . else ["${{ inputs.ref }}"]+. end' doc_config.json > tmp.json
+        mv tmp.json doc_config.json
+
     - name: Commit new doxygen
       working-directory: ./doxygen_store
       shell: bash
@@ -65,7 +98,7 @@ runs:
         git config --global user.name ${{ github.actor }}
         git config --global user.email ${{ github.actor }}@users.noreply.github.com
         commit_id=$(git rev-parse ${{ inputs.ref }})
-        git add ${{ inputs.ref }}
+        git add .
         # Only commit if doxygen is changed.
         changed=$(git diff-index HEAD)
         if [ -n "$changed" ]; then
