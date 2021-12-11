@@ -9,6 +9,17 @@ inputs:
     description: 'Add ref to releases listed in the index page.'
     required: false
     default: "false"
+  generate_command:
+    description: 'Command to generate doxygen bundle.'
+    required: false
+    default: |
+        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
+        if [ "$(wc -c < doxyoutput.txt | bc)" = "0" ]; then exit 0; else exit 1; fi
+  output_dir:
+    description: 'Relative output directory of generate_command.'
+    required: false
+    default: docs/doxygen/output/html
+
 runs:
   using: "composite"
   steps:
@@ -29,9 +40,7 @@ runs:
     - name: Generate doxygen
       working-directory: ./doxygen_source
       shell: bash
-      run: |
-        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
-        if [ "$(wc -c < doxyoutput.txt | bc)" = "0" ]; then exit 0; else exit 1; fi
+      run: ${{ inputs.generate_command }}
 
     - name: Checkout the repo for storing doxygen
       uses: actions/checkout@v2
@@ -60,7 +69,7 @@ runs:
       shell: bash
       run: |
         rm -rf doxygen_store/${{ inputs.ref }}
-        mv doxygen_source/docs/doxygen/output/html doxygen_store/${{ inputs.ref }}
+        mv doxygen_source/${{ inputs.output_dir }} doxygen_store/${{ inputs.ref }}
 
     - name: Update template files
       working-directory: ./doxygen_store/
