@@ -31,5 +31,11 @@
     },
     "ota": {
         "path": "FreeRTOS-Plus/Source/AWS/ota"
+    },
+    "sigv4": {
+        "path": "FreeRTOS-Plus/Source/AWS/sigv4"
+    },
+    "fleetprovisioning": {
+        "path": "FreeRTOS-Plus/Source/AWS/fleet-provisioning"
     }
 }
