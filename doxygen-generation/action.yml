@@ -1,0 +1,118 @@
+name: 'doxygen-generation'
+description: 'Generate doxygen documentation and push to gh-pages branch'
+inputs:
+  ref:
+    description: 'Reference (e.g. branch or tag) to the commit for generating doxygen'
+    required: false
+    default: 'main'
+  add_release:
+    description: 'Add ref to releases listed in the index page.'
+    required: false
+    default: "false"
+  generate_command:
+    description: 'Command to generate doxygen bundle.'
+    required: false
+    default: |
+        doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
+        if [ "$(wc -c < doxyoutput.txt | bc)" = "0" ]; then exit 0; else exit 1; fi
+  output_dir:
+    description: 'Relative output directory of generate_command.'
+    required: false
+    default: docs/doxygen/output/html
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout the repo for generating doxygen
+      uses: actions/checkout@v2
+      with:
+        path: doxygen_source
+        ref: ${{ inputs.ref }}
+
+    - name: Install Doxygen
+      shell: bash
+      run: |
+        wget -O doxygen.tgz "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz"
+        if [ $? -ne 0 ]; then exit 1; fi
+        sudo tar --strip-components=1 -xzf doxygen.tgz -C /usr/local
+        sudo apt-get install -y libclang-9-dev libclang-cpp9 graphviz
+
+    - name: Generate doxygen
+      working-directory: ./doxygen_source
+      shell: bash
+      run: ${{ inputs.generate_command }}
+
+    - name: Checkout the repo for storing doxygen
+      uses: actions/checkout@v2
+      with:
+        path: doxygen_store
+
+    - name: Switch to gh-pages branch
+      working-directory: ./doxygen_store
+      shell: bash
+      run: |
+        # Check if the gh-pages branch exists. If not, create it.
+        branch_exist=$(git ls-remote --heads origin gh-pages)
+        if [ -z ${branch_exist} ]; then
+          git config --global user.name ${{ github.actor }}
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+          git checkout --orphan gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Created gh-pages branch"
+          git push origin gh-pages
+        fi
+        # Switch to gh-pages branch
+        git fetch
+        git checkout gh-pages
+
+    - name: Replace previous doxygen documentation
+      shell: bash
+      run: |
+        rm -rf doxygen_store/${{ inputs.ref }}
+        mv doxygen_source/${{ inputs.output_dir }} doxygen_store/${{ inputs.ref }}
+
+    - name: Update template files
+      working-directory: ./doxygen_store/
+      shell: bash
+      run: |
+        cp -r $GITHUB_ACTION_PATH/template/* .
+
+    - name: Ensure fields of doc_config.json exist
+      working-directory: ./doxygen_store/
+      shell: bash
+      run: |
+        sudo apt-get install -y jq
+        if [ ! -d "_data" ]; then
+          mkdir _data
+          echo "{}" > _data/doc_config.json
+        fi
+        doc_title=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
+        jq '.name//="'$doc_title'"' _data/doc_config.json |
+        jq '.releases//=[]' |
+        jq '.branches//=["main"]' > tmp.json
+        mv tmp.json _data/doc_config.json
+
+    - name: Add to release list and update latest
+      if: inputs.add_release != 'false'
+      working-directory: ./doxygen_store/
+      shell: bash
+      run: |
+        jq '.releases|=if index("${{ inputs.ref }}") then . else ["${{ inputs.ref }}"]+. end' _data/doc_config.json > tmp.json
+        mv tmp.json _data/doc_config.json
+        rm -f latest
+        ln -s "${{ inputs.ref }}" latest
+
+    - name: Commit new doxygen
+      working-directory: ./doxygen_store
+      shell: bash
+      run: |
+        git config --global user.name ${{ github.actor }}
+        git config --global user.email ${{ github.actor }}@users.noreply.github.com
+        commit_id=$(git rev-parse ${{ inputs.ref }})
+        git add .
+        # Only commit if doxygen is changed.
+        changed=$(git diff-index HEAD)
+        if [ -n "$changed" ]; then
+          git commit -m "Doxygen for ${commit_id}"
+          git push origin gh-pages
+        fi

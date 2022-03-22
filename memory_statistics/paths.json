@@ -14,6 +14,9 @@
     "corePKCS11": {
         "path": "FreeRTOS-Plus/Source/corePKCS11"
     },
+    "coreSNTP": {
+        "path": "FreeRTOS-Plus/Source/Application-Protocols/coreSNTP"
+    },
     "shadow": {
         "path": "FreeRTOS-Plus/Source/AWS/device-shadow"
     },
@@ -28,5 +31,11 @@
     },
     "ota": {
         "path": "FreeRTOS-Plus/Source/AWS/ota"
+    },
+    "sigv4": {
+        "path": "FreeRTOS-Plus/Source/AWS/sigv4"
+    },
+    "fleetprovisioning": {
+        "path": "FreeRTOS-Plus/Source/AWS/fleet-provisioning"
     }
 }
