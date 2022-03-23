@@ -24,7 +24,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-
     - name: Install pandoc
       run: |
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
@@ -47,29 +46,30 @@ runs:
       shell: bash
     - name: Run link verifier script
       run: |
+        args="--test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
-          dirs=${{ inputs.exclude-dirs }}
-          dirs=${dirs//,/ }
-          args+=${dirs:+ --exclude-dirs $dirs}
+          dirs="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ }"
+          args+=" --exclude-dirs ${dirs}"
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          file_types=${{ inputs.include-file-types }}
-          file_types=${file_types//,/ }
-          args+=${file_types:+ --include-file-types $file_types}
+          file_types="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ }"
+          args+=" --include-file-types ${file_types}"
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          allowlist_file=${{ inputs.allowlist-file }}
-          allowlist_file=${allowlist_file//,/ }
-          args+=${allowlist_file:+ --allowlist-file $allowlist_file}
+          allowlist_file="${{ inputs.allowlist-file }}"
+          allowlist_file="${allowlist_file//,/ }"
+          args+=" --allowlist-file ${allowlist_file}"
         fi
         if [ -n "${{ inputs.user-agent }}" ]; then
-          user_agent=${{ inputs.user-agent }}
-          args+=${user_agent:+ --user-agent $user_agent}
+          user_agent="${{ inputs.user-agent }}"
+          args+=" --user-agent ${user_agent}"
         fi
-        echo $args
-        python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
-        if [ $? -ne "0" ]
-        then
+        echo "Running verify-links.py ${args}"
+        if python3 "${GITHUB_ACTION_PATH}/verify-links.py" ${args}; then
+          exit 0
+        else
           exit 1
         fi
       shell: bash
