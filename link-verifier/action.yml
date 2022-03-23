@@ -46,7 +46,7 @@ runs:
       shell: bash
     - name: Run link verifier script
       run: |
-        args="--test-markdown"
+        args="--verbose --test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           dirs="${{ inputs.exclude-dirs }}"
           dirs="${dirs//,/ }"
