@@ -20,12 +20,20 @@ The script will print URLs that were not accessible. For Markdown files, it will
 An allow list file contains a list of non-existent URLs used as placeholder examples in a repository.
 
 ### Example
+
 Run the script with a list of space separated names of directories to exclude. Optionally increase verbosity to print all links.
 
 ```bash
 ./links-verifier/verify-links.py --test-markdown --exclude-dirs third-party cmock --include-file-types .c .h .dox --verbose
 ```
-OR Run the script with a list of files (and/or) links that you want to test specifically. 
+
+Optionally, run the script with a custom user agent.
+
+```bash
+./links-verifier/verify-links.py --test-markdown --include-file-types .c .h --user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9"
+```
+
+Alternatively, run the script with a list of files (and/or) links that you want to test specifically.
 
 ```bash
 ./links-verifier/verify-links.py --files README.md  --links https://mosquitto.org --verbose
@@ -37,6 +45,7 @@ The `--links` and `--include-file-types` options are mutually exclusive i.e. if 
 The  `--files` and `--test-markdown`  options are mutually exclusive i.e. if the former is passed, then the script tests links only in the passed list of files, but if the
 latter is passed, then the script searches Markdown files and tests URLs, anchors and relative-file path in them. If both options are passed, then `--files` will take precedence.
 The `--exclude-dirs` option is only relevant to the `--test-markdown` and `--include-file-types` options.
+The `--user-agent` option allows specifying a specific user agent string to be used when making HTTP requests.
 
 | Option | Argument | Description |
 | --- | --- | --- |
@@ -49,3 +58,4 @@ The `--exclude-dirs` option is only relevant to the `--test-markdown` and `--inc
 | `-n`, `--num-processes` | Integer | Number of threads to run in parallel when generating HTML files from Markdown. Each link is still tested serially, however. |
 | `-k`, `--keep` | *None* | Option to keep temporary HTML files instead of deleting them. Only useful for debugging. |
 | `-v`, `--verbose` | *None* | Increase verbosity to print all files and links tested, instead of only errors. |
+| `-u`, `--user-agent`| A User-Agent string | User agent string to use for HTTP requests. |

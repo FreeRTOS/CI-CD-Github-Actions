@@ -17,6 +17,10 @@ inputs:
     description: 'Path to file containing allowlist of URLs.'
     required: false
     default: ''
+  user-agent:
+    description: 'User agent string to use when making http requests.'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps:
@@ -42,26 +46,30 @@ runs:
       shell: bash
     - name: Run link verifier script
       run: |
+        args="--verbose --test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
-          dirs=${{ inputs.exclude-dirs }}
-          dirs=${dirs//,/ }
-          args+=${dirs:+ --exclude-dirs $dirs}
+          dirs="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ }"
+          args+=" --exclude-dirs ${dirs}"
         fi
         if [ -n "${{ inputs.include-file-types }}" ]; then
-          file_types=${{ inputs.include-file-types }}
-          file_types=${file_types//,/ }
-          args+=${file_types:+ --include-file-types $file_types}
+          file_types="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ }"
+          args+=" --include-file-types ${file_types}"
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          allowlist_file=${{ inputs.allowlist-file }}
-          allowlist_file=${allowlist_file//,/ }
-          args+=${allowlist_file:+ --allowlist-file $allowlist_file}
+          allowlist_file="${{ inputs.allowlist-file }}"
+          allowlist_file="${allowlist_file//,/ }"
+          args+=" --allowlist-file ${allowlist_file}"
         fi
-        echo $args
-        python3 $GITHUB_ACTION_PATH/verify-links.py --test-markdown $args
-        if [ $? -ne "0" ]
-        then
+        if [ -n "${{ inputs.user-agent }}" ]; then
+          user_agent="${{ inputs.user-agent }}"
+          args+=" --user-agent ${user_agent}"
+        fi
+        echo "Running verify-links.py ${args}"
+        if python3 "${GITHUB_ACTION_PATH}/verify-links.py" ${args}; then
+          exit 0
+        else
           exit 1
         fi
       shell: bash
-

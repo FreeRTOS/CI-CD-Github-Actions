@@ -52,6 +52,8 @@ main_repo_list = {}
 use_gh_cache = True
 # Track links so that we don't test multiple times.
 link_cache = {}
+# HTTP headers to user when making a request
+http_headers = requests.utils.default_headers()
 
 class HtmlFile:
     """A class of files with a .html extension"""
@@ -184,10 +186,10 @@ def create_html(markdown_file):
 
 def test_url(url):
     """Tests a single url"""
-
     global use_gh_cache
     global main_repo_list
     global link_cache
+    global http_headers
     status = ''
     is_broken = False
     # Test if link was already tested before.
@@ -209,12 +211,12 @@ def test_url(url):
                     status = 'Good'
     if status != 'Good':
         try:
-            r = requests.head(url, allow_redirects=True)
+            r = requests.head(url, allow_redirects=True, headers=http_headers)
             # Some sites may return 404 for head but not get, e.g.
             # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
             if r.status_code >= 400:
                 # Allow redirects is already enabled by default for GET.
-                r = requests.get(url)
+                r = requests.get(url, headers=http_headers)
             # It's likely we will run into GitHub's rate-limiting if there are many links.
             if r.status_code == 429:
                 time.sleep(int(r.headers['Retry-After']))
@@ -289,8 +291,8 @@ def consolidate_repo_list(repo_list):
                     use_gh_cache = False
                 main_repo_list[repo][ISSUE_CACHED_KEY] = True
 
-
 def main():
+    global http_headers
     parser = argparse.ArgumentParser(
         description='A script to test HTTP links, and all links in Markdown files.',
         epilog='Requires beautifulsoup4, requests, and termcolor from PyPi. ' +
@@ -304,31 +306,37 @@ def main():
     parser.add_argument("-A", "--allowlist-file", action="store", dest="allowlist", help="Path to file containing list of allowed URLs.")
     parser.add_argument("-n", "--num-processes", action="store", type=int, default=4, help="Number of processes to run in parallel")
     parser.add_argument("-k", "--keep", action="store_true", default=False, help="Keep temporary files instead of deleting")
+    parser.add_argument("-u", "--user-agent", action="store", dest="user_agent", default=None, help="User agent to use for HTTP requests")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Print all links tested")
     args = parser.parse_args()
 
     html_file_list = []
     broken_links = []
-    file_list = []
-    link_list = []
+    md_file_list = []
+    link_set = set()
     exclude_dirs = [dir.lower() for dir in args.exclude_dirs] if args.exclude_dirs else []
 
-    # If any explicit files are passed, add them to file_list.
+    if args.user_agent != None:
+        http_headers.update({ 'User-Agent': args.user_agent })
+
+    if args.verbose:
+        print("Using User-Agent: {}".format(http_headers['User-Agent']))
+
+
+    # If any explicit files are passed, add them to md_file_list.
     if args.files is not None:
-        file_list = args.files
+        md_file_list = args.files
     elif args.test_markdown:
         # Obtain list of Markdown files from the repository (along with excluding passed directories).
         for root, dirs, files in os.walk("./"):
             # Prune dirs to remove exclude directories, if passed as command line input, from search.
             dirs[:] = [dir for dir in dirs if dir.lower() not in exclude_dirs]
-            file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
+            md_file_list += [os.path.join(root, f) for f in files if re.search(MARKDOWN_SEARCH_TERM, f, re.IGNORECASE)]
 
-    if args.verbose:
-        print(file_list)
-
-    # If any explicit links are passed, add them to link_list.
+    # If any explicit links are passed, add them to link_set.
     if args.links is not None:
-        link_list = args.links
+        link_set = set(args.links)
+    # Otherwise walk the file tree to discover links
     elif args.include_files is not None:
         for root, dirs, files in os.walk("./"):
             # Avoid exclude directories, if passed, from search.
@@ -336,15 +344,15 @@ def main():
             for file in files:
                 if any(file.endswith(file_type) for file_type in args.include_files):
                     f_path = os.path.join(root, file)
-                    print("Processing File: {}".format(f_path))
+                    if args.verbose:
+                        print("Processing File: {}".format(f_path))
                     with open(f_path, 'r', encoding="utf8", errors='ignore') as f:
                         # errors='ignore' argument Suppresses UnicodeDecodeError
                         # when reading invalid UTF-8 characters.
                         text = f.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
-                            if url[0] not in link_list:
-                                link_list.append(url[0])
+                            link_set.add(url[0])
 
     # If allowlist file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
@@ -354,7 +362,7 @@ def main():
 
     try:
         file_map = {}
-        for f in file_list:
+        for f in md_file_list:
             process = create_html(f)
             if process.returncode != 0:
                 cprint(process.stdout, 'red')
@@ -381,7 +389,7 @@ def main():
             if not args.keep:
                 os.remove(f)
 
-    for link in link_list:
+    for link in link_set:
         is_broken, status_code = test_url(link)
         if is_broken:
             broken_links.append(link)
