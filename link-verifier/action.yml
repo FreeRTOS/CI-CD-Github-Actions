@@ -20,7 +20,7 @@ inputs:
   user-agent:
     description: 'User agent string to use when making http requests.'
     required: false
-    default: ''
+    default: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36'
 runs:
   using: "composite"
   steps:
@@ -62,12 +62,8 @@ runs:
           allowlist_file="${allowlist_file//,/ }"
           args+=" --allowlist-file ${allowlist_file}"
         fi
-        if [ -n "${{ inputs.user-agent }}" ]; then
-          user_agent="${{ inputs.user-agent }}"
-          args+=" --user-agent ${user_agent}"
-        fi
-        echo "Running verify-links.py ${args}"
-        if python3 "${GITHUB_ACTION_PATH}/verify-links.py" ${args}; then
+        echo "Running verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\""
+        if python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}"; then
           exit 0
         else
           exit 1
