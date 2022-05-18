@@ -15,10 +15,10 @@ import traceback
 
 MARKDOWN_SEARCH_TERM = r'\.md$'
 # Regex to find a URL
-URL_SEARCH_TERM = r'(\b(https?|ftp|file)://[^\s\)\]\\"<>]+[^\s\)\.\]\\"<>])'
+URL_SEARCH_TERM = r'(\b(https?)://[^\s\)\]\\"<>]+[^\s\)\.\]\\"<>])'
 HTTP_URL_SEARCH_TERM = r'https?://'
 # Some HTML tags that we choose to ignore
-IGNORED_LINK_SCHEMES = r'mailto:|ftp:|tel:'
+IGNORED_LINK_SCHEMES = r'mailto:|ftps?:|tel:|file:'
 # Regexes to identify links to Github PRs or issues, which are very common in changelogs
 # and may result in rate limiting if each link is fetched manually.
 PULL_REQUEST_SEARCH = r'https://github.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/pull/(\d+)$'
