@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from termcolor import cprint
 from multiprocessing import Pool
 import traceback
+from collections import defaultdict
 
 MARKDOWN_SEARCH_TERM = r'\.md$'
 # Regex to find a URL
@@ -314,6 +315,7 @@ def main():
     broken_links = []
     md_file_list = []
     link_set = set()
+    link_to_files = defaultdict(set)
     exclude_dirs = [dir.lower() for dir in args.exclude_dirs] if args.exclude_dirs else []
 
     if args.user_agent != None:
@@ -353,6 +355,7 @@ def main():
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
                             link_set.add(url[0])
+                            link_to_files[url[0]].add(f_path)
 
     # If allowlist file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
@@ -393,10 +396,12 @@ def main():
         is_broken, status_code = test_url(link)
         if is_broken:
             broken_links.append(link)
-            cprint(f'{status_code}\t{link}', 'red')
+            print("FILES:", link_to_files[link])
+            cprint(f'\t{status_code}\t{link}', 'red')
         else:
             if args.verbose:
-                cprint(f'{status_code}\t{link}', 'green')
+                print("FILES:", link_to_files[link])
+                cprint(f'\t{status_code}\t{link}', 'green')
 
     # Return code > 0 to return error.
     num_broken = len(broken_links)
