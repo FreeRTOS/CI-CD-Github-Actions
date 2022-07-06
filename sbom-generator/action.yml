@@ -27,3 +27,4 @@ runs:
             git commit -m "Update SBOM for corePKCS11"
             git push origin
           fi
+        shell: bash
