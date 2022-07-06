@@ -1,0 +1,15 @@
+name: 'generate-sbom'
+description: 'Generate SBOM for corePKCS11 library'
+inputs:
+  path:
+    description: 'Path to repository folder containing manifest.yml to verify.'
+    required: false
+    default: ./
+runs:
+  using: "composite"
+  steps: 
+      - name: Run generator script
+        working-directory: ${{ inputs.path }}
+        run: |
+          python3 $GITHUB_ACTION_PATH/scan_corePKCS11.py
+        shell: bash
