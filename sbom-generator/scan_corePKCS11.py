@@ -131,7 +131,7 @@ def scan_pkcs():
                 temp_list.append(file_checksum)
     
 
-    output = io.StringIO() #open('corePKCS11.spdx', 'w')
+    output = open('corePKCS11.spdx', 'w')
     doc_writer(output, spdx_version, data_license, manifest['name'], sbom_namespace, sbom_creator)
     pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
     output.write(o.getvalue())
@@ -146,7 +146,7 @@ def scan_pkcs():
     for dependency in dependency_info.keys():
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + dependency + '\n')
 
-    print(output.getvalue())
+    #print(output.getvalue())
 
 
 if __name__ == "__main__":
