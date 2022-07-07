@@ -17,10 +17,10 @@ runs:
           python3 $GITHUB_ACTION_PATH/scan_corePKCS11.py
         shell: bash
       - name: create pull request
-        working-directory: ${{ inputs.path }}
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ inputs.path }}
           commit-message: Add sbom file
           title: 'Add sbom file'
           body: >
