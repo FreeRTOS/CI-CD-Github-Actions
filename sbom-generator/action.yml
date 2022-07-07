@@ -19,7 +19,8 @@ runs:
       - name: create pull request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-sbom
+          token: ${{ github.token }}
           path: ${{ inputs.path }}
           commit-message: Add sbom file
           title: 'Add sbom file'
