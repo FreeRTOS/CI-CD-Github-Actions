@@ -20,7 +20,7 @@ runs:
         working-directory: ${{ inputs.path }}
         uses: peter-evans/create-pull-request@v3
         with:
-          token: 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
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Add sbom file
           title: 'Add sbom file'
           body: >
