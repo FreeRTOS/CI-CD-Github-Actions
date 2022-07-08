@@ -5,6 +5,10 @@ inputs:
     description: 'Path to repository folder containing manifest.yml to verify.'
     required: false
     default: ./
+  token:
+    description: 'Token'
+    required: false
+    default: ${{ github.token }}
 runs:
   using: "composite"
   steps:
@@ -20,7 +24,7 @@ runs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: update-sbom
-          token: ${{ github.token }}
+          token: ${{ inputs.token }}
           path: ${{ inputs.path }}
           commit-message: Add sbom file
           title: 'Add sbom file'
