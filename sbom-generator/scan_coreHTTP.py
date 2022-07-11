@@ -8,11 +8,11 @@ from sbom_utils import *
 spdx_version = 'SPDX-2.2'
 data_license = 'CC0-1.0'
 sbom_creator = 'Amazon Web Services'
-sbom_namespace = 'https://github.com/FreeRTOS/corePKCS11/blob/main/sbom.spdx'
-url = 'https://github.com/FreeRTOS/corePKCS11'
+sbom_namespace = 'https://github.com/FreeRTOS/coreHTTP/blob/main/sbom.spdx'
+url = 'https://github.com/FreeRTOS/coreHTTP'
 REPO_PATH = ''
-    
-def scan_corePKCS11():
+
+def scan_coreHTTP():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
 
@@ -26,8 +26,7 @@ def scan_corePKCS11():
     root_license = manifest['license']
     
     #delete later
-    manifest['dependencies'][0]['license'] = 'Apache License 2.0'
-    manifest['dependencies'][1]['license'] = 'OASIS License'
+    manifest['dependencies'][0]['license'] = 'Temp License 2.0'
     
     for dependency in manifest['dependencies']:
         buffer3rd[dependency['name']] = io.StringIO()
@@ -53,7 +52,6 @@ def scan_corePKCS11():
         try: 
             buffer = buffer3rd[library]
             library_lic = dependency_info[library]['license']
-            #copyright = dependency_info[library]['copyright']
             dependency_file_list[library] = []
             temp_list = dependency_file_list[library]
         except:
@@ -87,7 +85,6 @@ def scan_corePKCS11():
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + dependency + '\n')
 
 
-
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
     parser.add_argument('--repo-root-path',
@@ -97,5 +94,5 @@ if __name__ == "__main__":
                         help='Path to the repository root.')
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
-    scan_corePKCS11()
+    scan_coreHTTP()
 

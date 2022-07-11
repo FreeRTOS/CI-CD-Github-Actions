@@ -9,6 +9,9 @@ inputs:
     description: 'Token'
     required: false
     default: ${{ github.token }}
+  script:
+    description: 'Python script for the specific library'
+    required: True
 runs:
   using: "composite"
   steps:
@@ -18,7 +21,7 @@ runs:
       - name: Run generator script
         working-directory: ${{ inputs.path }}
         run: |
-          python3 $GITHUB_ACTION_PATH/scan_corePKCS11.py
+          python3 $GITHUB_ACTION_PATH/${{ inputs.script }}
         shell: bash
       - name: create pull request
         uses: peter-evans/create-pull-request@v3

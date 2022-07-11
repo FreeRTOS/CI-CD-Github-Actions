@@ -2,18 +2,21 @@ import yaml
 from yaml.loader import SafeLoader
 import io
 import os
+import hashlib
+from datetime import datetime
 from argparse import ArgumentParser
 from sbom_utils import *
 
 spdx_version = 'SPDX-2.2'
 data_license = 'CC0-1.0'
 sbom_creator = 'Amazon Web Services'
-sbom_namespace = 'https://github.com/FreeRTOS/corePKCS11/blob/main/sbom.spdx'
-url = 'https://github.com/FreeRTOS/corePKCS11'
+sbom_namespace = 'https://github.com/aws/ota-for-aws-iot-embedded-sdk/blob/main/sbom.spdx'
+url = 'https://github.com/aws/ota-for-aws-iot-embedded-sdk'
 REPO_PATH = ''
     
-def scan_corePKCS11():
-    dependency_path = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
+def scan_overTheAir():
+    dependency_path = os.path.join(REPO_PATH, 'source/dependency')
+    path_3rdparty = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
 
     o = io.StringIO()
@@ -26,8 +29,8 @@ def scan_corePKCS11():
     root_license = manifest['license']
     
     #delete later
-    manifest['dependencies'][0]['license'] = 'Apache License 2.0'
-    manifest['dependencies'][1]['license'] = 'OASIS License'
+    manifest['dependencies'][0]['license'] = 'MIT'
+    manifest['dependencies'][1]['license'] = 'MIT'
     
     for dependency in manifest['dependencies']:
         buffer3rd[dependency['name']] = io.StringIO()
@@ -49,11 +52,12 @@ def scan_corePKCS11():
     for library in os.listdir(dependency_path):
         if library.startswith('.'):
             continue
+        if library == '3rdparty':
+            continue
         library_lic = root_license
         try: 
             buffer = buffer3rd[library]
             library_lic = dependency_info[library]['license']
-            #copyright = dependency_info[library]['copyright']
             dependency_file_list[library] = []
             temp_list = dependency_file_list[library]
         except:
@@ -69,7 +73,29 @@ def scan_corePKCS11():
                     file_writer(buffer, filepath, file, file_checksum, library_lic)
                 total_file_list.append(file_checksum)
                 temp_list.append(file_checksum)
-    
+
+    for library in os.listdir(path_3rdparty):
+        if library.startswith('.'):
+            continue
+        library_lic = root_license
+        try: 
+            buffer = buffer3rd[library]
+            library_lic = dependency_info[library]['license']
+            dependency_file_list[library] = []
+            temp_list = dependency_file_list[library]
+        except:
+            buffer = o
+            temp_list = []
+            
+
+        for subdir, dirs, files in os.walk(os.path.join(path_3rdparty, library)):
+            for file in files:
+                filepath = os.path.join(subdir, file)
+                file_checksum = hash_sha1(filepath)
+                if file.endswith('.c'):
+                    file_writer(buffer, filepath, file, file_checksum, library_lic)
+                total_file_list.append(file_checksum)
+                temp_list.append(file_checksum)
 
     output = open('sbom.spdx', 'w')
     doc_writer(output, spdx_version, data_license, manifest['name'], sbom_namespace, sbom_creator)
@@ -97,5 +123,5 @@ if __name__ == "__main__":
                         help='Path to the repository root.')
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
-    scan_corePKCS11()
+    scan_overTheAir()
 
