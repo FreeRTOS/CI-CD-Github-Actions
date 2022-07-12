@@ -27,7 +27,7 @@ runs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: update-sbom
-          base: [main]
+          base: main
           token: ${{ inputs.token }}
           path: ${{ inputs.path }}
           commit-message: Add sbom file
