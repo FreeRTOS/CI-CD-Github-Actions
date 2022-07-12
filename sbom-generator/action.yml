@@ -1,5 +1,5 @@
 name: 'generate-sbom'
-description: 'Generate SBOM for corePKCS11 library'
+description: 'Generate SBOM for FreeRTOS libraries'
 inputs:
   path:
     description: 'Path to repository folder containing manifest.yml to verify.'
