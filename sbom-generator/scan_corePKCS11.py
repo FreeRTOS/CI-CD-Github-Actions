@@ -15,19 +15,15 @@ REPO_PATH = ''
 def scan_corePKCS11():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
-
     o = io.StringIO()
     buffer3rd = {}
     dependency_info = {}
     total_file_list = []
     dependency_file_list = {}
+    
     with open(manifest_path) as f:
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
-    
-    #delete later
-    manifest['dependencies'][0]['license'] = 'Apache License 2.0'
-    manifest['dependencies'][1]['license'] = 'OASIS License'
     
     for dependency in manifest['dependencies']:
         buffer3rd[dependency['name']] = io.StringIO()
