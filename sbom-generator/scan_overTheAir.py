@@ -28,10 +28,6 @@ def scan_overTheAir():
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
     
-    #delete later
-    manifest['dependencies'][0]['license'] = 'MIT'
-    manifest['dependencies'][1]['license'] = 'MIT'
-    
     for dependency in manifest['dependencies']:
         buffer3rd[dependency['name']] = io.StringIO()
         dependency_info[dependency['name']] = dependency
