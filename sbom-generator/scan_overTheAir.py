@@ -108,8 +108,6 @@ def scan_overTheAir():
     for dependency in dependency_info.keys():
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + dependency + '\n')
 
-
-
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
     parser.add_argument('--repo-root-path',
