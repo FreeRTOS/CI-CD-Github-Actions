@@ -44,7 +44,6 @@ def scan_overTheAir():
                 file_writer(o, filepath, file, file_checksum, root_license)
             total_file_list.append(file_checksum)
     
-                        
     for library in os.listdir(dependency_path):
         if library.startswith('.'):
             continue
@@ -60,7 +59,6 @@ def scan_overTheAir():
             buffer = o
             temp_list = []
             
-
         for subdir, dirs, files in os.walk(os.path.join(dependency_path, library)):
             for file in files:
                 filepath = os.path.join(subdir, file)
@@ -82,8 +80,7 @@ def scan_overTheAir():
         except:
             buffer = o
             temp_list = []
-            
-
+        
         for subdir, dirs, files in os.walk(os.path.join(path_3rdparty, library)):
             for file in files:
                 filepath = os.path.join(subdir, file)
@@ -118,4 +115,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
     scan_overTheAir()
-
