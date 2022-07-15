@@ -24,7 +24,6 @@ def scan_kernel():
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
 
-        
     for subdir, dirs, files in os.walk(REPO_PATH):
         for file in files:
             if file.endswith('.spdx'):
@@ -35,12 +34,10 @@ def scan_kernel():
                 file_writer(o, filepath, file, file_checksum, root_license)
             total_file_list.append(file_checksum)
     
-
     output = open('sbom.spdx', 'w')
     doc_writer(output, spdx_version, data_license, manifest['name'], sbom_namespace, sbom_creator)
     pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
     output.write(o.getvalue())
-
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
@@ -52,4 +49,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
     scan_kernel()
-
