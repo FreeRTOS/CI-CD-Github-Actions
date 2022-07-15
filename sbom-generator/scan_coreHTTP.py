@@ -15,7 +15,6 @@ REPO_PATH = ''
 def scan_coreHTTP():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
-
     o = io.StringIO()
     buffer3rd = {}
     dependency_info = {}
@@ -25,13 +24,10 @@ def scan_coreHTTP():
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
     
-    #delete later
-    manifest['dependencies'][0]['license'] = 'Temp License 2.0'
-    
     for dependency in manifest['dependencies']:
         buffer3rd[dependency['name']] = io.StringIO()
         dependency_info[dependency['name']] = dependency
-        
+    
     for subdir, dirs, files in os.walk(os.path.join(REPO_PATH, 'source')):
         if 'dependency' in subdir:
             continue
@@ -44,7 +40,6 @@ def scan_coreHTTP():
                 file_writer(o, filepath, file, file_checksum, root_license)
             total_file_list.append(file_checksum)
     
-                        
     for library in os.listdir(dependency_path):
         if library.startswith('.'):
             continue
@@ -57,7 +52,6 @@ def scan_coreHTTP():
         except:
             buffer = o
             temp_list = []
-            
 
         for subdir, dirs, files in os.walk(os.path.join(dependency_path, library)):
             for file in files:
@@ -68,7 +62,6 @@ def scan_coreHTTP():
                 total_file_list.append(file_checksum)
                 temp_list.append(file_checksum)
     
-
     output = open('sbom.spdx', 'w')
     doc_writer(output, spdx_version, data_license, manifest['name'], sbom_namespace, sbom_creator)
     pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
@@ -83,7 +76,6 @@ def scan_coreHTTP():
     #print relationships
     for dependency in dependency_info.keys():
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + dependency + '\n')
-
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
