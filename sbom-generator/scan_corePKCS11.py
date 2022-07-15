@@ -40,7 +40,6 @@ def scan_corePKCS11():
             if file.endswith('.c'):
                 file_writer(o, filepath, file, file_checksum, root_license)
             total_file_list.append(file_checksum)
-    
                         
     for library in os.listdir(dependency_path):
         if library.startswith('.'):
@@ -56,7 +55,6 @@ def scan_corePKCS11():
             buffer = o
             temp_list = []
             
-
         for subdir, dirs, files in os.walk(os.path.join(dependency_path, library)):
             for file in files:
                 filepath = os.path.join(subdir, file)
@@ -66,7 +64,6 @@ def scan_corePKCS11():
                 total_file_list.append(file_checksum)
                 temp_list.append(file_checksum)
     
-
     output = open('sbom.spdx', 'w')
     doc_writer(output, spdx_version, data_license, manifest['name'], sbom_namespace, sbom_creator)
     pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
@@ -82,8 +79,6 @@ def scan_corePKCS11():
     for dependency in dependency_info.keys():
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + dependency + '\n')
 
-
-
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
     parser.add_argument('--repo-root-path',
@@ -94,4 +89,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
     scan_corePKCS11()
-
