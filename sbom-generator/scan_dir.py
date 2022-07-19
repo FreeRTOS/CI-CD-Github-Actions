@@ -24,6 +24,7 @@ def scan_dir():
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
     root_name = manifest['name']
+    URL += '/tree/' + manifest['version']
     output_buffer[root_name] = io.StringIO()
     
     try:

@@ -1,7 +1,7 @@
 name: 'generate-sbom'
 description: 'Generate SBOM for FreeRTOS libraries'
 inputs:
-  path:
+  repo_path:
     description: 'Path to repository folder containing manifest.yml to verify.'
     required: false
     default: ./
@@ -20,7 +20,7 @@ runs:
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
         shell: bash 
       - name: Run generator script
-        working-directory: ${{ inputs.path }}
+        working-directory: ${{ inputs.repo_path }}
         run: |
           python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }} --url ${{ inputs.url }}
         shell: bash

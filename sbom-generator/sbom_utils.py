@@ -34,7 +34,7 @@ def pacakge_writer(output, packageName: str, version: str, url: str, license: st
     output.write('PackageName: '+ packageName + '\n')
     output.write('SPDXID: SPDXRef-Package-'+ packageName + '\n')
     output.write('PackageVersion: '+ version + '\n')
-    output.write('PackageDownloadLocation: '+ url + '/tree/' + version + '\n')
+    output.write('PackageDownloadLocation: '+ url + '\n')
     output.write('PackageLicenseConcluded: '+ license + '\n')
     output.write('FilesAnalyzed: '+ str(file_analyzed) + '\n')
     output.write('PackageVerificationCode: '+ ver_code + '\n')
