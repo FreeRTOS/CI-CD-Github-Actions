@@ -5,9 +5,14 @@ inputs:
     description: 'Path to repository folder containing manifest.yml to verify.'
     required: false
     default: ./
-  script:
-    description: 'Python script for the specific library'
-    required: True
+  source_path:
+    description: 'Path to source code'
+    required: false
+    default: ./source
+  url:
+    description: 'github url to the repo'
+    required: false
+    default: 'https://github.com/FreeRTOS'
 runs:
   using: "composite"
   steps:
@@ -17,5 +22,5 @@ runs:
       - name: Run generator script
         working-directory: ${{ inputs.path }}
         run: |
-          python3 $GITHUB_ACTION_PATH/${{ inputs.script }}
+          python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }} --url ${{ inputs.url }}
         shell: bash
