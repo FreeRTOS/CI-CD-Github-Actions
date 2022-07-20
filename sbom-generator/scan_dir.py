@@ -7,7 +7,6 @@ from datetime import datetime
 from argparse import ArgumentParser
 from sbom_utils import *
 
-URL = ''
 REPO_PATH = ''
 SOURCE_PATH = ''
 
@@ -15,6 +14,7 @@ def scan_dir():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency')
     path_3rdparty = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
+    URL = 'https://github.com/' + os.getenv('GITHUB_REPOSITORY')
 
     output_buffer = {}
     total_file_list = []
@@ -120,8 +120,6 @@ def scan_dir():
             continue
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + library_name + '\n')
 
-
-
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
     parser.add_argument('--repo-root-path',
@@ -129,20 +127,13 @@ if __name__ == "__main__":
                         required=None,
                         default=os.getcwd(),
                         help='Path to the repository root.')
-    parser.add_argument('--url',
-                        type=str,
-                        required=None,
-                        default='https://github.com/FreeRTOS',
-                        help='Repo URL.')
     parser.add_argument('--source-path',
                         type=str,
                         required=None,
                         default=os.path.join(os.getcwd(), 'source'),
-                        help='Repo URL.')
+                        help='Path to the source code dir.')
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
-    URL = args.url
     SOURCE_PATH = os.path.abspath(args.source_path)
-
+    
     scan_dir()
-
