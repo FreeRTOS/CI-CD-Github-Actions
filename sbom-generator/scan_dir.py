@@ -14,7 +14,7 @@ def scan_dir():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency')
     path_3rdparty = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
-    URL = 'https://github.com/' + os.getenv('GITHUB_REPOSITORY')
+    url = 'https://github.com/' + os.getenv('GITHUB_REPOSITORY')
 
     output_buffer = {}
     total_file_list = []
@@ -24,7 +24,7 @@ def scan_dir():
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
     root_name = manifest['name']
-    URL += '/tree/' + manifest['version']
+    url += '/tree/' + manifest['version']
     output_buffer[root_name] = io.StringIO()
     
     try:
@@ -103,7 +103,7 @@ def scan_dir():
     #print sbom file to sbom.spdx
     output = open('sbom.spdx', 'w')
     doc_writer(output, manifest['version'], manifest['name'])
-    pacakge_writer(output, manifest['name'], manifest['version'], URL, root_license, package_hash(total_file_list), description=manifest['description'])
+    pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
     output.write(output_buffer[root_name].getvalue())
 
     #print dependencies
