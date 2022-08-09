@@ -40,7 +40,7 @@ def scan_dir():
         for file in files:
             if file.endswith('.spdx'):
                 continue
-            filepath = os.path.join(subdir, file)
+            filepath = os.path.join(subdir, file).replace(SOURCE_PATH, '')
             file_checksum = hash_sha1(filepath)
             total_file_list.append(file_checksum)
             if file.endswith('.c'):
