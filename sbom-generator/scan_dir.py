@@ -44,7 +44,7 @@ def scan_dir():
             file_checksum = hash_sha1(filepath)
             total_file_list.append(file_checksum)
             if file.endswith('.c'):
-                file_writer(output_buffer[root_name], filepath, file, file_checksum, root_license)
+                file_writer(output_buffer[root_name], filepath, file_checksum, root_license)
 
     #scan dependencies
     if os.path.exists(dependency_path):
@@ -69,7 +69,7 @@ def scan_dir():
                     filepath = os.path.join(subdir, file)
                     file_checksum = hash_sha1(filepath)
                     if file.endswith('.c'):
-                        file_writer(buffer, filepath, file, file_checksum, library_lic)
+                        file_writer(buffer, filepath, file_checksum, library_lic)
                     total_file_list.append(file_checksum)
                     temp_list.append(file_checksum)
 
@@ -96,7 +96,7 @@ def scan_dir():
                     filepath = os.path.join(subdir, file)
                     file_checksum = hash_sha1(filepath)
                     if file.endswith('.c'):
-                        file_writer(buffer, filepath, file, file_checksum, library_lic)
+                        file_writer(buffer, filepath, file_checksum, library_lic)
                     total_file_list.append(file_checksum)
                     temp_list.append(file_checksum)
 
