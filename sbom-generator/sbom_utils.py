@@ -21,8 +21,8 @@ def package_hash(file_list: str) -> str:
     return h.hexdigest()
 
 def file_writer(output, filepath: str, sha1: str, license: str, copyright='NOASSERTION', comment='NOASSERTION'):
-    output.write('FileName: .'+ filename + '\n')
-    output.write('SPDXID: SPDXRef-File'+ filename.replace('/', '-') + '\n')
+    output.write('FileName: .'+ filepath + '\n')
+    output.write('SPDXID: SPDXRef-File'+ filepath.replace('/', '-') + '\n')
     output.write('FileChecksum: SHA1: '+ sha1 + '\n')
     output.write('LicenseConcluded: '+ license + '\n')
     output.write('FileCopyrightText: '+ copyright + '\n')
