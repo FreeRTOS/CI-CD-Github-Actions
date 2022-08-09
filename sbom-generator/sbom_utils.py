@@ -23,7 +23,7 @@ def package_hash(file_list: str) -> str:
 def file_writer(output, filepath: str, sha1: str, license: str, copyright='NOASSERTION', comment='NOASSERTION'):
     output.write('FileName: .'+ filepath + '\n')
     output.write('SPDXID: SPDXRef-File'+ filepath.replace('/', '-') + '\n')
-    output.write('FileChecksum: SHA1: '+ hash_sha1(filepath) + '\n')
+    output.write('FileChecksum: SHA1: '+ sha1 + '\n')
     output.write('LicenseConcluded: '+ license + '\n')
     output.write('FileCopyrightText: '+ copyright + '\n')
     output.write('FileComment: '+ comment + '\n')
