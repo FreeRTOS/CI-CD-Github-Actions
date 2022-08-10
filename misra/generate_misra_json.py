@@ -213,7 +213,7 @@ request.urlretrieve(
 )
 
 file_path_regex: Pattern = re.compile(
-    r"misra_test_suite\.zip/Example-Suite-V2\.1/(D|R)_(\d{1,2})_(\d{1,2})\.c"
+    r"misra_test_suite\.zip/Example-Suite-V2\.1/(D|R)_(\d{1,2})_(\d{1,2})(?:_\d)?\.c"
 )
 
 misra_guideline_description_regex: Pattern = re.compile(
@@ -244,7 +244,7 @@ def cleanup_rule_text(rule_text: str):
 
 
 with zipfile.ZipFile("misra_test_suite.zip", "r") as zip:
-    guidelines: List[Dict[str, str]] = list()
+    guideline_map: Dict[str,Dict[str,str]] = dict()
 
     for misra_test_file in zipfile.Path(zip, "Example-Suite-V2.1/").iterdir():
         match = file_path_regex.match(str(misra_test_file))
@@ -272,9 +272,11 @@ with zipfile.ZipFile("misra_test_suite.zip", "r") as zip:
                     guideline["item"] = str(int(match[3], base=10))
                     guideline["description"] = cleanup_rule_text(match[4])
                     guideline["category"] = misra_category_map[guideline["id"]]
-                    guidelines.append(guideline)
+                    if guideline["id"] not in guideline_map:
+                        guideline_map[guideline["id"]] = guideline
 
     with open("misra_rules.json", "w", encoding="utf-8") as output_f:
+        guidelines: List[Dict[str, str]] = list(guideline_map.values())
         json.dump(guidelines, output_f, indent=4)
         output_f.write(os.linesep)
 
