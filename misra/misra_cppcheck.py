@@ -298,14 +298,17 @@ def main():
     for error in cc_error_list:
         if error.file_path in target_files_set:
             print(error)
-            if rule_text and error.error_id in rule_text:
+            text = None
+            if rule_text:
+                text = rule_text.get(error.error_id, None)
+            if text:
                 print(
                     "\t{}: {}".format(
-                        rule_text[error.error_id]["category"],
-                        rule_text[error.error_id]["description"],
+                        text.get('category', "Unknown"),
+                        text.get('description', 'Unknown'),
                     )
                 )
-            else:
+            elif error.message:
                 print("\t" + error.message)
             print()
 
