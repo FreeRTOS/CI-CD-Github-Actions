@@ -9,6 +9,10 @@ inputs:
     description: 'Path to the folder in the repository containing the source code.'
     required: false
     default: source
+  horrid_threshold:
+    description: 'The horrid threshold parameter passed to the invocation of complexity'
+    required: false
+    default: 8
 runs:
   using: "composite"
   steps: 
@@ -19,5 +23,5 @@ runs:
         working-directory: ${{ inputs.path }}
         run: |
           find ${{ inputs.source_path }}/ -iname '*.c' |\
-          xargs complexity --scores --threshold=0 --horrid-threshold=8
+          xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
         shell: bash
