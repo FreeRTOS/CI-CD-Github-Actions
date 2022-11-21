@@ -36,6 +36,8 @@ jobs:
         uses: ./complexity
         with:
           path: coreMQTT
+          # For coreMQTT the code complexity threshold is 10.
+          horrid_threshold: 10
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
     steps:
