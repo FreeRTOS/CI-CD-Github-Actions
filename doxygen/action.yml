@@ -16,7 +16,7 @@ inputs:
   doxygen_dependencies:
     description: 'Space-separated dependencies for doxygen.'
     required: false
-    default: "libclang-11-dev libclang-cpp11 graphviz"
+    default: libclang-11-dev libclang-cpp11 graphviz
   generate_zip:
     description: 'Flag to indicate whether a ZIP output should be created.'
     required: false
