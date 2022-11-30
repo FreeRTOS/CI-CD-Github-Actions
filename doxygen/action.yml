@@ -13,6 +13,10 @@ inputs:
     description: 'Download link for doxygen tar.gz (default version 1.9.5).'
     required: false
     default: "https://sourceforge.net/projects/doxygen/files/rel-1.9.5/doxygen-1.9.5.linux.bin.tar.gz"
+  doxygen_dependencies:
+    description: 'Space-separated dependencies for doxygen.'
+    required: false
+    default: "libclang-11-dev libclang-cpp11 graphviz"
   generate_zip:
     description: 'Flag to indicate whether a ZIP output should be created.'
     required: false
@@ -24,7 +28,7 @@ runs:
     - name: Install Doxygen
       run: |
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
-        sudo apt-get install -y libclang-11-dev libclang-cpp11 graphviz
+        sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
       shell: bash
     - name: Verify Doxygen build and Generate ZIP (if specified)
       working-directory: ${{ inputs.path }}
