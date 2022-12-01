@@ -30,7 +30,6 @@ inputs:
 
 runs:
   using: "composite"
-  runs-on: ubuntu-20.04
   steps:
     - name: Checkout the repo for generating doxygen
       uses: actions/checkout@v2
