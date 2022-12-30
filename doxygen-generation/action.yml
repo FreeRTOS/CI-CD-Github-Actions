@@ -20,9 +20,9 @@ inputs:
     required: false
     default: docs/doxygen/output/html
   doxygen_link:
-    description: 'Download link for doxygen tar.gz (default version 1.9.2).'
+    description: 'Download link for doxygen tar.gz (default version 1.9.4).'
     required: false
-    default: "https://sourceforge.net/projects/doxygen/files/rel-1.9.2/doxygen-1.9.2.linux.bin.tar.gz"
+    default: "https://sourceforge.net/projects/doxygen/files/rel-1.9.4/doxygen-1.9.4.linux.bin.tar.gz"
   doxygen_dependencies:
     description: 'Space-separated dependencies for doxygen.'
     required: false
