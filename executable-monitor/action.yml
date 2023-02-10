@@ -9,7 +9,7 @@ inputs:
     required: false
     default: "Demo completed successfully."
   timeout-seconds:
-    description: 'Maximum amount of time to run the executable. Default is 600.''
+    description: 'Maximum amount of time to run the executable. Default is 600.'
     required: false
     default: 600
   number-of-runs:
