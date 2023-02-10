@@ -1,0 +1,28 @@
+name: 'executable-monitor'
+description: 'Runs and executable until a termination line is hit or a timeout occurs. Reports if the executable completed successfully or failed.'
+inputs:
+  exe-path:
+    description: 'Path to the executable to run.'
+    required: true
+  success-line:
+    description: 'Line of output from executable indicating success.'
+    required: false
+    default: "Demo completed successfully."
+  timeout-seconds:
+    description: 'Maximum amount of time to run the executable. Default is 600.''
+    required: false
+    default: 600
+  number-of-runs:
+    description: 'Number of times to run the executable.'
+    required: false
+    default: 1
+runs:
+  using: "composite"
+  steps: 
+      - name: Install dependencies
+        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        shell: bash
+      - name: Run executable with monitoring script
+        working-directory: ${{ inputs.path }}
+        run: python3 $GITHUB_ACTION_PATH/executable-runner.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --number-of-runs=${{ inputs.number-of-runs }}
+        shell: bash
