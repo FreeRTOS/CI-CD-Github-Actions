@@ -18,6 +18,10 @@ if __name__ == '__main__':
                         type=int,
                         required=True,
                         help='Timeout for each executable run.')
+    parser.add_argument('--success-line',
+                        type=str,
+                        required=True,
+                        help='Line that indicates executable completed successfully')
 
     args = parser.parse_args()
 
@@ -34,6 +38,8 @@ if __name__ == '__main__':
     
     print("Device Output:")
     for line in proc.stdout:
+        if line.strip("\n") == args.success_line:
+            break
         sys.stdout.write(line)
         logfile.write(line)
     
