@@ -38,7 +38,7 @@ if __name__ == '__main__':
     
     print("Device Output:")
     for line in proc.stdout:
-        if line.strip("\n") == args.success_line:
+        if args.success_line in line:
             break
         sys.stdout.write(line)
         logfile.write(line)
