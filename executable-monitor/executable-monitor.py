@@ -30,13 +30,14 @@ if __name__ == '__main__':
 
     logfile = open('mqtt_demo_plaintext.log', 'w')
 
-    proc=subprocess.Popen([args.exe_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc=subprocess.Popen([args.exe_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     
     print("Device Output:")
     for line in proc.stdout:
         sys.stdout.write(line)
         logfile.write(line)
-    proc.wait()
+    
+    logfile.write("\nExit Status: Reached successful line.")
 
     sys.exit(0)
 
