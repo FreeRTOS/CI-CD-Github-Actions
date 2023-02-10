@@ -23,5 +23,5 @@ runs:
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
         shell: bash
       - name: Run executable with monitoring script
-        run: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --number-of-runs=${{ inputs.number-of-runs }}
+        run: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --number-of-runs=${{ inputs.number-of-runs }} --success-line=${{ inputs.success-line }}
         shell: bash
