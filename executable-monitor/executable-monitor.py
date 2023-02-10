@@ -20,9 +20,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.ignore_submodule_path != None:
-        IGNORE_SUBMODULES_LIST = args.ignore_submodule_path.split(',')
-
     # Convert any relative path (like './') in passed argument to absolute path.
     EXE_PATH = os.path.abspath(args.exe_path)
 
