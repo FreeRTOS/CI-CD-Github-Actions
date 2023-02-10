@@ -2,6 +2,7 @@
 
 import os, sys
 from argparse import ArgumentParser
+import subprocess
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='manifest.yml verifier')
@@ -26,6 +27,16 @@ if __name__ == '__main__':
     print(f"Running executable: {EXE_PATH} ")
     print(f"Timeout per run (seconds): {args.timeout_seconds}")
     print(f"Number of runs: {args.number_of_runs}")
+
+    logfile = open('mqtt_demo_plaintext.log', 'w')
+
+    proc=subprocess.Popen([args.exe_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    
+    print("Device Output:")
+    for line in proc.stdout:
+        sys.stdout.write(line)
+        logfile.write(line)
+    proc.wait()
 
     sys.exit(0)
 
