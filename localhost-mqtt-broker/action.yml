@@ -22,7 +22,9 @@ runs:
         id: generate-credentials
         run: |
           python3 $GITHUB_ACTION_PATH/localhost_credential_creation.py
-          ls
+          echo "$(readlink root_ca_cert.crt)"
+          echo "$(readlink device_cert.crt)"
+          echo "$(readlink device_priv_key.key)"
         shell: bash
       - name: Run localhost MQTT broker
         run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py &
