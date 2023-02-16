@@ -1,3 +1,4 @@
+import random
 from OpenSSL import crypto, SSL
 
 # File names for generated credentials
