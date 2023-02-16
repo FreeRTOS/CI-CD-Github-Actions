@@ -23,6 +23,7 @@ runs:
         run: |
           python3 $GITHUB_ACTION_PATH/localhost_credential_creation.py
           ls
+        shell: bash
       - name: Run localhost MQTT broker
         run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py &
         shell: bash
