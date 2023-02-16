@@ -24,7 +24,7 @@ runs:
           python3 $GITHUB_ACTION_PATH/localhost_credential_creation.py
           echo "root-ca-cert-path=$(pwd)/root_ca_cert.crt" >> $GITHUB_OUTPUT
           echo "device-cert-path=$(pwd)/device_cert.crt" >> $GITHUB_OUTPUT
-          echo "device-priv-key-path=$(pwd)/devie_priv_key.key" >> $GITHUB_OUTPUT
+          echo "device-priv-key-path=$(pwd)/device_priv_key.key" >> $GITHUB_OUTPUT
         shell: bash
       - name: Run localhost MQTT broker
         run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py &
