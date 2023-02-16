@@ -1,0 +1,28 @@
+name: 'Localhost MQTT Broker'
+description: 'Starts an MQTT Broker using Python. For TLS connections (including mutual authentication), connect to localhost:8883. For plaintext connections, connect to localhost:1883.'
+
+outputs:
+  root-ca-cert-path:
+    description: "Root CA certificate file path."
+    value: ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
+  device-cert-path:
+    description: "Device certificate file path."
+    value: ${{ steps.generate-credentials.outputs.device-cert-path }}
+  device-priv-key-path:
+    description: "Device private key file path."
+    value: ${{ steps.generate-credentials.outputs.device-priv-key-path }}
+
+runs:
+  using: "composite"
+  steps: 
+      - name: Install dependencies
+        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        shell: bash
+      - name: Generate server and client credentials
+        id: generate-credentials
+        run: |
+          python3 $GITHUB_ACTION_PATH/localhost_credential_creation.py
+          ls
+      - name: Run localhost MQTT broker
+        run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py &
+        shell: bash
