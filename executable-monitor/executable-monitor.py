@@ -34,9 +34,13 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    if not os.path.exists(args.exe_path):
+        print(f'Input executable path \"{args.exe_path}\" does not exist.')
+        sys.exit(1)
+
     # Create log directory if it does not exist.
     if not os.path.exists(args.log_dir):
-        os.makedirst(args.log_dir)
+        os.makedirs(args.log_dir, exist_ok = True)
 
     # Convert any relative path (like './') in passed argument to absolute path.
     EXE_PATH = os.path.abspath(args.exe_path)
