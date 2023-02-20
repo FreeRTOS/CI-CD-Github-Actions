@@ -4,6 +4,9 @@ inputs:
   exe-path:
     description: 'Path to the executable to run.'
     required: true
+  log-dir:
+    description: 'Path to directory to store logs.'
+    required: true
   success-line:
     description: 'Line of output from executable indicating success.'
     required: false
@@ -23,5 +26,5 @@ runs:
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
         shell: bash
       - name: Run executable with monitoring script
-        run: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --number-of-runs=${{ inputs.number-of-runs }} --success-line="${{ inputs.success-line }}"
+        run: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --number-of-runs=${{ inputs.number-of-runs }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }}
         shell: bash
