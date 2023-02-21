@@ -97,7 +97,7 @@ if __name__ == '__main__':
         exe.kill()
 
     # Capture remaining output and check for the successful line
-    for exe_stdout_line in exe.stdout.readlines()
+    for exe_stdout_line in exe.stdout.readlines():
         sys.stdout.write(exe_stdout_line)
         log_file.write(exe_stdout_line)
         if args.success_line in exe_stdout_line:
