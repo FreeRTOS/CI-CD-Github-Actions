@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     EXE_NAME = os.path.basename(EXE_PATH)
 
-    log_file = open(f"{LOG_DIR}/{EXE_NAME}_output.txt', 'w')
+    log_file = open(f'{LOG_DIR}/{EXE_NAME}_output.txt', 'w')
 
     exe = subprocess.Popen([EXE_PATH], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
   
