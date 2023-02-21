@@ -25,14 +25,17 @@ if __name__ == '__main__':
                         help='Timeout for each executable run.')
     parser.add_argument('--success-line',
                         type=str,
-                        required='--success-exit-status' not in sys.argv,
+                        required=False,
                         help='Line that indicates executable completed successfully. Required if --success-exit-status is not used.')
     parser.add_argument('--success-exit-status',
                         type=int,
-                        required='--success-line' not in sys.argv,
+                        required=False,
                         help='Exit status that indicates that the executable completed successfully. Required if --success-line is not used.')
 
     args = parser.parse_args()
+
+    if args.success_exit_status is None and args.success_line is None:
+        print("Must specify at least one of the following: --success-line, --success-exit-status.")
 
     if not os.path.exists(args.exe_path):
         print(f'Input executable path \"{args.exe_path}\" does not exist.')
