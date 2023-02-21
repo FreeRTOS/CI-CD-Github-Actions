@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
     if args.success_exit_status is None and args.success_line is None:
         print("Must specify at least one of the following: --success-line, --success-exit-status.")
+        sys.exit(1)
 
     if not os.path.exists(args.exe_path):
         print(f'Input executable path \"{args.exe_path}\" does not exist.')
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     print(f"Running executable: {EXE_PATH} ")
     print(f"Storing logs in: {LOG_DIR}")
     print(f"Timeout per run (seconds): {args.timeout_seconds}")
-    print(f"Number of runs: {args.number_of_runs}")
+    print(f"Number of runs: {args.number_of_runs}\n")
 
     EXE_NAME = os.path.basename(EXE_PATH)
 
@@ -83,7 +84,7 @@ if __name__ == '__main__':
         log_file.write(exe_stdout_line)
 
         # Check if the executable printed out it's success line
-        if args.success_line in exe_stdout_line:
+        if args.success_line is not None and args.success_line in exe_stdout_line:
             success_line_found = True
 
         # Check if executable exitted
@@ -103,7 +104,7 @@ if __name__ == '__main__':
     for exe_stdout_line in exe.stdout.readlines():
         sys.stdout.write(exe_stdout_line)
         log_file.write(exe_stdout_line)
-        if args.success_line in exe_stdout_line:
+        if args.success_line is not None and args.success_line in exe_stdout_line:
             success_line_found = True
     
     sys.stdout.write("\nEND OF DEVICE OUTPUT\n\n")
@@ -116,22 +117,24 @@ if __name__ == '__main__':
 
     if args.success_line is not None:
         if success_line_found:
-            logfile.write("\nSuccess Line: Found.")
+            sys.stdout.write("Success Line: Found.\n")
+            log_file.write("Success Line: Found.\n")
         else:
-            logfile.write("\nSuccess Line: Success line not output.")
+            sys.stdout.write("Success Line: Success line not output.\n")
+            log_file.write("Success Line: Success line not output.\n")
             exit_status = 1
 
     if args.success_exit_status is not None:
         if exe_exitted:
             if exe_exit_status != args.success_exit_status:
                 exit_status = 1
-            logfile.write(f"\nExit Status: {exe_exit_status}")
+            sys.stdout.write(f"Exit Status: {exe_exit_status}\n")
+            log_file.write(f"Exit Status: {exe_exit_status}\n")
         else:
-            logfile.write("\nExit Status: Executable did not exit.")
+            sys.stdout.write("Exit Status: Executable did not exit.\n")
+            log_file.write("Exit Status: Executable did not exit.\n")
             exe_status = 1
     
 
     # Report if executable executed successfully to workflow
     sys.exit(exit_status)
-
-
