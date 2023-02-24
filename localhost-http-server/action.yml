@@ -1,0 +1,25 @@
+name: 'Localhost HTTP Server'
+description: 'Starts an MQTT server using Python. For TLS connections (including mutual authentication), connect to localhost:443. For plaintext connections, connect to localhost:80.'
+
+inputs:
+  root-ca-cert-path:
+    description: "Root CA certificate file path."
+    required: True
+  server-cert-path:
+    description: "Server certificate file path."
+    required: True
+  server-priv-key-path:
+    description: "Server private key file path."
+    required: True
+
+runs:
+  using: "composite"
+  steps: 
+      - name: Install dependencies
+        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        shell: bash
+      - name: Run localhost HTTP server
+        run: |
+          python3 $GITHUB_ACTION_PATH/localhost_http_server.py --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
+          python3 -m http.server 80 --bind 127.0.0.1 &
+        shell: bash
