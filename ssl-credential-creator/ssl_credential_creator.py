@@ -24,6 +24,7 @@ TEST_CERT_SUBJECT_ROOT_CA = crypto.X509Name(TEST_CERT_SUBJECT)
 TEST_CERT_SUBJECT_ROOT_CA.CN = 'localhostrootca'
 
 def generate_priv_keys_and_certs():
+    
     # Root CA generation
 
     ca_key_pair = crypto.PKey()

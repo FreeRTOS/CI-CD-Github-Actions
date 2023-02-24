@@ -1,0 +1,40 @@
+name: 'SSL Credential Creator'
+description: 'Creates a Root CA private key, a Root CA certificate, a server private key, a server certificate, a device private key, and certificate. These can be used to set up servers with authentication.'
+
+outputs:
+  root-ca-priv-key-path:
+    description: "Root CA private key file path."
+    value: ${{ steps.generate-credentials.outputs.root-ca-priv-key-path }}
+  root-ca-cert-path:
+    description: "Root CA certificate file path."
+    value: ${{ steps.generate-credentials.outputs.root-ca-cert-path }}
+  server-priv-key-path:
+    description: "Server private key file path."
+    value: ${{ steps.generate-credentials.outputs.server-priv-key-path }}
+  server-cert-path:
+    description: "Server certificate file path."
+    value: ${{ steps.generate-credentials.outputs.server-cert-path }}
+  device-priv-key-path:
+    description: "Device private key file path."
+    value: ${{ steps.generate-credentials.outputs.device-priv-key-path }}
+  device-cert-path:
+    description: "Device certificate file path."
+    value: ${{ steps.generate-credentials.outputs.device-cert-path }}
+
+runs:
+  using: "composite"
+  steps: 
+      - name: Install dependencies
+        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        shell: bash
+      - name: Generate credentials
+        id: generate-credentials
+        run: |
+          python3 $GITHUB_ACTION_PATH/ssl_credential_creator.py
+          echo "root-ca-priv-key-path=$(pwd)/root_ca_priv_key.key" >> $GITHUB_OUTPUT
+          echo "root-ca-cert-path=$(pwd)/root_ca_cert.crt" >> $GITHUB_OUTPUT
+          echo "server-priv-key-path=$(pwd)/server_priv_key.key" >> $GITHUB_OUTPUT
+          echo "server-cert-path=$(pwd)/server_cert.crt" >> $GITHUB_OUTPUT
+          echo "device-priv-key-path=$(pwd)/device_priv_key.key" >> $GITHUB_OUTPUT
+          echo "device-cert-path=$(pwd)/device_cert.crt" >> $GITHUB_OUTPUT
+        shell: bash

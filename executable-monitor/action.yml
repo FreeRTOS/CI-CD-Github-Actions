@@ -19,6 +19,7 @@ inputs:
     description: 'Number of times to run the executable.'
     required: false
     default: 1
+
 runs:
   using: "composite"
   steps: 

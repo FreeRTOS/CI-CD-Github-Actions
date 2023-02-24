@@ -2,16 +2,29 @@ import logging
 import asyncio
 import os
 import socket
+from argparse import ArgumentParser
 from amqtt.broker import Broker
 
 logger = logging.getLogger(__name__)
 
 LOCAL_HOST_IP = socket.gethostbyname("localhost")
 
-# File names for credentials
-ROOT_CA_CERT_FILE = "root_ca_cert.crt"
-SERVER_PRIV_KEY_FILE = "server_priv_key.key"
-SERVER_CERT_FILE = "server_cert.crt"
+# Parse passed in credentials
+parser = ArgumentParser(description='Localhost MQTT broker.')
+
+parser.add_argument('--root-ca-cert-path',
+                    type=str,
+                    required=True,
+                    help='Path to the root CA certificate.')
+parser.add_argument('--server-cert-path',
+                    type=str,
+                    required=True,
+                    help='Path to the server certificate.')
+parser.add_argument('--server-priv-key-path',
+                    type=str,
+                    required=True,
+                    help='Path to the private key')
+args = parser.parse_args()
 
 # Broker configuration
 config = {
@@ -24,9 +37,9 @@ config = {
             "type": "tcp",
             "bind": f"{LOCAL_HOST_IP}:8883",
             "ssl": "on",
-            "cafile": ROOT_CA_CERT_FILE,
-            "certfile": SERVER_CERT_FILE,
-            "keyfile": SERVER_PRIV_KEY_FILE,
+            "cafile": args.root_ca_cert_path,
+            "certfile": args.server_cert_path,
+            "keyfile": args.server_priv_key_path,
         },
     },
     "sys_interval": 10,
