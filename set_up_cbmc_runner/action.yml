@@ -1,0 +1,134 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# CBMC starter kit 2.9
+name: Set up CBMC runner
+inputs:
+  cbmc_version:
+    description: Version number or 'latest' for CBMC
+    required: true
+    default: latest
+  cbmc_viewer_version:
+    description: Version number or 'latest' for CBMC Viewer
+    required: true
+    default: latest
+  litani_version:
+    description: Version number or 'latest' for Litani
+    required: true
+    default: latest
+  kissat_tag:
+    description: Git tag number or 'latest' for kissat SAT solver
+    required: true
+    default: ''
+  cadical_tag:
+    description: Git tag number or 'latest' for cadical SAT solver
+    required: true
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Check out repository and submodules recursively
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: Install latest CBMC
+      if: ${{ inputs.cbmc_version == 'latest' }}
+      shell: bash
+      run: |
+        echo "Using latest CBMC"
+        # Search within 5 most recent releases for latest available package
+        CBMC_REL="https://api.github.com/repos/diffblue/cbmc/releases?page=1&per_page=5"
+        CBMC_DEB=$(curl -s $CBMC_REL | jq -r '.[].assets[].browser_download_url' | grep -e 'ubuntu-20.04' | head -n 1)
+        CBMC_ARTIFACT_NAME=$(basename $CBMC_DEB)
+        curl -o $CBMC_ARTIFACT_NAME -L $CBMC_DEB
+        sudo dpkg -i $CBMC_ARTIFACT_NAME
+        rm ./$CBMC_ARTIFACT_NAME
+    - name: Install CBMC ${{ inputs.cbmc_version }}
+      if: ${{ inputs.cbmc_version != 'latest' }}
+      shell: bash
+      run: |
+        echo "Using CBMC version ${{ inputs.cbmc_version }}"
+        curl -o cbmc.deb -L \
+          https://github.com/diffblue/cbmc/releases/download/cbmc-${{ inputs.cbmc_version }}/ubuntu-20.04-cbmc-${{ inputs.cbmc_version }}-Linux.deb
+        sudo dpkg -i ./cbmc.deb
+        rm ./cbmc.deb
+    - name: Install latest CBMC viewer
+      if: ${{ inputs.cbmc_viewer_version == 'latest' }}
+      shell: bash
+      run: |
+        echo "Using latest CBMC Viewer"
+        CBMC_VIEWER_REL="https://api.github.com/repos/model-checking/cbmc-viewer/releases/latest"
+        CBMC_VIEWER_VERSION=$(curl -s $CBMC_VIEWER_REL | jq -r .name | sed  's/viewer-//')
+        pip3 install cbmc-viewer==$CBMC_VIEWER_VERSION
+    - name: Install CBMC viewer ${{ inputs.cbmc_viewer_version }}
+      if: ${{ inputs.cbmc_viewer_version != 'latest' }}
+      shell: bash
+      run: |
+        echo "Using CBMC Viewer version ${{ inputs.cbmc_version }}"
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes \
+          build-essential universal-ctags
+        pip3 install cbmc-viewer==${{ inputs.cbmc_viewer_version }}
+    - name: Install latest Litani
+      if: ${{ inputs.litani_version == 'latest' }}
+      shell: bash
+      run: |
+        echo "Using latest Litani"
+        # Search within 5 most recent releases for latest available package
+        LITANI_REL="https://api.github.com/repos/awslabs/aws-build-accumulator/releases?page=1&per_page=5"
+        LITANI_DEB=$(curl -s $LITANI_REL | jq -r '.[].assets[0].browser_download_url' | head -n 1)
+        DBN_PKG_FILENAME=$(basename $LITANI_DEB)
+        curl -L $LITANI_DEB -o $DBN_PKG_FILENAME
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes ./$DBN_PKG_FILENAME
+        rm ./$DBN_PKG_FILENAME
+    - name: Install Litani ${{ inputs.litani_version }}
+      if: ${{ inputs.litani_version != 'latest' }}
+      shell: bash
+      run: |
+        echo "Using Litani version ${{ inputs.cbmc_version }}"
+        curl -o litani.deb -L \
+          https://github.com/awslabs/aws-build-accumulator/releases/download/${{ inputs.litani_version }}/litani-${{ inputs.litani_version }}.deb
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes ./litani.deb
+        rm ./litani.deb
+    - name: Install ${{ inputs.kissat_tag }} kissat
+      if: ${{ inputs.kissat_tag != '' }}
+      shell: bash
+      run: |
+        if ${{ inputs.kissat_tag == '' }}; then return 0; fi
+        if ${{ inputs.kissat_tag == 'latest' }}
+        then
+          KISSAT_REL="https://api.github.com/repos/arminbiere/kissat/releases/latest"
+          KISSAT_TAG_NAME=$(curl -s $KISSAT_REL | jq -r '.tag_name')
+        else
+          KISSAT_TAG_NAME=${{ inputs.kissat_tag }}
+        fi
+        echo "Installing kissat $KISSAT_TAG_NAME"
+        git clone https://github.com/arminbiere/kissat.git \
+          && cd kissat \
+          && git checkout $KISSAT_TAG_NAME \
+          && ./configure \
+          && cd build \
+          && make -j;
+        echo "$(pwd)" >> $GITHUB_PATH
+    - name: Install ${{ inputs.cadical_tag }} cadical
+      if: ${{ inputs.cadical_tag != '' }}
+      shell: bash
+      run: |
+        if ${{ inputs.cadical_tag == '' }}; then return 0; fi
+        if ${{ inputs.cadical_tag == 'latest' }}
+        then
+          CADICAL_REL="https://api.github.com/repos/arminbiere/cadical/releases/latest"
+          CADICAL_TAG_NAME=$(curl -s $CADICAL_REL | jq -r '.tag_name')
+        else
+          CADICAL_TAG_NAME=${{ inputs.cadical_tag }}
+        fi
+        echo "Installing cadical $CADICAL_TAG_NAME"
+        git clone https://github.com/arminbiere/cadical.git \
+          && cd cadical \
+          && git checkout $CADICAL_TAG_NAME \
+          && ./configure \
+          && cd build \
+          && make -j;
+        echo "$(pwd)" >> $GITHUB_PATH
