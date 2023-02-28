@@ -1,0 +1,55 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# CBMC starter kit 2.9
+name: Run CBMC
+inputs:
+  proofs_dir:
+    required: true
+    description: >
+      The path to the cbmc/proofs directory, relative to the repository root
+      and including `/proofs` at the end.
+  run_cbmc_proofs_command:
+    required: true
+    default: ./run-cbmc-proofs.py
+    description: >
+      The path to a script that runs CBMC proofs by invoking Litani, relative
+      to the proofs directory
+
+runs:
+  using: composite
+  steps:
+    - name: Run CBMC
+      shell: bash
+      working-directory: ${{ inputs.proofs_dir }}
+      run: ${{ inputs.run_cbmc_proofs_command }}
+    - name: Check repository visibility
+      shell: bash
+      run: |
+        VIZ="${{ fromJson(toJson(github.event.repository)).visibility }}";
+        echo "REPO_VISIBILITY=${VIZ}" | tee -a "${GITHUB_ENV}";
+    - name: Set name for zip artifact with CBMC proof results
+      shell: bash
+      id: artifact
+      if: ${{ env.REPO_VISIBILITY == 'public' }}
+      run: |
+        echo "name=cbmc_proof_results_${{ fromJson(toJson(github.event.repository)).name }}_$(date +%Y_%m_%d_%H_%M_%S)" >> $GITHUB_OUTPUT
+    - name: Create zip artifact with CBMC proof results
+      if: ${{ env.REPO_VISIBILITY == 'public' }}
+      shell: bash
+      run: |
+        FINAL_REPORT_DIR="${{ inputs.proofs_dir }}/output/latest/html"
+        pushd $FINAL_REPORT_DIR \
+          && zip -r ${{ steps.artifact.outputs.name }}.zip . \
+          && popd \
+          && mv $FINAL_REPORT_DIR/${{ steps.artifact.outputs.name }}.zip .
+    - name: Upload zip artifact of CBMC proof results to GitHub Actions
+      if: ${{ env.REPO_VISIBILITY == 'public' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.artifact.outputs.name }}
+        path: ${{ steps.artifact.outputs.name }}.zip
+    - name: CBMC proof results
+      shell: bash
+      run: |
+        python3 ${{ inputs.proofs_dir }}/lib/summarize.py \
+          --run-file ${{ inputs.proofs_dir }}/output/latest/html/run.json
