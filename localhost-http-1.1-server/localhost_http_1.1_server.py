@@ -5,9 +5,6 @@ import socket
 import ssl
 from argparse import ArgumentParser
 
-from signal import signal, SIGPIPE, SIG_DFL
-signal(SIGPIPE,SIG_DFL)
-
 LOCAL_HOST_IP = socket.gethostbyname("localhost")
 PLAINTEXT_PORT = 8080
 SSL_PORT = 4443
