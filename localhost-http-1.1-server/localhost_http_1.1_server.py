@@ -19,8 +19,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.
-        recv_content_len = int(self.headers.get('Content-Length'))
-        recv_body = self.rfile.read(recv_content_len)
+        if self.headers.get('Content-Length') is not None:
+            recv_content_len = int(self.headers.get('Content-Length'))
+            recv_body = self.rfile.read(recv_content_len)
 
         # Always send a 200 response with "Hello" in the body.
         response_body = "Hello".encode('utf-8')
@@ -33,8 +34,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_PUT(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.
-        recv_content_len = int(self.headers.get('Content-Length'))
-        recv_body = self.rfile.read(recv_content_len)
+        if self.headers.get('Content-Length') is not None:
+            recv_content_len = int(self.headers.get('Content-Length'))
+            recv_body = self.rfile.read(recv_content_len)
 
         # Always send a 200 response with "Hello" in the body.
         response_body = "Hello".encode('utf-8')
@@ -47,8 +49,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.
-        recv_content_len = int(self.headers.get('Content-Length'))
-        recv_body = self.rfile.read(recv_content_len)
+        if self.headers.get('Content-Length') is not None:
+            recv_content_len = int(self.headers.get('Content-Length'))
+            recv_body = self.rfile.read(recv_content_len)
 
         # Always send a 200 response with "Hello" in the body.
         response_body = "Hello".encode('utf-8')
@@ -61,8 +64,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.
-        recv_content_len = int(self.headers.get('Content-Length'))
-        recv_body = self.rfile.read(recv_content_len)
+        if self.headers.get('Content-Length') is not None:
+            recv_content_len = int(self.headers.get('Content-Length'))
+            recv_body = self.rfile.read(recv_content_len)
 
         # Always send a 200 response with same headers as GET but without
         # response body
