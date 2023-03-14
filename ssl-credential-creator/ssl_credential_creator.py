@@ -12,10 +12,10 @@ DEVICE_CERT_FILE = "device_cert.crt"
 # Reusable certificate subject for testing
 TEST_CERT_SUBJECT = crypto.X509Name(crypto.X509().get_subject())
 TEST_CERT_SUBJECT.C = 'US'
-TEST_CERT_SUBJECT.ST = 'Test'
-TEST_CERT_SUBJECT.L = 'Test'
-TEST_CERT_SUBJECT.O = 'Test'
-TEST_CERT_SUBJECT.OU = 'Test'
+TEST_CERT_SUBJECT.ST = 'Test_ST'
+TEST_CERT_SUBJECT.L = 'Test_L'
+TEST_CERT_SUBJECT.O = 'Test_O'
+TEST_CERT_SUBJECT.OU = 'Test_OU'
 TEST_CERT_SUBJECT.CN = 'localhost'
 TEST_CERT_SUBJECT.emailAddress = 'test@test.com'
 
