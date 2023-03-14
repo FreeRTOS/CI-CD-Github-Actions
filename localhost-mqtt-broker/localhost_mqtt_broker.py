@@ -32,10 +32,12 @@ config = {
         "default": {
             "type": "tcp",
             "bind": f"{LOCAL_HOST_IP}:1883",
+            "max-connections": 1000,
         },
         "tls": {
             "type": "tcp",
             "bind": f"{LOCAL_HOST_IP}:8883",
+            "max-connections": 1000,
             "ssl": "on",
             "cafile": args.root_ca_cert_path,
             "certfile": args.server_cert_path,
