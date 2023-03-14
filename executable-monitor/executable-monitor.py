@@ -19,10 +19,6 @@ if __name__ == '__main__':
                         type=int,
                         required=True,
                         help='Timeout for each executable run.')
-    parser.add_argument('--number-of-runs',
-                        type=int,
-                        required=True,
-                        help='Timeout for each executable run.')
     parser.add_argument('--success-line',
                         type=str,
                         required=False,
@@ -53,7 +49,6 @@ if __name__ == '__main__':
     print(f"Running executable: {EXE_PATH} ")
     print(f"Storing logs in: {LOG_DIR}")
     print(f"Timeout per run (seconds): {args.timeout_seconds}")
-    print(f"Number of runs: {args.number_of_runs}\n")
 
     EXE_NAME = os.path.basename(EXE_PATH)
 
