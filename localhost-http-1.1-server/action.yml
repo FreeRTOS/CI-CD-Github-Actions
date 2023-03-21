@@ -21,3 +21,4 @@ runs:
       - name: Run localhost HTTP broker
         run: python3 $GITHUB_ACTION_PATH/localhost_http_1.1_server.py --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
         shell: bash
+        
