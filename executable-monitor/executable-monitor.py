@@ -91,6 +91,7 @@ if __name__ == '__main__':
 
     while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
 
+        logging.info("checking status ...")
         # Read executable's stdout and write to stdout and logfile
         exe_stdout_line = exe.stdout.readline()
         logging.info(exe_stdout_line)
