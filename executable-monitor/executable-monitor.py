@@ -82,13 +82,14 @@ if __name__ == '__main__':
             [exe_abs_path], 
             capture_output=True,
             timeout=args.timeout_seconds,
-            text=True)
+            text=True,
+            encoding="utf-8")
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
-        logging.info(e.stdout)
+        logging.info(e.stdout.decode())
         print(" abnormal demo run exit ....")
         with open(log_file_path) as of:
             for exe_stdout_line in of.readlines():
-                print(exe_stdout_line)
+                #print(exe_stdout_line)
                 if args.success_line is not None and args.success_line in exe_stdout_line:
                     success_line_found = True
 
