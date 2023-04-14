@@ -73,51 +73,70 @@ if __name__ == '__main__':
     logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds): {args.timeout_seconds}")
 
-    exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
-  
-    cur_time_seconds = time.time()
-    timeout_time_seconds = cur_time_seconds + args.timeout_seconds
-    timeout_occurred = False
-
-    exe_exit_status = None
-    exe_exitted = False
-
-    success_line_found = False
-    cur_line_ouput = 1
-
-    wait_for_exit = args.success_exit_status is not None       
-
+    #exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     logging.info("START OF DEVICE OUTPUT\n")
+    try:
+        exe = subprocess.run( 
+            [exe_abs_path], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT,
+            capture_output=True,
+            timeout=args.timeout_seconds,
+            text=True)
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
+        for exe_stdout_line in e.stdout.readlines():
+            logging.info(exe_stdout_line)
+            if args.success_line is not None and args.success_line in exe_stdout_line:
+                success_line_found = True
 
-    while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
+    else: 
+        for exe_stdout_line in exe.stdout.readlines():
+            logging.info(exe_stdout_line)
+            if args.success_line is not None and args.success_line in exe_stdout_line:
+                success_line_found = True
+    # cur_time_seconds = time.time()
+    # timeout_time_seconds = cur_time_seconds + args.timeout_seconds
+    # timeout_occurred = False
 
-        logging.info("checking status ...")
-        # Read executable's stdout and write to stdout and logfile
-        exe_stdout_line = exe.stdout.readline()
-        logging.info(exe_stdout_line)
+    # exe_exit_status = None
+    # exe_exitted = False
 
-        # Check if the executable printed out it's success line
-        if args.success_line is not None and args.success_line in exe_stdout_line:
-            success_line_found = True
+    # success_line_found = False
+    # cur_line_ouput = 1
 
-        # Check if executable exitted
-        exe_exit_status = exe.poll()
-        if exe_exit_status is not None:
-            exe_exitted = True
+    # wait_for_exit = args.success_exit_status is not None       
 
-        # Check for timeout
-        cur_time_seconds = time.time()
-        if cur_time_seconds >= timeout_time_seconds:
-            timeout_occurred = True
+    #logging.info("START OF DEVICE OUTPUT\n")
 
-    if not exe_exitted:
-        exe.kill()
+    # while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
+
+    #     logging.info("checking status ...")
+    #     # Read executable's stdout and write to stdout and logfile
+    #     exe_stdout_line = exe.stdout.readline()
+    #     logging.info(exe_stdout_line)
+
+    #     # Check if the executable printed out it's success line
+    #     if args.success_line is not None and args.success_line in exe_stdout_line:
+    #         success_line_found = True
+
+    #     # Check if executable exitted
+    #     exe_exit_status = exe.poll()
+    #     if exe_exit_status is not None:
+    #         exe_exitted = True
+
+    #     # Check for timeout
+    #     cur_time_seconds = time.time()
+    #     if cur_time_seconds >= timeout_time_seconds:
+    #         timeout_occurred = True
+
+    # if not exe_exitted:
+    #     exe.kill()
 
     # Capture remaining output and check for the successful line
-    for exe_stdout_line in exe.stdout.readlines():
-        logging.info(exe_stdout_line)
-        if args.success_line is not None and args.success_line in exe_stdout_line:
-            success_line_found = True
+    # for exe_stdout_line in e.stdout.readlines():
+    #     logging.info(exe_stdout_line)
+    #     if args.success_line is not None and args.success_line in exe_stdout_line:
+    #         success_line_found = True
     
     logging.info("END OF DEVICE OUTPUT\n")
 
@@ -132,14 +151,14 @@ if __name__ == '__main__':
             logging.error("Success Line: Success line not output.\n")
             exit_status = 1
 
-    if args.success_exit_status is not None:
-        if exe_exitted:
-            if exe_exit_status != args.success_exit_status:
-                exit_status = 1
-            logging.info(f"Exit Status: {exe_exit_status}")
-        else:
-            logging.error("Exit Status: Executable did not exit.\n")
-            exe_status = 1
+    # if args.success_exit_status is not None:
+    #     if exe_exitted:
+    #         if exe_exit_status != args.success_exit_status:
+    #             exit_status = 1
+    #         logging.info(f"Exit Status: {exe_exit_status}")
+    #     else:
+    #         logging.error("Exit Status: Executable did not exit.\n")
+    #         exe_status = 1
     
 
     # Report if executable executed successfully to workflow
