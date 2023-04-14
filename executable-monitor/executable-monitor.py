@@ -85,20 +85,20 @@ if __name__ == '__main__':
             text=True)
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
         logging.info(e.stdout)
-        print(" not normal demo run exit ....")
-        with open(log_file_path) as of:
-            for exe_stdout_line in of.readlines():
-                #print(exe_stdout_line)
-                if args.success_line is not None and args.success_line in exe_stdout_line:
-                    success_line_found = True
+        print(" abnormal demo run exit ....")
+        # with open(log_file_path) as of:
+        #     for exe_stdout_line in of.readlines():
+        #         #print(exe_stdout_line)
+        #         if args.success_line is not None and args.success_line in exe_stdout_line:
+        #             success_line_found = True
 
-    else: 
-        logging.info(exe.stdout)
-        with open(log_file_path) as of:
-            for exe_stdout_line in of.readlines():
-                #print(exe_stdout_line)
-                if args.success_line is not None and args.success_line in exe_stdout_line:
-                    success_line_found = True
+
+    logging.info(exe.stdout)
+    with open(log_file_path) as of:
+        for exe_stdout_line in of.readlines():
+            #print(exe_stdout_line)
+            if args.success_line is not None and args.success_line in exe_stdout_line:
+                success_line_found = True
     # cur_time_seconds = time.time()
     # timeout_time_seconds = cur_time_seconds + args.timeout_seconds
     # timeout_occurred = False
