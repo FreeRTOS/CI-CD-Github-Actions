@@ -78,8 +78,6 @@ if __name__ == '__main__':
     try:
         exe = subprocess.run( 
             [exe_abs_path], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT,
             capture_output=True,
             timeout=args.timeout_seconds,
             text=True)
