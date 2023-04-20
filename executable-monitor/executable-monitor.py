@@ -85,9 +85,9 @@ if __name__ == '__main__':
             text=True,
             encoding="utf-8")
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
+        logging.warning(" Abnormal exit \n")
         if e.stdout is not None:
             logging.info(e.stdout.decode())
-            logging.warning(" Abnormal exit \n")
             with open(log_file_path) as of:
                 for exe_stdout_line in of.readlines():
                     if args.success_line is not None and args.success_line in exe_stdout_line:
