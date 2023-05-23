@@ -73,7 +73,9 @@ if __name__ == '__main__':
     logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds): {args.timeout_seconds}")
 
-    exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+    exe = subprocess.Popen(["stdbuf", "-oL", exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, universal_newlines=True)
   
     cur_time_seconds = time.time()
     timeout_time_seconds = cur_time_seconds + args.timeout_seconds
@@ -85,7 +87,9 @@ if __name__ == '__main__':
     success_line_found = False
     cur_line_ouput = 1
 
-    wait_for_exit = args.success_exit_status is not None       
+    wait_for_exit = args.success_exit_status is not None
+
+    logging.info(f'Wait for exit status: {wait_for_exit}')       
 
     logging.info("START OF DEVICE OUTPUT\n")
 
