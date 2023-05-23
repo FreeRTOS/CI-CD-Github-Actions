@@ -85,7 +85,8 @@ if __name__ == '__main__':
     exe_exitted = False
 
     success_line_found = False
-    cur_line_ouput = 1
+
+    output_buf = ""
 
     wait_for_exit = args.success_exit_status is not None
 
@@ -96,11 +97,11 @@ if __name__ == '__main__':
     while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
 
         # Read executable's stdout and write to stdout and logfile
-        exe_stdout_line = exe.stdout.readline()
-        logging.info(exe_stdout_line)
+        output_buf = output_buf + exe.stdout.read(1)
+        # logging.info(exe_stdout_line)
 
         # Check if the executable printed out it's success line
-        if args.success_line is not None and args.success_line in exe_stdout_line:
+        if args.success_line is not None and args.success_line in output_buf:
             success_line_found = True
 
         # Check if executable exitted
@@ -117,10 +118,13 @@ if __name__ == '__main__':
         exe.kill()
 
     # Capture remaining output and check for the successful line
-    for exe_stdout_line in exe.stdout.readlines():
-        logging.info(exe_stdout_line)
-        if args.success_line is not None and args.success_line in exe_stdout_line:
-            success_line_found = True
+
+    output_buf = output_buf + exe.stdout.read()
+
+    logging.info(f"\n{output_buf}")
+    
+    if args.success_line is not None and args.success_line in output_buf:
+        success_line_found = True
     
     logging.info("END OF DEVICE OUTPUT\n")
 
