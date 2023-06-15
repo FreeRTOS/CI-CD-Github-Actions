@@ -13,5 +13,5 @@ runs:
         id: git-ip-address
         run: |
           python3 $GITHUB_ACTION_PATH/git_ip_address.py
-          echo "git-ip-address-path=$(pwd)/git-ip-address.txt" >> $GITHUB_OUTPUT
+          echo "git-ip-address-path=$GITHUB_ACTION_PATH/git-ip-address.txt" >> $GITHUB_OUTPUT
         shell: bash
