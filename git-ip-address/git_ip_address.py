@@ -9,9 +9,12 @@ def get_ip_address():
         for part in ip_address:
             file.write("#define configECHO_SERVER_ADDR" + str(count) + " " + str(part) + "\n")
             count += 1
-
+    
+    echo_address = ""
     with open('git_ip_address.txt', 'r') as f:
-        print(f.read())
+        echo_address = f.read()
+        print(echo_address)
+    return echo_address
 
 if __name__ == "__main__":
     get_ip_address()
