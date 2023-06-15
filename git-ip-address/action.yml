@@ -1,0 +1,17 @@
+name: 'git-ip-address'
+description: 'To get the actual ip address for git server which holds the echo server'
+
+outputs:
+  git-ip-address-path:
+    description: "Git IP Address File"
+    value: ${{ steps.git-ip-address.outputs.git-ip-address-path }}
+
+runs:
+  using: "composite"
+  steps: 
+      - name: Generate git IP address
+        id: git-ip-address
+        run: |
+          python3 $GITHUB_ACTION_PATH/git_ip_address.py
+          echo "git-ip-address-path=$(pwd)/git-ip-address.txt" >> $GITHUB_OUTPUT
+        shell: bash
