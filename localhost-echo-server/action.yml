@@ -1,0 +1,11 @@
+name: 'Localhost Echo Server'
+description: 'Starts an echo server using Python.'
+
+runs:
+  using: "composite"
+  steps: 
+      - name: Run localhost Echo server
+        run: |
+          python3 --version
+          python3 $GITHUB_ACTION_PATH/local_echo_server.py &
+        shell: bash
