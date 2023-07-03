@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import asyncio
 import logging
 import os
@@ -14,7 +16,7 @@ async def echo_handler(reader, writer):
   writer.close()
 
 if __name__ == '__main__':
-  parser = ArgumentParser(description='Localhost MQTT broker.')
+  parser = ArgumentParser(description='Localhost Echo server.')
   parser.add_argument('--port_number',
                       type=int,
                       required=True,
