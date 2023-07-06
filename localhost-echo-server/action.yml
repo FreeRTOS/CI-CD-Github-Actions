@@ -1,5 +1,5 @@
 name: 'Localhost Echo Server'
-description: 'Starts an echo server using GoLang.'
+description: 'Starts an echo server using Python.'
 
 inputs:
   port_number:
@@ -9,9 +9,8 @@ inputs:
 runs:
   using: "composite"
   steps: 
-      - uses: actions/setup-go@v4
       - name: Run localhost Echo server
         run: |
-          go version
-          go run $GITHUB_ACTION_PATH/local_echo_server.go ${{ inputs.port_number }} &
+          python3 --version
+          python3 $GITHUB_ACTION_PATH/local_echo_server.py --port_number=${{ inputs.port_number }} &
         shell: bash
