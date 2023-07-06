@@ -80,8 +80,12 @@ if __name__ == '__main__':
     success_line_found = False
     wait_for_exit = args.success_exit_status is not None
 
+    # Create two file descriptors. The subprocess writes to one, the parent task reads from the other
+    WriteOutputFile = open("output.log", "w")
+    ReadOutputFile = open("output.log", "r")
+
     # Launch the executable
-    exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+    exe = subprocess.Popen([exe_abs_path], stdout=WriteOutputFile, stderr=WriteOutputFile, universal_newlines=True)
 
     cur_time_seconds = time.time()
     timeout_time_seconds = cur_time_seconds + args.timeout_seconds
@@ -90,14 +94,18 @@ if __name__ == '__main__':
 
     while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
 
+        # Sleep for a short duration between loops to not steal all system resources
+        time.sleep(.1)
+
         # Check if executable exitted
         exe_exit_status = exe.poll()
         if exe_exit_status is not None:
             exe_exitted = True
 
         # Read executable's stdout and write to stdout and logfile
-        exe_stdout_line = exe.stdout.readline()
-        logging.info(exe_stdout_line)
+        exe_stdout_line = ReadOutputFile.readline()
+        if(exe_stdout_line is not None) and (len(exe_stdout_line) > 1):
+            logging.info(exe_stdout_line)
 
         # Check if the executable printed out it's success line
         if args.success_line is not None and args.success_line in exe_stdout_line:
@@ -106,20 +114,22 @@ if __name__ == '__main__':
         # Check for timeout
         cur_time_seconds = time.time()
         if cur_time_seconds >= timeout_time_seconds:
+            logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT\n")
             timeout_occurred = True
-
-        # Sleep for a short duration between loops to not steal all system resources
-        time.sleep(.1)
 
     if not exe_exitted:
         exe.kill()
 
     # Capture remaining output and check for the successful line
-    for exe_stdout_line in exe.stdout.readlines():
+    for exe_stdout_line in ReadOutputFile.readlines():
         logging.info(exe_stdout_line)
         if args.success_line is not None and args.success_line in exe_stdout_line:
             success_line_found = True
-    
+
+    # Close the files
+    WriteOutputFile.close()
+    ReadOutputFile.close()
+
     logging.info("END OF DEVICE OUTPUT\n")
 
     logging.info("EXECUTABLE RUN SUMMARY:\n")
