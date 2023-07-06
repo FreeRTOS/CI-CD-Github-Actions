@@ -81,9 +81,10 @@ if __name__ == '__main__':
     logging.info(f"Running executable: {exe_abs_path} ")
     logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds): {args.timeout_seconds}")
-    logging.info(f"Searching for success line {args.success_line}")
+    logging.info(f"Searching for success line: {args.success_line}")
     logging.info(f"Attempting the run {retryAttempts} times")
-
+    if args.success_exit_status is not None:
+        logging.info("Looking for exit status {0}".format(args.success_exit_status ))
     for attempts in range(0,retryAttempts):
 
         # Initialize values
@@ -106,7 +107,7 @@ if __name__ == '__main__':
 
         logging.info("START OF DEVICE OUTPUT\n")
 
-        while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
+        while ( not timeout_occurred ) or ( not exe_exitted ) or (not success_line_found and not wait_for_exit ) or (success_line_found and wait_for_exit ):
 
             # Sleep for a short duration between loops to not steal all system resources
             # time.sleep(.1)
@@ -119,8 +120,8 @@ if __name__ == '__main__':
             # Read executable's stdout and write to stdout and logfile
             exe_stdout_line = ReadOutputFile.readline()
             if(exe_stdout_line is not None) and (len(exe_stdout_line) > 1):
-                # Check if the executable printed out it's success line
-                if args.success_line is not None and args.success_line in exe_stdout_line:
+                # Check if the executable printed out its success line
+                if ( args.success_line is not None ) and ( args.success_line in exe_stdout_line ) :
                     success_line_found = True
                     success_line = exe_stdout_line
                     logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
@@ -136,6 +137,7 @@ if __name__ == '__main__':
         if not exe_exitted:
             exe.kill()
 
+        logging.info(f"PRINTING REST OF LOG\n")
         # Capture remaining output and check for the successful line
         for exe_stdout_line in ReadOutputFile.readlines():
             logging.info(exe_stdout_line)
