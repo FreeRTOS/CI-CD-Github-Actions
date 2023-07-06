@@ -107,7 +107,7 @@ if __name__ == '__main__':
         while not (timeout_occurred or exe_exitted or (not wait_for_exit and success_line_found)):
 
             # Sleep for a short duration between loops to not steal all system resources
-            time.sleep(.1)
+            # time.sleep(.1)
 
             # Check if executable exitted
             exe_exit_status = exe.poll()
