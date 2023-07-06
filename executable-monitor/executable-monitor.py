@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
             # Read executable's stdout and write to stdout and logfile
             exe_stdout_line = ReadOutputFile.readline()
-            if(exe_stdout_line is not None) and (len(exe_stdout_line) > 1):
+            if(exe_stdout_line is not None) and (len(exe_stdout_line.strip()) > 1):
                 # Check if the executable printed out its success line
                 if ( args.success_line is not None ) and ( args.success_line in exe_stdout_line ) :
                     logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
