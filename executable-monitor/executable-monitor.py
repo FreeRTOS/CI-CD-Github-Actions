@@ -117,11 +117,12 @@ if __name__ == '__main__':
             # Read executable's stdout and write to stdout and logfile
             exe_stdout_line = ReadOutputFile.readline()
             if(exe_stdout_line is not None) and (len(exe_stdout_line) > 1):
-                logging.info(exe_stdout_line)
-
-            # Check if the executable printed out it's success line
-            if args.success_line is not None and args.success_line in exe_stdout_line:
-                success_line_found = True
+                # Check if the executable printed out it's success line
+                if args.success_line is not None and args.success_line in exe_stdout_line:
+                    success_line_found = True
+                    logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
+                else:
+                    logging.info(exe_stdout_line)
 
             # Check for timeout
             cur_time_seconds = time.time()
