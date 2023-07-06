@@ -81,11 +81,13 @@ if __name__ == '__main__':
     logging.info(f"Running executable: {exe_abs_path} ")
     logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds): {args.timeout_seconds}")
+    logging.info(f"Searching for success line {args.success_line}")
     logging.info(f"Attempting the run {retryAttempts} times")
 
     for attempts in range(0,retryAttempts):
 
         # Initialize values
+        success_line = ""
         timeout_occurred = False
         exe_exit_status = None
         exe_exitted = False
@@ -120,6 +122,7 @@ if __name__ == '__main__':
                 # Check if the executable printed out it's success line
                 if args.success_line is not None and args.success_line in exe_stdout_line:
                     success_line_found = True
+                    success_line = exe_stdout_line
                     logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
                 else:
                     logging.info(exe_stdout_line)
@@ -138,6 +141,8 @@ if __name__ == '__main__':
             logging.info(exe_stdout_line)
             if args.success_line is not None and args.success_line in exe_stdout_line:
                 success_line_found = True
+                success_line = exe_stdout_line
+                logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
 
         # Close the files
         WriteOutputFile.close()
@@ -150,9 +155,7 @@ if __name__ == '__main__':
         exit_status = 0
 
         if args.success_line is not None:
-            if success_line_found:
-                logging.info("Success Line: Found.\n")
-            else:
+            if not success_line_found:
                 logging.error("Success Line: Success line not output.\n")
                 exit_status = 1
 
