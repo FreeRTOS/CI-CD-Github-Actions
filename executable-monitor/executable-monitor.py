@@ -111,11 +111,12 @@ if __name__ == '__main__':
         # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
         while ( not exit_condition_met ):
             # Sleep for a short duration between loops to not steal all system resources
-            time.sleep(.1)
+            time.sleep(.05)
 
             # Check if executable exitted
             exe_exit_status = exe.poll()
             if exe_exit_status is not None:
+                logging.info(f"EXECUTABLE CLOSED WITH STATUS: {exe_exit_status}")
                 exe_exitted = True
                 exit_condition_met = True
 
@@ -140,7 +141,7 @@ if __name__ == '__main__':
                 exit_condition_met = True
 
         if not exe_exitted:
-            logging.info(f"EXECUTABLE DID NOT EXIT\n")
+            logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW\n")
             exe.kill()
 
         logging.info(f"PRINTING REST OF LOG\n")
@@ -173,7 +174,7 @@ if __name__ == '__main__':
                     exit_status = 1
                 logging.info(f"Exit Status: {exe_exit_status}")
             else:
-                logging.error("Exit Status: Executable did not exit.\n")
+                logging.error("Exit Status: Executable did not exit by itself.\n")
                 exit_status = 1
 
         if( exit_status == 0 ):
