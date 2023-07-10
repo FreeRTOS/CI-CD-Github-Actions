@@ -18,7 +18,7 @@ inputs:
   retry-attempts:
     description: 'Number of times to re-launch the binary to check for success.'
     required: false
-    default: 1
+    default: 0
 
 runs:
   using: "composite"
