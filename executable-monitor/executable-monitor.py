@@ -104,7 +104,7 @@ if __name__ == '__main__':
         ReadOutputFile = open("output.log", "r")
 
         # Launch the executable
-        exe = subprocess.Popen([exe_abs_path], stdout=WriteOutputFile, stderr=WriteOutputFile, universal_newlines=True)
+        exe = subprocess.Popen([exe_abs_path], stdout=WriteOutputFile, stderr=WriteOutputFile, universal_newlines=True, env=os.environ)
 
         cur_time_seconds = time.time()
         timeout_time_seconds = cur_time_seconds + args.timeout_seconds
@@ -113,8 +113,8 @@ if __name__ == '__main__':
 
         # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
         while ( not exit_condition_met ):
-            # Uncomment this sleep for a short duration between loops to not steal all system resources
-            # time.sleep(.05)
+            # Sleep for a short duration between loops to not steal all system resources
+            time.sleep(.05)
 
             # Check if executable exitted
             exe_exit_status = exe.poll()
