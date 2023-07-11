@@ -97,6 +97,9 @@ if __name__ == '__main__':
         wait_for_exit = args.success_exit_status is not None
 
         # Create two file descriptors. The subprocess writes to one, the parent task reads from the other
+        # This is a workaround to avoid the fact that calling readline() on the stdout of the subprocess is
+        # a blocking call. Where if the subproces is running but hasn't printed anything, readline will never time out.
+        # The approach uses the underlying file system to rely on an end of file character to ensure that it does not hang.
         WriteOutputFile = open("output.log", "w")
         ReadOutputFile = open("output.log", "r")
 
@@ -110,8 +113,8 @@ if __name__ == '__main__':
 
         # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
         while ( not exit_condition_met ):
-            # Sleep for a short duration between loops to not steal all system resources
-            time.sleep(.05)
+            # Uncomment this sleep for a short duration between loops to not steal all system resources
+            # time.sleep(.05)
 
             # Check if executable exitted
             exe_exit_status = exe.poll()
@@ -121,6 +124,8 @@ if __name__ == '__main__':
                 exit_condition_met = True
 
             # Read executable's stdout and write to stdout and logfile
+            # A potential improvement here would be to do readlines() on the file, then truncate()
+            # This might be cleaner than this approach of reading a single line each loop.
             exe_stdout_line = ReadOutputFile.readline()
             if(exe_stdout_line is not None) and (len(exe_stdout_line.strip()) > 1):
                 # Check if the executable printed out its success line
@@ -144,14 +149,15 @@ if __name__ == '__main__':
             logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW\n")
             exe.kill()
 
-        logging.info(f"PRINTING REST OF LOG\n")
-        # Capture remaining output and check for the successful line
-        for exe_stdout_line in ReadOutputFile.readlines():
-            logging.info(exe_stdout_line)
-            if args.success_line is not None and args.success_line in exe_stdout_line:
-                success_line_found = True
-                success_line = exe_stdout_line
-                logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
+        if not exit_condition_met:
+            logging.info(f"PARSING REST OF LOG\n")
+            # Capture remaining output and check for the successful line
+            for exe_stdout_line in ReadOutputFile.readlines():
+                logging.info(exe_stdout_line)
+                if args.success_line is not None and args.success_line in exe_stdout_line:
+                    success_line_found = True
+                    success_line = exe_stdout_line
+                    logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
 
         # Close the files
         WriteOutputFile.close()
