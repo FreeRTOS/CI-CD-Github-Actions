@@ -98,8 +98,8 @@ if __name__ == '__main__':
 
         # Create two file descriptors. The subprocess writes to one, the parent task reads from the other
         # This is a workaround to avoid the fact that calling readline() on the stdout of the subprocess is
-        # a blocking call. Where if the subproces is running but hasn't printed anything, readline will never time out.
-        # The approach uses the underlying file system to rely on an end of file character to ensure that it does not hang.
+        # a blocking call. Where if the subprocess is running but hasn't printed anything, readline will never time out.
+        # The approach uses the underlying file system to not block on data that hasn't been written.
         WriteOutputFile = open("output.log", "w")
         ReadOutputFile = open("output.log", "r")
 
@@ -141,16 +141,16 @@ if __name__ == '__main__':
             # Check for timeout
             cur_time_seconds = time.time()
             if cur_time_seconds >= timeout_time_seconds:
-                logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT\n")
+                logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT")
                 timeout_occurred = True
                 exit_condition_met = True
 
         if not exe_exitted:
-            logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW\n")
+            logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW")
             exe.kill()
 
         if not exit_condition_met:
-            logging.info(f"PARSING REST OF LOG\n")
+            logging.info(f"PARSING REST OF LOG")
             # Capture remaining output and check for the successful line
             for exe_stdout_line in ReadOutputFile.readlines():
                 logging.info(exe_stdout_line)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
         WriteOutputFile.close()
         ReadOutputFile.close()
 
-        logging.info("END OF DEVICE OUTPUT\n")
+        logging.info("END OF DEVICE OUTPUT")
 
         logging.info("EXECUTABLE RUN SUMMARY:\n")
 
