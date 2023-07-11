@@ -14,7 +14,11 @@ inputs:
   timeout-seconds:
     description: 'Maximum amount of time to run the executable. Default is 600.'
     required: false
-    default: 600
+    default: 300
+  retry-attempts:
+    description: 'Number of times to re-launch the binary to check for success.'
+    required: false
+    default: 0
 
 runs:
   using: "composite"
@@ -23,5 +27,6 @@ runs:
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
         shell: bash
       - name: Run executable with monitoring script
-        run: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }}
+        run: |
+          python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
         shell: bash
