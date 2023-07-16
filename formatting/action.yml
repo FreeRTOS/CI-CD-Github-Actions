@@ -29,12 +29,11 @@ runs:
           : # Uncrustify on C files while ignoring symlinks.
           : # Make a collapsible section in the log to run uncrustify
           echo "::group::Uncrustify Check"
-          : # GitHub runners automtically run "set -e" which causes scripts to fail on the first exit code
-          : # This would mean the first time a file fails the formatting check that we do not finish
-          : # formatting all files.
+          : # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
+          : # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
           : # Format all the files using the common config file.
-          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg
+          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
           echo "::endgroup::"
           : # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
