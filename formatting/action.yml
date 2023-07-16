@@ -38,10 +38,10 @@ runs:
           : # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
           if [ "$?" = "0" ]; then
+            echo "Uncrustify check passed"
             exit 0
-            echo "Uncrustify run passed"
           else
-            echo -e "\033[31;1;43mFormatting check (using Uncrustify) failed...\033[0m"
+            echo -e "\033[32;3mFormatting check (using Uncrustify) failed...\033[0m"
             echo -e "\033[32;3mTo have the code uncrustified for you, please comment '/bot run uncrustify' (without the quotes) on the Pull Request.\033[0m"
             : # If there is an error, set this flag high again so the exit 1 fails the run
             set -e
@@ -56,9 +56,10 @@ runs:
           grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
-            echo "Files have trailing whitespace."
+            echo -e "\033[32;3mFiles have trailing whitespace.\033[0m"
             exit 1
           else
+            echo "Trailing whitespace check passed"
             exit 0
           fi
         shell: bash
@@ -70,9 +71,10 @@ runs:
           find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
           if [ "$?" = "0" ]; then
             set -e
-            echo "Files have CRLF line endings."
+            echo -e "\033[32;3mFiles have CRLF line endings.\033[0m"
             exit 1
           else
+            echo "Line ending check passed"
             exit 0
           fi
         shell: bash
