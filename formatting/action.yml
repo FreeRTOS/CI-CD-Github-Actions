@@ -17,20 +17,46 @@ runs:
   using: "composite"
   steps: 
       - name: Install Uncrustify
-        run: sudo apt-get install uncrustify
+        run: |
+          : # Install Uncrustify
+          echo "::group::Install Uncrustify"
+          sudo apt-get install uncrustify
+          echo "::endgroup::"
         shell: bash
       - name: Run Uncrustify
         working-directory: ${{ inputs.path }}
         run: |
-          # Run uncrustify on C files while ignoring symlinks.
-          find . -iname "*.[hc]" -type f -exec uncrustify --check -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C {} +
+          : # Uncrustify on C files while ignoring symlinks.
+          : # Make a collapsible section in the log to run uncrustify
+          echo "::group::Uncrustify Check"
+          : # GitHub runners automtically run "set -e" which causes scripts to fail on the first exit code
+          : # This would mean the first time a file fails the formatting check that we do not finish
+          : # formatting all files.
+          set +e
+          : # Format all the files using the common config file.
+          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg
+          echo "::endgroup::"
+          : # Run a git diff to print the differences if any exist, return an error code if there are any
+          git diff --exit-code
+          if [ "$?" = "0" ]; then
+            exit 0
+            echo "Uncrustify run passed"
+          else
+            echo -e "\033[31;1;43mFormatting check (using Uncrustify) failed...\033[0m"
+            echo -e "\033[32;3mTo have the code uncrustified for you, please comment '/bot run uncrustify' (without the quotes) on the Pull Request.\033[0m"
+            : # If there is an error, set this flag high again so the exit 1 fails the run
+            set -e
+            exit 1
+          fi
         shell: bash
       - name: Check For Trailing Whitespace
         working-directory: ${{ inputs.path }}
         run: |
+          : # Trailing Whitespace Check
           set +e
           grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
+            set -e
             echo "Files have trailing whitespace."
             exit 1
           else
@@ -40,9 +66,11 @@ runs:
       - name: Check for CRLF
         working-directory: ${{ inputs.path }}
         run: |
+          : # Check for CRLF Line Ending
           set +e
           find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
           if [ "$?" = "0" ]; then
+            set -e
             echo "Files have CRLF line endings."
             exit 1
           else
