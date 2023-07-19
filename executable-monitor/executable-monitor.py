@@ -9,7 +9,7 @@ from multiprocessing import Process
 
 exit_status = 1
 
-def runAndMonitor(retryAttempts, args):
+def runAndMonitor(args):
     # Set up logging
     logging.getLogger().setLevel(logging.NOTSET)
 
@@ -37,97 +37,93 @@ def runAndMonitor(retryAttempts, args):
     logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds) per run: {args.timeout_seconds}")
     logging.info(f"Searching for success line: {args.success_line}")
-    logging.info(f"Will re-try the run {retryAttempts} times")
+    
     if args.success_exit_status is not None:
         logging.info("Looking for exit status {0}".format(args.success_exit_status ))
 
-    for attempts in range(0,retryAttempts + 1):
-        # Initialize values
-        exe_exit_status = None
-        exe_exitted = False
-        success_line_found = False
-        exit_condition_met = False
-        wait_for_exit = args.success_exit_status is not None
+    # Initialize values
+    exe_exit_status = None
+    exe_exitted = False
+    success_line_found = False
+    exit_condition_met = False
+    wait_for_exit = args.success_exit_status is not None
 
-        # Launch the executable
-        exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=os.environ)
+    # Launch the executable
+    exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=os.environ)
 
-        cur_time_seconds = time.time()
-        timeout_time_seconds = cur_time_seconds + args.timeout_seconds
+    cur_time_seconds = time.time()
+    timeout_time_seconds = cur_time_seconds + args.timeout_seconds
 
-        logging.info("START OF DEVICE OUTPUT\n")
+    logging.info("START OF DEVICE OUTPUT\n")
 
-        # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
-        while ( not exit_condition_met ):
-            # Check if executable exitted
-            exe_exit_status = exe.poll()
-            if (exe_exit_status is not None) and (exe_exitted is False):
-                logging.info(f"EXECUTABLE CLOSED WITH STATUS: {exe_exit_status}")
-                exe_exitted = True
-                if( args.success_line is None):
-                    exit_condition_met = True
-
-            exe_stdout_line = exe.stdout.readline()
-            if(exe_stdout_line is not None) and (len(exe_stdout_line.strip()) > 1):
-                # Check if the executable printed out its success line
-                if ( args.success_line is not None ) and ( args.success_line in exe_stdout_line ) :
-                    logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
-                    success_line_found = True
-                    if( not wait_for_exit ):
-                        exit_condition_met = True
-                else:
-                    logging.info(exe_stdout_line)
-
-            # Check for timeout
-            cur_time_seconds = time.time()
-            if cur_time_seconds >= timeout_time_seconds:
-                logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT")
+    # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
+    while ( not exit_condition_met ):
+        # Check if executable exitted
+        exe_exit_status = exe.poll()
+        if (exe_exit_status is not None) and (exe_exitted is False):
+            logging.info(f"EXECUTABLE CLOSED WITH STATUS: {exe_exit_status}")
+            exe_exitted = True
+            if( args.success_line is None):
                 exit_condition_met = True
-            
-            # Sleep for a short duration between loops to not steal all system resources
-            time.sleep(.05)
 
-        if not exe_exitted:
-            logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW")
-            exe.kill()
-
-        if not exit_condition_met:
-            logging.info(f"PARSING REST OF LOG")
-            # Capture remaining output and check for the successful line
-            for exe_stdout_line in exe.stdout.readlines():
-                logging.info(exe_stdout_line)
-                if args.success_line is not None and args.success_line in exe_stdout_line:
-                    success_line_found = True
-                    logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
-
-        logging.info("END OF DEVICE OUTPUT")
-        logging.info("EXECUTABLE RUN SUMMARY:")
-        exit_status = 0
-
-        if args.success_line is not None:
-            if not success_line_found:
-                logging.error("Success Line: Success line not output.\n")
-                exit_status = 1
-
-        if args.success_exit_status is not None:
-            if exe_exitted:
-                if exe_exit_status != args.success_exit_status:
-                    exit_status = 1
-                logging.info(f"Exit Status: {exe_exit_status}\n")
+        exe_stdout_line = exe.stdout.readline()
+        if(exe_stdout_line is not None) and (len(exe_stdout_line.strip()) > 1):
+            # Check if the executable printed out its success line
+            if ( args.success_line is not None ) and ( args.success_line in exe_stdout_line ) :
+                logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
+                success_line_found = True
+                if( not wait_for_exit ):
+                    exit_condition_met = True
             else:
-                logging.error("Exit Status: Executable did not exit by itself.\n")
+                logging.info(exe_stdout_line)
+
+        # Check for timeout
+        cur_time_seconds = time.time()
+        if cur_time_seconds >= timeout_time_seconds:
+            logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT")
+            exit_condition_met = True
+        
+        # Sleep for a short duration between loops to not steal all system resources
+        time.sleep(.05)
+
+    if not exe_exitted:
+        logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW")
+        exe.kill()
+
+    if not exit_condition_met:
+        logging.info(f"PARSING REST OF LOG")
+        # Capture remaining output and check for the successful line
+        for exe_stdout_line in exe.stdout.readlines():
+            logging.info(exe_stdout_line)
+            if args.success_line is not None and args.success_line in exe_stdout_line:
+                success_line_found = True
+                logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
+
+    logging.info("END OF DEVICE OUTPUT")
+    logging.info("EXECUTABLE RUN SUMMARY:")
+    exit_status = 0
+
+    if args.success_line is not None:
+        if not success_line_found:
+            logging.error("Success Line: Success line not output.\n")
+            exit_status = 1
+
+    if args.success_exit_status is not None:
+        if exe_exitted:
+            if exe_exit_status != args.success_exit_status:
                 exit_status = 1
-
-        if( exit_status == 0 ):
-            logging.info(f"Run found a valid success metric\n")
-            return(exit_status)
-
-        elif( attempts < retryAttempts ):
-            logging.info(f"Did not succeed, trying re-attempt {attempts+1} of {retryAttempts}\n")
-
+            logging.info(f"Exit Status: {exe_exit_status}\n")
         else:
-            logging.error("Run did not find a valid success metric.\n")
+            logging.error("Exit Status: Executable did not exit by itself.\n")
+            exit_status = 1
 
+    if( exit_status == 0 ):
+        logging.info(f"Run found a valid success metric\n")
+    
+    else:
+        logging.error("Run did not find a valid success metric.\n")
+    
+    return(exit_status)
 
 if __name__ == '__main__':
 
@@ -178,21 +174,33 @@ if __name__ == '__main__':
     else:
         retryAttempts = args.retry_attempts
 
-    thread = Process(target=runAndMonitor, args=(retryAttempts, args))
 
-    thread.start()
+    threadTimeout = ( args.timeout_seconds + 1 )
+    args.timeout_seconds = args.timeout_seconds + 10
+    for attempts in range(0,retryAttempts + 1):
+        exitStatus = 1
+        # Set the timeout for the thread    
+        thread = Process(target=runAndMonitor, args=(args,))
+        thread.start()
+        # Wait for the thread to join, or hit a timeout
+        thread.join(timeout=threadTimeout)
+        # As join() always returns None, you must call is_alive() after join() to decide whether a timeout happened
+        # If the thread is still alive, the join() call timed out.       
+        if thread.exitcode is None:
+            exitStatus = 1
+        else:
+            exitStatus = thread.exitcode
 
-    # Set the timeout for the thread
-    threadTimeout = ( args.timeout_seconds * ( retryAttempts + 1 ) ) + 10
+        print(f"exitStatus = {exitStatus} | thread.exitcode = {thread.exitcode}")
+        if thread.is_alive():
+            print(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout} SECONDS: FORCE KILLING THREAD\n")
+            thread.kill()
+            exitStatus = 1
 
-    # Wait for the thread to join, or hit a timeout
-    thread.join(timeout=threadTimeout)
-    # As join() always returns None, you must call is_alive() after join() to decide whether a timeout happened
-    # If the thread is still alive, the join() call timed out.
-    if thread.is_alive():
-        print(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout} SECONDS: FORCE KILLING THREAD\n")
-        thread.kill()
-        sys.exit(1)
+        elif( ( attempts < retryAttempts ) and exitStatus == 1 ):
+            print(f"DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {retryAttempts}\n")
 
+
+    print("Exiting with exitStatus = {0}".format(exitStatus))
     # Report final exit status if no successful run occured
-    sys.exit(thread.exitcode)
+    sys.exit(exitStatus)
