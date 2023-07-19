@@ -17,35 +17,63 @@ runs:
   using: "composite"
   steps: 
       - name: Install Uncrustify
-        run: sudo apt-get install uncrustify
+        run: |
+          : # Install Uncrustify
+          echo "::group::Install Uncrustify"
+          sudo apt-get install uncrustify
+          echo "::endgroup::"
         shell: bash
       - name: Run Uncrustify
         working-directory: ${{ inputs.path }}
         run: |
-          # Run uncrustify on C files while ignoring symlinks.
-          find . -iname "*.[hc]" -type f -exec uncrustify --check -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C {} +
+          : # Uncrustify on C files while ignoring symlinks.
+          : # Make a collapsible section in the log to run uncrustify
+          echo "::group::Uncrustify Check"
+          : # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
+          : # This would mean the first time a file fails the check that we exit without formatting all files.
+          set +e
+          : # Format all the files using the common config file.
+          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          echo "::endgroup::"
+          : # Run a git diff to print the differences if any exist, return an error code if there are any
+          git diff --exit-code
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mUncrustify check passed\033[0m"
+            exit 0
+          else
+            echo -e "\033[32;31mFormatting check (using Uncrustify) failed...\033[0m"
+            : # If there is an error, set this flag high again so the exit 1 fails the run
+            set -e
+            exit 1
+          fi
         shell: bash
       - name: Check For Trailing Whitespace
         working-directory: ${{ inputs.path }}
         run: |
+          : # Trailing Whitespace Check
           set +e
           grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
-            echo "Files have trailing whitespace."
+            set -e
+            echo -e "\033[32;31mFiles have trailing whitespace.\033[0m"
             exit 1
           else
+            echo -e "\033[32;3mTrailing whitespace check passed\033[0m"
             exit 0
           fi
         shell: bash
       - name: Check for CRLF
         working-directory: ${{ inputs.path }}
         run: |
+          : # Check for CRLF Line Ending
           set +e
           find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
           if [ "$?" = "0" ]; then
-            echo "Files have CRLF line endings."
+            set -e
+            echo -e "\033[32;31mFiles have CRLF line endings.\033[0m"
             exit 1
           else
+            echo -e "\033[32;3mLine ending check passed\033[0m"
             exit 0
           fi
         shell: bash
