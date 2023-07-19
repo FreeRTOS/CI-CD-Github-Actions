@@ -59,9 +59,6 @@ def runAndMonitor(retryAttempts, args):
 
         # While a timeout hasn't happened, the executable is running, and an exit condition has not been met
         while ( not exit_condition_met ):
-            # Sleep for a short duration between loops to not steal all system resources
-            time.sleep(.05)
-
             # Check if executable exitted
             exe_exit_status = exe.poll()
             if (exe_exit_status is not None) and (exe_exitted is False):
@@ -86,6 +83,9 @@ def runAndMonitor(retryAttempts, args):
             if cur_time_seconds >= timeout_time_seconds:
                 logging.info(f"TIMEOUT OF {args.timeout_seconds} SECONDS HIT")
                 exit_condition_met = True
+            
+            # Sleep for a short duration between loops to not steal all system resources
+            time.sleep(.05)
 
         if not exe_exitted:
             logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW")
@@ -195,4 +195,4 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Report final exit status if no successful run occured
-    sys.exit(exit_status)
+    sys.exit(thread.exitcode)
