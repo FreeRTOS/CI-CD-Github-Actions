@@ -7,8 +7,6 @@ import time
 import logging
 from multiprocessing import Process
 
-exit_status = 1
-
 def runAndMonitor(args):
     # Set up logging
     logging.getLogger().setLevel(logging.NOTSET)
@@ -33,11 +31,6 @@ def runAndMonitor(args):
     file_logging_handler.setFormatter(file_logging_formatter)
     logging.getLogger().addHandler(file_logging_handler)
 
-    logging.info(f"Running executable: {exe_abs_path} ")
-    logging.info(f"Storing logs in: {log_dir}")
-    logging.info(f"Timeout (seconds) per run: {args.timeout_seconds}")
-    logging.info(f"Searching for success line: {args.success_line}")
-    
     if args.success_exit_status is not None:
         logging.info("Looking for exit status {0}".format(args.success_exit_status ))
 
@@ -74,6 +67,7 @@ def runAndMonitor(args):
                 success_line_found = True
                 if( not wait_for_exit ):
                     exit_condition_met = True
+                    exe.kill()
             else:
                 logging.info(exe_stdout_line)
 
@@ -84,7 +78,7 @@ def runAndMonitor(args):
             exit_condition_met = True
         
         # Sleep for a short duration between loops to not steal all system resources
-        time.sleep(.05)
+        # time.sleep(.05)
 
     if not exe_exitted:
         logging.info(f"EXECUTABLE DID NOT EXIT, MANUALLY KILLING NOW")
@@ -126,6 +120,15 @@ def runAndMonitor(args):
     return(exit_status)
 
 if __name__ == '__main__':
+    # Set up logging
+    logging.getLogger().setLevel(logging.NOTSET)
+
+    # Add stdout handler to logging
+    stdout_logging_handler = logging.StreamHandler(sys.stdout)
+    stdout_logging_handler.setLevel(logging.DEBUG)
+    stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    stdout_logging_handler.setFormatter(stdout_logging_formatter)
+    logging.getLogger().addHandler(stdout_logging_handler)
 
     # Parse arguments
     parser = ArgumentParser(description='Executable monitor.')
@@ -157,50 +160,65 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.success_exit_status is None and args.success_line is None:
-        print("Must specify at least one of the following: --success-line, --success-exit-status.")
+        logging.info("Must specify at least one of the following: --success-line, --success-exit-status.")
         sys.exit(1)
 
     if not os.path.exists(args.exe_path):
-        print(f'Input executable path \"{args.exe_path}\" does not exist.')
+        logging.info(f'Input executable path \"{args.exe_path}\" does not exist.')
         sys.exit(1)
+
+    # Convert any relative path (like './') in passed argument to absolute path.
+    exe_abs_path = os.path.abspath(args.exe_path)
+    log_dir = os.path.abspath(args.log_dir)
 
     # Create log directory if it does not exist.
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir, exist_ok = True)
 
+    # Add file handler to output logging to a log file
+    exe_name = os.path.basename(exe_abs_path)
+    log_file_path = f'{log_dir}/{exe_name}_output.txt'
+    file_logging_handler = logging.FileHandler(log_file_path)
+    file_logging_handler.setLevel(logging.DEBUG)
+    file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_logging_handler.setFormatter(file_logging_formatter)
+    logging.getLogger().addHandler(file_logging_handler)
 
     if not args.retry_attempts:
         retryAttempts = 0
     else:
         retryAttempts = args.retry_attempts
+    
+    logging.info(f"Running executable: {exe_abs_path} ")
+    logging.info(f"Storing logs in: {log_dir}")
+    logging.info(f"Timeout (seconds) per run: {args.timeout_seconds}")
+    logging.info(f"Searching for success line: {args.success_line}\n")
 
-
-    threadTimeout = ( args.timeout_seconds + 1 )
-    args.timeout_seconds = args.timeout_seconds + 10
+    # Small increase on the timeout to allow the thread to try and timeout
+    threadTimeout = ( args.timeout_seconds + 3 )
     for attempts in range(0,retryAttempts + 1):
-        exitStatus = 1
+        exit_status = 1
         # Set the timeout for the thread    
         thread = Process(target=runAndMonitor, args=(args,))
         thread.start()
-        # Wait for the thread to join, or hit a timeout
+        # Wait for the thread to join, or hit a timeout. 
         thread.join(timeout=threadTimeout)
         # As join() always returns None, you must call is_alive() after join() to decide whether a timeout happened
         # If the thread is still alive, the join() call timed out.       
-        if thread.exitcode is None:
-            exitStatus = 1
-        else:
-            exitStatus = thread.exitcode
-
-        print(f"exitStatus = {exitStatus} | thread.exitcode = {thread.exitcode}")
-        if thread.is_alive():
-            print(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout} SECONDS: FORCE KILLING THREAD\n")
+        if ( ( thread.exitcode is None ) and ( thread.is_alive() ) ):
+            # Print the thread timeout they passed in to the log
+            logging.info(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 1} SECONDS: FORCE KILLING THREAD")
             thread.kill()
-            exitStatus = 1
+            exit_status = 1
+        else:
+            exit_status = thread.exitcode
+            logging.info(f"THREAD EXITED WITH EXITCODE {exit_status}")
 
-        elif( ( attempts < retryAttempts ) and exitStatus == 1 ):
-            print(f"DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {retryAttempts}\n")
+        if( ( attempts < retryAttempts ) and exit_status == 1 ):
+            logging.info(f"DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {retryAttempts}\n")
+        else:
+            break
 
-
-    print("Exiting with exitStatus = {0}".format(exitStatus))
+    logging.info(f"EXECUTABLE MONITOR EXITING WITH STATUS: {exit_status}")
     # Report final exit status if no successful run occured
-    sys.exit(exitStatus)
+    sys.exit(exit_status)
