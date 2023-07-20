@@ -138,7 +138,7 @@ jobs:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 1
-          success-line: "SLEEPING FOR 6 SECONDS"
+          success-line: "SLEEPING FOR 12 SECONDS"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -150,17 +150,6 @@ jobs:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          retry-attempts: 2
-
-      - name: API Test | Failure Case | Executable Monitor | No Log Dir
-        continue-on-error: true
-        id: test-executable-monitor-API-no-log-dir
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
           retry-attempts: 2
 
       - name: API Test | Failure Case | Executable Monitor | No Exe Path
@@ -184,13 +173,6 @@ jobs:
           else
             echo "::endgroup::"
             echo -e "\033[32;31mtest-executable-monitor-API-no-success-metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-API-no-log-dir.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mtest-executable-monitor-API-no-log-dir had outcome '${{ steps.test-executable-monitor-API-no-log-dir.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mtest-executable-monitor-API-no-log-dir had unexpected '${{ steps.test-executable-monitor-API-no-log-dir.outcome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then

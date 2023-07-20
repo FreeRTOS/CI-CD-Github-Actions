@@ -18,18 +18,20 @@ def runAndMonitor(args):
     stdout_logging_handler.setFormatter(stdout_logging_formatter)
     logging.getLogger().addHandler(stdout_logging_handler)
 
-    # Convert any relative path (like './') in passed argument to absolute path.
-    exe_abs_path = os.path.abspath(args.exe_path)
-    log_dir = os.path.abspath(args.log_dir)
+    if args.log_dir is not None:
+        # Create log directory if it does not exist.
+        if not os.path.exists(args.log_dir):
+            os.makedirs(args.log_dir, exist_ok = True)
 
-    # Add file handler to output logging to a log file
-    exe_name = os.path.basename(exe_abs_path)
-    log_file_path = f'{log_dir}/{exe_name}_output.txt'
-    file_logging_handler = logging.FileHandler(log_file_path)
-    file_logging_handler.setLevel(logging.DEBUG)
-    file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    file_logging_handler.setFormatter(file_logging_formatter)
-    logging.getLogger().addHandler(file_logging_handler)
+        # Add file handler to output logging to a log file
+        exe_name = os.path.basename(exe_abs_path)
+        log_file_path = f'{log_dir}/{exe_name}_output.txt'
+        file_logging_handler = logging.FileHandler(log_file_path)
+        file_logging_handler.setLevel(logging.DEBUG)
+        file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        file_logging_handler.setFormatter(file_logging_formatter)
+        logging.getLogger().addHandler(file_logging_handler)
+        logging.info(f"Storing logs in: {log_dir}")
 
     # Initialize values
     exe_exit_status = None
@@ -136,7 +138,7 @@ if __name__ == '__main__':
                         help='Path to the executable.')
     parser.add_argument('--log-dir',
                         type=str,
-                        required=True,
+                        required=False,
                         help='Path to directory to store logs in.')
     parser.add_argument('--timeout-seconds',
                         type=int,
@@ -173,21 +175,22 @@ if __name__ == '__main__':
     exe_abs_path = os.path.abspath(args.exe_path)
     log_dir = os.path.abspath(args.log_dir)
 
-    # Create log directory if it does not exist.
-    if not os.path.exists(args.log_dir):
-        os.makedirs(args.log_dir, exist_ok = True)
+    if args.log_dir is not None:
+        # Create log directory if it does not exist.
+        if not os.path.exists(args.log_dir):
+            os.makedirs(args.log_dir, exist_ok = True)
 
-    # Add file handler to output logging to a log file
-    exe_name = os.path.basename(exe_abs_path)
-    log_file_path = f'{log_dir}/{exe_name}_output.txt'
-    file_logging_handler = logging.FileHandler(log_file_path)
-    file_logging_handler.setLevel(logging.DEBUG)
-    file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    file_logging_handler.setFormatter(file_logging_formatter)
-    #logging.getLogger().addHandler(file_logging_handler)
+        # Add file handler to output logging to a log file
+        exe_name = os.path.basename(exe_abs_path)
+        log_file_path = f'{log_dir}/{exe_name}_output.txt'
+        file_logging_handler = logging.FileHandler(log_file_path)
+        file_logging_handler.setLevel(logging.DEBUG)
+        file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        file_logging_handler.setFormatter(file_logging_formatter)
+        logging.getLogger().addHandler(file_logging_handler)
+        logging.info(f"Storing logs in: {log_dir}")
 
     logging.info(f"Running executable: {exe_abs_path} ")
-    logging.info(f"Storing logs in: {log_dir}")
     logging.info(f"Timeout (seconds) per run: {args.timeout_seconds}")
     
     if not args.retry_attempts:
