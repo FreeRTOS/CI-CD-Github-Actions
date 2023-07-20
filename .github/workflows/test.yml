@@ -101,6 +101,24 @@ jobs:
           success-exit-code: 0
           timeout-seconds: 75
 
+      - name: API Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code, Use Default Timeout
+        id: test-executable-monitor-action-no-exit-code-no-timeout
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          success-line: "Sleeping for 6 seconds"
+          retry-attempts: 2
+          
+      - name: API Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code, Use Default Timeout
+        id: test-executable-monitor-action-no-success-line-no-timeout
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          success-exit-code: 0
+          retry-attempts: 2
+          
       - name: API Test | Failure Case | Executable Monitor | Retries, No Success Line, No Exit Code
         continue-on-error: true
         id: test-executable-monitor-API-no-success-metric
@@ -109,17 +127,6 @@ jobs:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          retry-attempts: 2
-
-      - name: API Test | Failure Case | Executable Monitor | No Timeout
-        continue-on-error: true
-        id: test-executable-monitor-API-no-timeout
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
-          success-line: "Sleeping for 6 seconds"
-          success-exit-code: 0
           retry-attempts: 2
 
       - name: API Test | Failure Case | Executable Monitor | No Log Dir
@@ -154,13 +161,6 @@ jobs:
           else
             echo "::endgroup::"
             echo -e "\033[32;31mtest-executable-monitor-API-no-success-metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-API-no-timeout.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mtest-executable-monitor-API-no-timeout had outcome '${{ steps.test-executable-monitor-API-no-timeout.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mtest-executable-monitor-API-no-timeout had unexpected '${{ steps.test-executable-monitor-API-no-timeout.outcome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-log-dir.outcome}}" = "failure" ]; then
