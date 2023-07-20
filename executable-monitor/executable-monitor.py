@@ -215,7 +215,7 @@ if __name__ == '__main__':
         # If the thread is still alive, the join() call timed out.       
         if ( ( thread.exitcode is None ) and ( thread.is_alive() ) ):
             # Print the thread timeout they passed in to the log
-            logging.info(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 1} SECONDS: FORCE KILLING THREAD")
+            logging.info(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 3} SECONDS: FORCE KILLING THREAD")
             thread.kill()
             exit_status = 1
         else:
