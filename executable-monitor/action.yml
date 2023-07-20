@@ -6,7 +6,8 @@ inputs:
     required: true
   log-dir:
     description: 'Path to directory to store logs.'
-    required: true
+    required: false
+    default: ""
   success-line:
     description: 'Line of output from executable indicating success.'
     required: false
@@ -47,17 +48,25 @@ runs:
           echo "::group::Executable Output"
           echo "inputs.success-exit-code:${{ inputs.success-exit-code }}\n"
           echo "inputs.success-line:${{ inputs.success-line }}\n"
+          optArgs="" 
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
             echo -e "\033[32;31mDid not supply an input of success-line or success-exit-code to search for\033[0m"
             exit 1
-          elif [ "${{ inputs.success-exit-code }}" = "" ]; then
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
-          elif [ "${{ inputs.success-line }}" = "" ]; then
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-exit-code=${{ inputs.success-exit-code }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
-          else
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --success-exit-code=${{ inputs.success-exit-code }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
           fi
+          if [ "${{ inputs.success-exit-code }}" != "" ]; then
+             optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
+          fi
+
+          if [ "${{ inputs.success-line }}" != "" ]; then
+            optArgs="--success-line=${{ inputs.success-line}} $optArgs"
+          fi
+
+          if [ "${{ inputs.log-dir }}" != "" ]; then
+            optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
+          fi
+          echo "optArgs= $optArgs"
+          python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
           echo "::endgroup::"
           if [ "$?" = "0" ]; then
             echo -e "\033[32;3mValid exit status found\033[0m"
