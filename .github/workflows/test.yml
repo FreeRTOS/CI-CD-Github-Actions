@@ -45,6 +45,7 @@ jobs:
           gcc executable-monitor/test.c -o executable-monitor/test.out
           echo "::endgroup::"
           if [ "$?" = "0" ]; then
+            readlink -f executable-monitor/test.out
             echo -e "\033[32;3mCompiled executable-monitor/test.c\033[0m"
           else
             echo -e "\033[32;31mCompilation of executable-monitor/test.c failed...\033[0m"
@@ -55,7 +56,7 @@ jobs:
         id: test-executable-monitor-action
         uses: ./executable-monitor
         with:
-          exe-path: test.out
+          exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "Sleeping for 6 seconds"
@@ -67,7 +68,7 @@ jobs:
         id: test-executable-monitor-API-no-success-metric
         uses: ./executable-monitor
         with:
-          exe-path: test.out
+          exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
           retry-attempts: 2
@@ -87,7 +88,7 @@ jobs:
         id: test-executable-monitor-action-no-exit-code
         uses: ./executable-monitor
         with:
-          exe-path: test.out
+          exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "Sleeping for 6 seconds"
@@ -97,7 +98,7 @@ jobs:
         id: test-executable-monitor-action-no-success-line
         uses: ./executable-monitor
         with:
-          exe-path: test.out
+          exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
           success-exit-status: 0
@@ -107,7 +108,7 @@ jobs:
         id: test-executable-monitor-action-no-retry-attempts
         uses: ./executable-monitor
         with:
-          exe-path: test.out
+          exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           success-line: "Sleeping for 6 seconds"
 
