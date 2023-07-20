@@ -27,10 +27,31 @@ inputs:
 runs:
   using: "composite"
   steps: 
-      - name: Install dependencies
-        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
-        shell: bash
-      - name: Run executable with monitoring script
+      - name: Install Dependencies
         run: |
+          # Install Dependencies
+          echo "::group::Install Dependencies"
+          pip install -r $GITHUB_ACTION_PATH/requirements.txt
+          echo "::endgroup::"
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mInstalled all dependencies\033[0m"
+            exit 0
+          else
+            echo -e "\033[32;31mDependencies Install failed...\033[0m"
+            exit 1
+          fi
+        shell: bash
+      - name: Run Executable with Monitoring
+        run: |
+          # Run Executable with Monitoring
+          echo "::group::Executable Output"
           python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }} --success-exit-status=${{ inputs.success-exit-status }}
+          echo "::endgroup::"
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mValid exit status found\033[0m"
+            exit 0
+          else
+            echo -e "\033[32;31mDid not find a valid exit condition\033[0m"
+            exit 1
+          fi
         shell: bash
