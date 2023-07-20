@@ -63,7 +63,7 @@ int main( int argc,
         date_and_time.seconds = tm->tm_sec;
         date_and_time.msec = ( int ) ( tv.tv_usec / 1000 );
 
-        fprintf( stdout, "%02d:%02d:%02d.%03d %02d-%02d-%04d Sleeping for %d seconds\n",
+        fprintf( stdout, "%02d:%02d:%02d.%03d %02d-%02d-%04d TEST APPLICIATION SLEEPING FOR %d SECONDS\n",
                  date_and_time.hour,
                  date_and_time.minutes,
                  date_and_time.seconds,
@@ -76,6 +76,6 @@ int main( int argc,
         sleep( i * 3U );
     }
 
-    printf( "Exiting test application\n" );
+    printf( "EXITING TEST APPLICICATION WITH EXIT CODE = %d\n",exitCode );
     return exitCode;
 }

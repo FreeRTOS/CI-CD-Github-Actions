@@ -59,7 +59,7 @@ jobs:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -81,7 +81,7 @@ jobs:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
 
       - name: Functional Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code
@@ -100,7 +100,7 @@ jobs:
         with:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           timeout-seconds: 20
       
       - name: Functional Test | Success Case | Executable Monitor | No Retries, No Success Line, Exit Code
@@ -118,7 +118,7 @@ jobs:
         with:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
           
       - name: API Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code, Use Default Timeout
@@ -129,7 +129,19 @@ jobs:
           log-dir: demo_run_logs
           success-exit-code: 0
           retry-attempts: 2
-          
+
+      - name: Functional Test | Failure Case | Executable Monitor | Fail On Timeout
+        id: test-executable-monitor-action-fail-on-timeout
+        continue-on-error: true
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 1
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          retry-attempts: 2
+
       - name: API Test | Failure Case | Executable Monitor | Retries, No Success Line, No Exit Code
         continue-on-error: true
         id: test-executable-monitor-API-no-success-metric
@@ -147,7 +159,7 @@ jobs:
         with:
           exe-path: executable-monitor/test.out
           timeout-seconds: 20
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -158,7 +170,7 @@ jobs:
         with:
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-line: "Sleeping for 6 seconds"
+          success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -186,6 +198,13 @@ jobs:
           else
             echo "::endgroup::"
             echo -e "\033[32;31mtest-executable-monitor-API-no-exe-path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
+          echo -e "\033[32;3mtest-executable-monitor-action-fail-on-timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-action-fail-on-timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
             exit 1
           fi
           echo "::endgroup::"
