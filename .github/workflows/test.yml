@@ -57,7 +57,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
@@ -68,9 +67,19 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 75
           success-line: "LINE_THAT_WILL_NOT_PRINT_BUT_EXISTS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code, With log file
+        id: test-executable-monitor-action-log-file
+        uses: ./executable-monitor
+        with:
+          log-dir: demo_run_logs
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -79,7 +88,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
@@ -89,7 +97,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 75
           success-exit-code: 0
           retry-attempts: 2
@@ -99,7 +106,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           success-line: "SLEEPING FOR 6 SECONDS"
           timeout-seconds: 20
       
@@ -108,7 +114,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           success-exit-code: 0
           timeout-seconds: 75
 
@@ -117,7 +122,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
           
@@ -126,7 +130,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           success-exit-code: 0
           retry-attempts: 2
 
@@ -136,7 +139,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 1
           success-line: "SLEEPING FOR 12 SECONDS"
           success-exit-code: 0
@@ -148,7 +150,6 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
           timeout-seconds: 20
           retry-attempts: 2
 
@@ -157,7 +158,6 @@ jobs:
         id: test-executable-monitor-API-no-exe-path
         uses: ./executable-monitor
         with:
-          log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "SLEEPING FOR 6 SECONDS"
           success-exit-code: 0
