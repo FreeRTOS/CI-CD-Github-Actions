@@ -63,7 +63,7 @@ runs:
           fi
 
           if [ "${{ inputs.success-line }}" != "" ]; then
-            optArgs='--success-line="${{ inputs.success-line}}" $optArgs'
+            optArgs="--success-line=\""${{ inputs.success-line}}"\" $optArgs"
           fi
 
           echo "optArgs= $optArgs"
