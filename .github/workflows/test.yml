@@ -52,14 +52,25 @@ jobs:
             exit 1
           fi
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code
-        id: test-executable-monitor-action
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Success Line
+        id: test-executable-monitor-action-success-line
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "Sleeping for 6 seconds"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Exit Code
+        id: test-executable-monitor-action-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 75
+          success-line: "LINE_THAT_WILL_NOT_PRINT_BUT_EXISTS"
           success-exit-code: 0
           retry-attempts: 2
 
