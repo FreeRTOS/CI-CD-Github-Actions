@@ -52,7 +52,7 @@ jobs:
             exit 1
           fi
 
-      - name: Test Executable Monitor Action
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code
         id: test-executable-monitor-action
         uses: ./executable-monitor
         with:
@@ -63,28 +63,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Test Executable Monitor API - No success metric
-        continue-on-error: true
-        id: test-executable-monitor-API-no-success-metric
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          log-dir: demo_run_logs
-          timeout-seconds: 20
-          retry-attempts: 2
-
-      - name: Check Last Step
-        if: success() || failure() && steps.test-executable-monitor-API-no-success-metric.outcome == 'failure'
-        run: |
-          # Check Last Step Failed
-          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mCheck Last Step had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
-          else
-            echo -e "\033[32;31mCheck Last Step had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-
-      - name: Test Executable Monitor Action No Exit Code
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code
         id: test-executable-monitor-action-no-exit-code
         uses: ./executable-monitor
         with:
@@ -94,7 +73,7 @@ jobs:
           success-line: "Sleeping for 6 seconds"
           retry-attempts: 2
 
-      - name: Test Executable Monitor Action No Success Line
+      - name: Functional Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code
         id: test-executable-monitor-action-no-success-line
         uses: ./executable-monitor
         with:
@@ -104,7 +83,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Test Executable Monitor Action No Retry Attempts Success Line
+      - name: Functional Test | Success Case | Executable Monitor | No Retries, Success Line, No Exit Code
         id: test-executable-monitor-action-no-retry-attempts-success-line
         uses: ./executable-monitor
         with:
@@ -113,7 +92,7 @@ jobs:
           success-line: "Sleeping for 6 seconds"
           timeout-seconds: 20
       
-      - name: Test Executable Monitor Action No Retry Attempts Exit Code
+      - name: Functional Test | Success Case | Executable Monitor | No Retries, No Success Line, Exit Code
         id: test-executable-monitor-action-no-retry-attempts-exit-code
         uses: ./executable-monitor
         with:
@@ -121,6 +100,85 @@ jobs:
           log-dir: demo_run_logs
           success-exit-code: 0
           timeout-seconds: 75
+
+      - name: API Test | Failure Case | Executable Monitor | Retries, No Success Line, No Exit Code
+        continue-on-error: true
+        id: test-executable-monitor-API-no-success-metric
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | No Timeout
+        continue-on-error: true
+        id: test-executable-monitor-API-no-timeout
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          log-dir: demo_run_logs
+          success-line: "Sleeping for 6 seconds"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | No Log Dir
+        continue-on-error: true
+        id: test-executable-monitor-API-no-log-dir
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          success-line: "Sleeping for 6 seconds"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | No Exe Path
+        continue-on-error: true
+        id: test-executable-monitor-API-no-exe-path
+        uses: ./executable-monitor
+        with:
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          success-line: "Sleeping for 6 seconds"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Check Failure Test Cases
+        id: check-failure-test-cases
+        run: |
+          # Check Last Step Failed
+          echo "::group::Check Failure Test Cases"
+          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mtest-executable-monitor-API-no-success-metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-success-metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-API-no-timeout.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mtest-executable-monitor-API-no-timeout had outcome '${{ steps.test-executable-monitor-API-no-timeout.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-timeout had unexpected '${{ steps.test-executable-monitor-API-no-timeout.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-API-no-log-dir.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mtest-executable-monitor-API-no-log-dir had outcome '${{ steps.test-executable-monitor-API-no-log-dir.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-log-dir had unexpected '${{ steps.test-executable-monitor-API-no-log-dir.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
+          echo -e "\033[32;3mtest-executable-monitor-API-no-exe-path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-exe-path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          echo "::endgroup::"
+          echo -e "All failure tests failed correctly"
 
   test-complexity-check:
     runs-on: ubuntu-latest

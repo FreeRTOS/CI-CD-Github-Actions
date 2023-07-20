@@ -184,7 +184,7 @@ if __name__ == '__main__':
     file_logging_handler.setLevel(logging.DEBUG)
     file_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_logging_handler.setFormatter(file_logging_formatter)
-    logging.getLogger().addHandler(file_logging_handler)
+    #logging.getLogger().addHandler(file_logging_handler)
 
     logging.info(f"Running executable: {exe_abs_path} ")
     logging.info(f"Storing logs in: {log_dir}")
