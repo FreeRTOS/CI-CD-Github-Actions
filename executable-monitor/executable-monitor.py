@@ -18,7 +18,9 @@ def runAndMonitor(args):
     stdout_logging_handler.setFormatter(stdout_logging_formatter)
     logging.getLogger().addHandler(stdout_logging_handler)
 
+    exe_abs_path = os.path.abspath(args.exe_path)
     if args.log_dir is not None:
+        log_dir = os.path.abspath(args.log_dir)
         # Create log directory if it does not exist.
         if not os.path.exists(args.log_dir):
             os.makedirs(args.log_dir, exist_ok = True)
@@ -173,9 +175,9 @@ if __name__ == '__main__':
 
     # Convert any relative path (like './') in passed argument to absolute path.
     exe_abs_path = os.path.abspath(args.exe_path)
-    log_dir = os.path.abspath(args.log_dir)
 
     if args.log_dir is not None:
+        log_dir = os.path.abspath(args.log_dir)
         # Create log directory if it does not exist.
         if not os.path.exists(args.log_dir):
             os.makedirs(args.log_dir, exist_ok = True)
