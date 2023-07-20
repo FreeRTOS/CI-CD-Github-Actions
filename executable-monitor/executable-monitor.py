@@ -36,7 +36,6 @@ def runAndMonitor(args):
     exe_exitted = False
     success_line_found = False
     exit_condition_met = False
-    wait_for_exit = args.success_exit_status is not None
 
     # Launch the executable
     exe = subprocess.Popen([exe_abs_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, env=os.environ)
@@ -100,19 +99,19 @@ def runAndMonitor(args):
         exit_status = 0
         logging.info(f"Success Line: Success line was output")
     
-    # Check if a exit status was found if that was an option
-    if ( ( exit_status != 0 ) and ( args.success_exit_status is not None) ):
+    # Check if a exit code was found if that was an option
+    if ( ( exit_status != 0 ) and ( args.success_exit_code is not None) ):
         # If the executable had to be force killed mark it as a failure
         if( not exe_exitted):
-            logging.error("Exit Status: Executable did not exit by itself.\n")
+            logging.error("Exit Code: Executable did not exit by itself.\n")
             exit_status = 1
         # If the executable exited with a different status mark it as a failure
-        elif ( ( exe_exitted ) and ( exe_exit_status != args.success_exit_status ) ):
-            logging.error(f"Exit Status: {exe_exit_status} is not equal to requested exit status of {args.success_exit_status}\n")    
+        elif ( ( exe_exitted ) and ( exe_exit_status != args.success_exit_code ) ):
+            logging.error(f"Exit Code: {exe_exit_status} is not equal to requested exit code of {args.success_exit_code}\n")    
             exit_status = 1
-        # If the executable exited with the same status as requested mark a success
-        elif ( ( exe_exitted ) and ( exe_exit_status == args.success_exit_status ) ):
-            logging.info(f"Exit Status: Executable exited with requested exit status")
+        # If the executable exited with the same code as requested mark a success
+        elif ( ( exe_exitted ) and ( exe_exit_status == args.success_exit_code ) ):
+            logging.info(f"Exit Code: Executable exited with requested exit code")
             exit_status = 0
 
     logging.info(f"Runner thread exiting with status {exit_status}\n")
@@ -146,8 +145,8 @@ if __name__ == '__main__':
     parser.add_argument('--success-line',
                         type=str,
                         required=False,
-                        help='Line that indicates executable completed successfully. Required if --success-exit-status is not used.')
-    parser.add_argument('--success-exit-status',
+                        help='Line that indicates executable completed successfully. Required if --success-exit-code is not used.')
+    parser.add_argument('--success-exit-code',
                         type=int,
                         required=False,
                         help='Exit status that indicates that the executable completed successfully. Required if --success-line is not used.')
@@ -158,12 +157,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.success_exit_status is None and args.success_line is None:
-        logging.error("Must specify at least one of the following: --success-line, --success-exit-status.")
+    if args.success_exit_code is None and args.success_line is None:
+        logging.error("Must specify at least one of the following: --success-line, --success-exit-code.")
         sys.exit(1)
 
-    elif args.success_exit_status is not None and args.success_line is not None:
-        logging.warning("Received an option for success-line and success-exit-status.")
+    elif args.success_exit_code is not None and args.success_line is not None:
+        logging.warning("Received an option for success-line and success-exit-code.")
         logging.warning("Be aware: This program will report SUCCESS on either of these conditions being met")
 
     if not os.path.exists(args.exe_path):
@@ -198,8 +197,8 @@ if __name__ == '__main__':
     
     if args.success_line is not None:
         logging.info(f"Searching for success line: {args.success_line}")
-    if args.success_exit_status is not None:
-        logging.info(f"Searching for exit code: {args.success_exit_status}")
+    if args.success_exit_code is not None:
+        logging.info(f"Searching for exit code: {args.success_exit_code}")
     
     # Small increase on the timeout to allow the thread to try and timeout
     threadTimeout = ( args.timeout_seconds + 3 )
