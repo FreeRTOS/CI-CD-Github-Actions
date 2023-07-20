@@ -117,7 +117,8 @@ def runAndMonitor(args):
     else:
         logging.error("Run did not find a valid success metric.\n")
     
-    return(exit_status)
+    logging.info(f"Runner thread exiiting with status {exit_status}")
+    exit(exit_status)
 
 if __name__ == '__main__':
     # Set up logging
@@ -149,7 +150,7 @@ if __name__ == '__main__':
                         required=False,
                         help='Line that indicates executable completed successfully. Required if --success-exit-status is not used.')
     parser.add_argument('--success-exit-status',
-                        type=int,
+                        type=str,
                         required=False,
                         help='Exit status that indicates that the executable completed successfully. Required if --success-line is not used.')
     parser.add_argument('--retry-attempts',
@@ -158,6 +159,13 @@ if __name__ == '__main__':
                         help='Number of times to attempt re-running the executable if the correct exit condition is not found.')
 
     args = parser.parse_args()
+
+    # GitHub action needs to be able to pass in a "blank" value. This means the parser needs to take in success exit status as a str
+    # Check if it was the blank value, if it was set it to None. If it was not convert it to an integer
+    if args.success_exit_status == "":
+        args.success_exit_status = None
+    else:
+        args.success_exit_status = int(args.success_exit_status)
 
     if args.success_exit_status is None and args.success_line is None:
         logging.info("Must specify at least one of the following: --success-line, --success-exit-status.")

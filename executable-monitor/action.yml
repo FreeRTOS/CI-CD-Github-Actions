@@ -19,6 +19,10 @@ inputs:
     description: 'Number of times to re-launch the binary to check for success.'
     required: false
     default: 0
+  success-exit-status:
+    description: 'Exit status that indicates that the executable completed successfully. Required if --success-line is not used.'
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -28,5 +32,5 @@ runs:
         shell: bash
       - name: Run executable with monitoring script
         run: |
-          python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
+          python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }} --success-exit-status=${{ inputs.success-exit-status }}
         shell: bash
