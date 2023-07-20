@@ -47,7 +47,7 @@ runs:
           echo "::group::Executable Output"
           echo "inputs.success-exit-status:${{ inputs.success-exit-status }}\n"
           echo "inputs.success-line:${{ inputs.success-line }}\n"
-          if [ ( "${{ inputs.success-exit-status }}" = "" ) && ( "${{ inputs.success-line }}" = "" ) ]; then
+          if [ "${{ inputs.success-exit-status }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::""
             echo -e "\033[32;31mDid not supply an input of success-line or success-exit-status to search for\033[0m"
             exit 1

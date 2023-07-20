@@ -23,6 +23,7 @@ jobs:
           path: coreMQTT
           exclude-files: lexicon.txt
           exclude-dirs: build,docs
+
   test-executable-monitor:
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +58,7 @@ jobs:
           exe-path: test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-line: "Sleep for 6 seconds"
+          success-line: "Sleeping for 6 seconds"
           success-exit-code: 0
           retry-attempts: 2
 
@@ -89,7 +90,7 @@ jobs:
           exe-path: test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-line: "Sleep for 6 seconds"
+          success-line: "Sleeping for 6 seconds"
           retry-attempts: 2
 
       - name: Test Executable Monitor Action No Success Line
@@ -101,13 +102,14 @@ jobs:
           timeout-seconds: 20
           success-exit-code: 0
           retry-attempts: 2
+
       - name: Test Executable Monitor Action No Retry Attempts
         id: test-executable-monitor-action-no-retry-attempts
         uses: ./executable-monitor
         with:
           exe-path: test.out
           log-dir: demo_run_logs
-          success-line: "Sleep for 6 seconds"
+          success-line: "Sleeping for 6 seconds"
 
   test-complexity-check:
     runs-on: ubuntu-latest
