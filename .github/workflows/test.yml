@@ -23,6 +23,93 @@ jobs:
           path: coreMQTT
           exclude-files: lexicon.txt
           exclude-dirs: build,docs
+  test-executable-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compile executable monitor test
+        id: compile-executable-monitor-test
+        shell: bash
+        run: |
+          # Compile executable monitor test
+          echo "::group::Compile executable monitor test"
+          sudo apt install build-essential
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mInstalled build-essential\033[0m"
+            exit 0
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mInstall build-essential failed...\033[0m"
+            exit 1
+          fi
+          gcc executable-monitor/test.c -o executable-monitor/test.out
+          echo "::endgroup::"
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mCompiled executable-monitor/test.c\033[0m"
+            exit 0
+          else
+            echo -e "\033[32;31mCompilation of executable-monitor/test.c failed...\033[0m"
+            exit 1
+          fi
+      - name: Test Executable Monitor API - No success metric
+        continue-on-error: true
+        id: test-executable-monitor-API-no-success-metric
+        uses: ./executable-monitor
+        with:
+          exe-path: test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          retry-attempts: 2
+
+      - name: Check Last Step
+        if: success() || failure() && steps.test-executable-monitor-API-no-success-metric.outcome == 'failure'
+        run: |
+          # Check Last Step Failed
+          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mCheck Last Step had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+          else
+            echo -e "\033[32;31mCheck Last Step had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+
+      - name: Test Executable Monitor Action
+        id: test-executable-monitor-action
+        uses: ./executable-monitor
+        with:
+          exe-path: test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          success-line: "Sleep for 6 seconds"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Test Executable Monitor Action No Exit Code
+        id: test-executable-monitor-action-no-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          success-line: "Sleep for 6 seconds"
+          retry-attempts: 2
+
+      - name: Test Executable Monitor Action No Success Line
+        id: test-executable-monitor-action-no-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: test.out
+          log-dir: demo_run_logs
+          timeout-seconds: 20
+          success-exit-code: 0
+          retry-attempts: 2
+      - name: Test Executable Monitor Action No Retry Attempts
+        id: test-executable-monitor-action-no-retry-attempts
+        uses: ./executable-monitor
+        with:
+          exe-path: test.out
+          log-dir: demo_run_logs
+          success-line: "Sleep for 6 seconds"
+
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
