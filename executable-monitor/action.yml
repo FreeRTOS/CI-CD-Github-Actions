@@ -57,14 +57,15 @@ runs:
           if [ "${{ inputs.success-exit-code }}" != "" ]; then
              optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
           fi
-
-          if [ "${{ inputs.success-line }}" != "" ]; then
-            optArgs="--success-line=${{ inputs.success-line}} $optArgs"
-          fi
-
+          
           if [ "${{ inputs.log-dir }}" != "" ]; then
             optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
           fi
+
+          if [ "${{ inputs.success-line }}" != "" ]; then
+            optArgs='--success-line="${{ inputs.success-line}}" $optArgs'
+          fi
+
           echo "optArgs= $optArgs"
           python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
           echo "::endgroup::"
