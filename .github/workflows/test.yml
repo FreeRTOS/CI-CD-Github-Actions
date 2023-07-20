@@ -59,7 +59,7 @@ jobs:
           log-dir: demo_run_logs
           timeout-seconds: 20
           success-line: "Sleeping for 6 seconds"
-          success-exit-code: 0
+          success-exit-status: 0
           retry-attempts: 2
 
       - name: Test Executable Monitor API - No success metric
@@ -100,7 +100,7 @@ jobs:
           exe-path: test.out
           log-dir: demo_run_logs
           timeout-seconds: 20
-          success-exit-code: 0
+          success-exit-status: 0
           retry-attempts: 2
 
       - name: Test Executable Monitor Action No Retry Attempts

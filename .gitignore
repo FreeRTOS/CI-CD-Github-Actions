@@ -1,2 +1,3 @@
 *.out
 logDir/
+demo_run_logs/
