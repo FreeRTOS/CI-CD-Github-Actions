@@ -45,6 +45,8 @@ runs:
         run: |
           # Run Executable with Monitoring
           echo "::group::Executable Output"
+          echo "inputs.success-exit-status:${{ inputs.success-exit-status }}\n"
+          echo "inputs.success-line:${{ inputs.success-line }}\n"
           if [ ( "${{ inputs.success-exit-status }}" = "" ) && ( "${{ inputs.success-line }}" = "" ) ]; then
             echo "::endgroup::""
             echo -e "\033[32;31mDid not supply an input of success-line or success-exit-status to search for\033[0m"
@@ -52,9 +54,9 @@ runs:
           elif [ "${{ inputs.success-exit-status }}" = "" ]; then
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
           elif [ "${{ inputs.success-line }}" = "" ]; then
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-exit-status=${{ inputs.success-exit-status }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-exit-status=${{ inputs.success-exit-status }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
           else
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --success-exit-status=${{ inputs.success-exit-status }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" --success-exit-status=${{ inputs.success-exit-status }} --log-dir=${{ inputs.log-dir }} --retry-attempts=${{ inputs.retry-attempts }}
           fi
           echo "::endgroup::"
           if [ "$?" = "0" ]; then
