@@ -133,6 +133,21 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
+      # Get the time 2 minutes from now, then look for that in the executable
+      - name: Get time 2 minutes from now
+        id: future-time
+        run: echo "::set-output name=time::$(date --date='2 minutes' +%H:%M)"
+
+      - name: Functional Test | Sucess Case | Executable Monitor | Test Retry Run occurs on Wrong exit code
+        id: test-executable-monitor-action-retry-on-wrong-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-exit-code: 12356
+          timeout-seconds: 20
+          retry-attempts: 10
+          success-line: ${{ steps.future-time.outputs.time }}
+
       - name: Functional Test | Failure Case | Executable Monitor | Fail On Timeout
         id: test-executable-monitor-action-fail-on-timeout
         continue-on-error: true
@@ -142,16 +157,6 @@ jobs:
           timeout-seconds: 1
           success-line: "SLEEPING FOR 12 SECONDS"
           success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs
-        id: test-executable-monitor-action-retry-on-wrong-exit-code
-        continue-on-error: true
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-exit-code: 12356
-          timeout-seconds: 180
           retry-attempts: 2
 
       - name: API Test | Failure Case | Executable Monitor | Retries, No Success Metric
@@ -183,13 +188,6 @@ jobs:
           else
             echo "::endgroup::"
             echo -e "\033[32;31mFunctional Test | Failure Case | Executable Monitor | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mFunctional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs had outcome '${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mFunctional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs had unexpected '${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
