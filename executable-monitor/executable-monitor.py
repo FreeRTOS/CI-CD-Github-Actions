@@ -225,7 +225,7 @@ if __name__ == '__main__':
             exit_status = thread.exitcode
             logging.info(f"THREAD EXITED WITH EXITCODE {exit_status}")
 
-        if( ( attempts  < args.retry_attempts ) and exit_status == 1 ):
+        if( ( attempts  < args.retry_attempts ) and exit_status != 0 ):
             logging.warning(f"DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {args.retry_attempts}\n")
         else:
             break

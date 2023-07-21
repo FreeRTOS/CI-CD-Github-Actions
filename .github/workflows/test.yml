@@ -144,7 +144,17 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: API Test | Failure Case | Executable Monitor | Retries, No Success Line, No Exit Code
+      - name: Functional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs
+        id: test-executable-monitor-action-retry-on-wrong-exit-code
+        continue-on-error: true
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-exit-code: 12356
+          timeout-seconds: 180
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | Retries, No Success Metric
         continue-on-error: true
         id: test-executable-monitor-API-no-success-metric
         uses: ./executable-monitor
@@ -168,25 +178,32 @@ jobs:
         run: |
           # Check Last Step Failed
           echo "::group::Check Failure Test Cases"
-          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mtest-executable-monitor-API-no-success-metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mFunctional Test | Failure Case | Executable Monitor | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
           else
             echo "::endgroup::"
-            echo -e "\033[32;31mtest-executable-monitor-API-no-success-metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
+            echo -e "\033[32;31mFunctional Test | Failure Case | Executable Monitor | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mFunctional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs had outcome '${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mFunctional Test | Failure Case | Executable Monitor | Retry when wrong exit code occurs had unexpected '${{ steps.test-executable-monitor-action-retry-on-wrong-exit-code.outome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mAPI Test | Failure Case | Executable Monitor | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mAPI Test | Failure Case | Executable Monitor | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
-          echo -e "\033[32;3mtest-executable-monitor-API-no-exe-path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
+            echo -e "\033[32;3mAPI Test | Failure Case | Executable Monitor | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
           else
             echo "::endgroup::"
-            echo -e "\033[32;31mtest-executable-monitor-API-no-exe-path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
-          echo -e "\033[32;3mtest-executable-monitor-action-fail-on-timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mtest-executable-monitor-action-fail-on-timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
+            echo -e "\033[32;31mAPI Test | Failure Case | Executable Monitor | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
             exit 1
           fi
           echo "::endgroup::"
