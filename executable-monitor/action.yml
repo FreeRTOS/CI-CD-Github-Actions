@@ -46,8 +46,6 @@ runs:
         run: |
           # Run Executable with Monitoring
           echo "::group::Executable Output"
-          echo "inputs.success-exit-code:${{ inputs.success-exit-code }}\n"
-          echo "inputs.success-line:${{ inputs.success-line }}\n"
           optArgs=" " 
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
