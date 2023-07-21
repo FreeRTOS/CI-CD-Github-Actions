@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
+
 typedef struct DateAndTime
 {
     int year;
@@ -30,7 +32,7 @@ int main( int argc,
         printf( "This is a basic test application.\n" );
         printf( "It prints the date and time and then sleeps for loopCount * 3\n" );
         printf( "This program takes in two inputs, a loop count and an exit code\n" );
-        printf( "By default it will run 5 loops and exit with exit status 0\n" );
+        printf( "By default it will run %d loops and exit with exit status %d\n", totalLoops, exitCode );
     }
 
     if( argc == 2 )
@@ -75,7 +77,9 @@ int main( int argc,
                  );
         sleep( i * 3U );
     }
-
+#ifdef EXIT_WITH_MINUTES
+    exitCode = date_and_time.minutes;
+#endif
     printf( "EXITING TEST APPLICICATION WITH EXIT CODE = %d\n",exitCode );
     return exitCode;
 }
