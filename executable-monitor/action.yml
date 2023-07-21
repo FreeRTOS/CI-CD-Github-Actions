@@ -65,8 +65,10 @@ runs:
           fi
 
           if [ "${{ inputs.success-line }}" != "" ]; then
+            echo 'python3 "$GITHUB_ACTION_PATH"/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} "$optArgs" --success-line="${{ inputs.success-line}}"'
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs --success-line="${{ inputs.success-line}}"
           else
+            echo 'python3 "$GITHUB_ACTION_PATH"/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} "$optArgs"'
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
           fi
           echo "::endgroup::"

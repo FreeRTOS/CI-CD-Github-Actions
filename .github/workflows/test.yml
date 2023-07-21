@@ -43,6 +43,7 @@ jobs:
             exit 1
           fi
           gcc executable-monitor/test.c -o executable-monitor/test.out
+          gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
           echo "::endgroup::"
           if [ "$?" = "0" ]; then
             readlink -f executable-monitor/test.out
@@ -135,18 +136,30 @@ jobs:
 
       # Get the time 2 minutes from now, then look for that in the executable
       - name: Get time 2 minutes from now
+        continue-on-error: true  
         id: future-time
-        run: echo "::set-output name=time::$(date --date='2 minutes' +%H:%M)"
+        run: |
+          # Get times for future demos
+          echo "::set-output name=two_minutes_ahead::$(date --date='2 minutes' +%H:%M)"
+          echo "::set-output name=five_minutes_ahead::$(date --date='5 minutes' +%M)"
 
       - name: Functional Test | Sucess Case | Executable Monitor | Test Retry Run occurs on Wrong exit code
-        id: test-executable-monitor-action-retry-on-wrong-exit-code
+        id: test-executable-monitor-action-retry-success-line
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          success-exit-code: 12356
           timeout-seconds: 20
           retry-attempts: 10
-          success-line: ${{ steps.future-time.outputs.time }}
+          success-line: ${{ steps.future-time.outputs.two_minutes_ahead }}
+
+      - name: Functional Test | Success Case | Executable Monitor | Retry when wrong exit code occurs
+        id: test-executable-monitor-action-retry-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-exit-code: ${{ steps.future-time.outputs.five_minutes_ahead }}
+          timeout-seconds: 60
+          retry-attempts: 10
 
       - name: Functional Test | Failure Case | Executable Monitor | Fail On Timeout
         id: test-executable-monitor-action-fail-on-timeout
