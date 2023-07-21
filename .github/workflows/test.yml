@@ -134,14 +134,13 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      # Get the time 2 minutes from now, then look for that in the executable
+      # Get future times from now, then look for that in the executable
       - name: Get time 2 minutes from now
-        continue-on-error: true  
         id: future-time
         run: |
           # Get times for future demos
-          echo "::set-output name=two_minutes_ahead::$(date --date='2 minutes' +%H:%M)"
-          echo "::set-output name=five_minutes_ahead::$(date --date='5 minutes' +%M)"
+          echo "time_success_line=$(date --date='2 minutes' +%H:%M)" >> "$GITHUB_ENV"
+          echo "time_exit_code=$(date --date='5 minutes' +%M)" >> "$GITHUB_ENV"
 
       - name: Functional Test | Sucess Case | Executable Monitor | Test Retry Run occurs on Wrong exit code
         id: test-executable-monitor-action-retry-success-line
@@ -150,14 +149,14 @@ jobs:
           exe-path: executable-monitor/test.out
           timeout-seconds: 20
           retry-attempts: 10
-          success-line: ${{ steps.future-time.outputs.two_minutes_ahead }}
+          success-line: ${{ env.time_success_line }}
 
       - name: Functional Test | Success Case | Executable Monitor | Retry when wrong exit code occurs
         id: test-executable-monitor-action-retry-exit-code
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test_exit_current_minutes.out
-          success-exit-code: ${{ steps.future-time.outputs.five_minutes_ahead }}
+          success-exit-code: ${{ env.time_exit_code }}
           timeout-seconds: 60
           retry-attempts: 10
 
