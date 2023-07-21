@@ -46,52 +46,51 @@ runs:
         run: |
           # Run Executable with Monitoring
           echo "::group::Argument Parsing"
-          optArgs=("")
+          optArgs=" "
           # Make sure we have an exit condition to look for
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
             echo -e "\033[32;31mDid not supply an input of success-line or success-exit-code to search for\033[0m"
             exit 1
           fi
-          
+
           # Check if an exit code was provided
           if [ "${{ inputs.success-exit-code }}" != "" ]; then
-            echo "Adding --success-exit-code=${{ inputs.success-exit-code }}) to the call"
-            optArgs+=(--success-exit-code=${{ inputs.success-exit-code }})
+            optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
+            echo "Adding --success-exit-code=${{ inputs.success-exit-code }} to the call"
           fi
 
           # Check for log directory/if a log file should be created
           if [ "${{ inputs.log-dir }}" != "" ]; then
+            optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
             echo "Adding --log-dir=${{ inputs.log-dir}} to the call"
-            optArgs+=(--log-dir=${{ inputs.log-dir}})
           fi
 
           # Check for retry attempts
           if [ "${{ inputs.retry-attempts }}" != "" ]; then
-            echo "Adding --retry-attempts=${{ inputs.retry-attemps}} to the call"
-            optArgs+=(--retry-attempts=${{ inputs.retry-attempts}})
+            optArgs="--retry-attempts=${{ inputs.retry-attempts }} $optArgs"
+            echo "Adding --retry-attempts=${{ inputs.retry-attempts }} to the call"
           fi
 
           # Check if a success line was provided. Converting the github input to a bash variable
           # Will cause it to tokenize on spaces when passed into python
           # So just only add the success line if it exits.
-          if [ "${{ inputs.success-line }}" != "" ]; then
-              echo "Adding --success-line=${{ inputs.success-line}} to the call"
-              # End the group about parsing the inputs, print the line that will be run
-              echo "::endgroup::"
-              echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" ${optArgs[@]}\033[0m"
-          else
-              # End the group about parsing the inputs, print the line that will be run
-              echo "::endgroup::"
-              echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs[@]}\033[0m"
-          fi
-
-          # Set +e so that an exit code doesn't cause immediately failure. Allows printing exit status string. Create new group
+          # set +e so if the run fails we can capture that and print custom error message
           set +e
-          echo "::group::Executable Output"
-          python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs[@]}
-
-          # Need to store the status as the endgroup echo will count for the $? check
+          if [ "${{ inputs.success-line }}" != "" ]; then
+            successLineArgs="--success-line=\"${{ inputs.success-line}}\" $optArgs"
+            echo "Adding --success-line=${{ inputs.success-line}} to the call"
+            echo "::endgroup::"
+            echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs  \033[0m"
+            echo "::group::Executable Output"
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs --success-line="${{ inputs.success-line}}"
+          else
+            echo "::endgroup::"
+            echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs \033[0m"
+            echo "::group::Executable Output"
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
+          fi
+          # Store status as the echo group will overwrite it
           exitStatus=$?
           echo "::endgroup::"
           if [ "$exitStatus" = "0" ]; then
