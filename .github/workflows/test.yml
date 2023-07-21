@@ -53,7 +53,7 @@ jobs:
             exit 1
           fi
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Success Line
+      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Success Line
         id: test-executable-monitor-action-success-line
         uses: ./executable-monitor
         with:
@@ -63,7 +63,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Exit Code
+      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Exit Code
         id: test-executable-monitor-action-exit-code
         uses: ./executable-monitor
         with:
@@ -73,7 +73,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code, With log file
+      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code, With log file
         id: test-executable-monitor-action-log-file
         uses: ./executable-monitor
         with:
@@ -84,7 +84,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code
+      - name: Functional Test | Success Case | Retries, Success Line, No Exit Code
         id: test-executable-monitor-action-no-exit-code
         uses: ./executable-monitor
         with:
@@ -93,7 +93,7 @@ jobs:
           success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
 
-      - name: Functional Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code
+      - name: Functional Test | Success Case | Retries, No Success Line, Exit Code
         id: test-executable-monitor-action-no-success-line
         uses: ./executable-monitor
         with:
@@ -102,7 +102,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: Functional Test | Success Case | Executable Monitor | No Retries, Success Line, No Exit Code
+      - name: Functional Test | Success Case | No Retries, Success Line, No Exit Code
         id: test-executable-monitor-action-no-retry-attempts-success-line
         uses: ./executable-monitor
         with:
@@ -110,7 +110,7 @@ jobs:
           success-line: "SLEEPING FOR 6 SECONDS"
           timeout-seconds: 20
       
-      - name: Functional Test | Success Case | Executable Monitor | No Retries, No Success Line, Exit Code
+      - name: Functional Test | Success Case | No Retries, No Success Line, Exit Code
         id: test-executable-monitor-action-no-retry-attempts-exit-code
         uses: ./executable-monitor
         with:
@@ -118,7 +118,7 @@ jobs:
           success-exit-code: 0
           timeout-seconds: 75
 
-      - name: API Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code, Use Default Timeout
+      - name: API Test | Success Case | Retries, Success Line, No Exit Code, Use Default Timeout
         id: test-executable-monitor-action-no-exit-code-no-timeout
         uses: ./executable-monitor
         with:
@@ -126,7 +126,7 @@ jobs:
           success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
           
-      - name: API Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code, Use Default Timeout
+      - name: API Test | Success Case | Retries, No Success Line, Exit Code, Use Default Timeout
         id: test-executable-monitor-action-no-success-line-no-timeout
         uses: ./executable-monitor
         with:
@@ -135,14 +135,14 @@ jobs:
           retry-attempts: 2
 
       # Get future times from now, then look for that in the executable
-      - name: Get time 2 minutes from now
+      - name: Get Future Times
         id: future-time
         run: |
           # Get times for future demos
           echo "time_success_line=$(date --date='2 minutes' +%H:%M)" >> "$GITHUB_ENV"
           echo "time_exit_code=$(date --date='5 minutes' +%M)" >> "$GITHUB_ENV"
 
-      - name: Functional Test | Sucess Case | Executable Monitor | Test Retry Run occurs on Wrong exit code
+      - name: Functional Test | Sucess Case | Test Retry Run occurs on Wrong exit code
         id: test-executable-monitor-action-retry-success-line
         uses: ./executable-monitor
         with:
@@ -151,7 +151,7 @@ jobs:
           retry-attempts: 10
           success-line: ${{ env.time_success_line }}
 
-      - name: Functional Test | Success Case | Executable Monitor | Retry when wrong exit code occurs
+      - name: Functional Test | Success Case | Retry On Wrong Exit Code
         id: test-executable-monitor-action-retry-exit-code
         uses: ./executable-monitor
         with:
@@ -160,7 +160,7 @@ jobs:
           timeout-seconds: 60
           retry-attempts: 10
 
-      - name: Functional Test | Failure Case | Executable Monitor | Fail On Timeout
+      - name: Functional Test | Failure Case | Fail On Timeout
         id: test-executable-monitor-action-fail-on-timeout
         continue-on-error: true
         uses: ./executable-monitor
@@ -171,7 +171,7 @@ jobs:
           success-exit-code: 0
           retry-attempts: 2
 
-      - name: API Test | Failure Case | Executable Monitor | Retries, No Success Metric
+      - name: API Test | Failure Case | Retries, No Success Metric
         continue-on-error: true
         id: test-executable-monitor-API-no-success-metric
         uses: ./executable-monitor
@@ -180,7 +180,7 @@ jobs:
           timeout-seconds: 20
           retry-attempts: 2
 
-      - name: API Test | Failure Case | Executable Monitor | No Exe Path
+      - name: API Test | Failure Case | No Exe Path
         continue-on-error: true
         id: test-executable-monitor-API-no-exe-path
         uses: ./executable-monitor
@@ -196,24 +196,24 @@ jobs:
           # Check Last Step Failed
           echo "::group::Check Failure Test Cases"
           if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mFunctional Test | Failure Case | Executable Monitor | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
+            echo -e "\033[32;3mFunctional Test | Failure Case | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
           else
             echo "::endgroup::"
-            echo -e "\033[32;31mFunctional Test | Failure Case | Executable Monitor | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
+            echo -e "\033[32;31mFunctional Test | Failure Case | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | Executable Monitor | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+            echo -e "\033[32;3mAPI Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
           else
             echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | Executable Monitor | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
+            echo -e "\033[32;31mAPI Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
             exit 1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | Executable Monitor | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
+            echo -e "\033[32;3mAPI Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
           else
             echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | Executable Monitor | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
+            echo -e "\033[32;31mAPI Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
             exit 1
           fi
           echo "::endgroup::"
