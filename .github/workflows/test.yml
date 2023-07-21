@@ -23,6 +23,175 @@ jobs:
           path: coreMQTT
           exclude-files: lexicon.txt
           exclude-dirs: build,docs
+
+  test-executable-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compile executable monitor test
+        id: compile-executable-monitor-test
+        shell: bash
+        run: |
+          # Compile executable monitor test
+          echo "::group::Compile executable monitor test"
+          sudo apt install build-essential
+          if [ "$?" = "0" ]; then
+            echo -e "\033[32;3mInstalled build-essential\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mInstall build-essential failed...\033[0m"
+            exit 1
+          fi
+          gcc executable-monitor/test.c -o executable-monitor/test.out
+          echo "::endgroup::"
+          if [ "$?" = "0" ]; then
+            readlink -f executable-monitor/test.out
+            echo -e "\033[32;3mCompiled executable-monitor/test.c\033[0m"
+          else
+            echo -e "\033[32;31mCompilation of executable-monitor/test.c failed...\033[0m"
+            exit 1
+          fi
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Success Line
+        id: test-executable-monitor-action-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code | Pass on Exit Code
+        id: test-executable-monitor-action-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 75
+          success-line: "LINE_THAT_WILL_NOT_PRINT_BUT_EXISTS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, and Exit Code, With log file
+        id: test-executable-monitor-action-log-file
+        uses: ./executable-monitor
+        with:
+          log-dir: demo_run_logs
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code
+        id: test-executable-monitor-action-no-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          success-line: "SLEEPING FOR 6 SECONDS"
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code
+        id: test-executable-monitor-action-no-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 75
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Success Case | Executable Monitor | No Retries, Success Line, No Exit Code
+        id: test-executable-monitor-action-no-retry-attempts-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          timeout-seconds: 20
+      
+      - name: Functional Test | Success Case | Executable Monitor | No Retries, No Success Line, Exit Code
+        id: test-executable-monitor-action-no-retry-attempts-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-exit-code: 0
+          timeout-seconds: 75
+
+      - name: API Test | Success Case | Executable Monitor | Retries, Success Line, No Exit Code, Use Default Timeout
+        id: test-executable-monitor-action-no-exit-code-no-timeout
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          retry-attempts: 2
+          
+      - name: API Test | Success Case | Executable Monitor | Retries, No Success Line, Exit Code, Use Default Timeout
+        id: test-executable-monitor-action-no-success-line-no-timeout
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Functional Test | Failure Case | Executable Monitor | Fail On Timeout
+        id: test-executable-monitor-action-fail-on-timeout
+        continue-on-error: true
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 1
+          success-line: "SLEEPING FOR 12 SECONDS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | Retries, No Success Line, No Exit Code
+        continue-on-error: true
+        id: test-executable-monitor-API-no-success-metric
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          timeout-seconds: 20
+          retry-attempts: 2
+
+      - name: API Test | Failure Case | Executable Monitor | No Exe Path
+        continue-on-error: true
+        id: test-executable-monitor-API-no-exe-path
+        uses: ./executable-monitor
+        with:
+          timeout-seconds: 20
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          retry-attempts: 2
+
+      - name: Check Failure Test Cases
+        id: check-failure-test-cases
+        run: |
+          # Check Last Step Failed
+          echo "::group::Check Failure Test Cases"
+          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
+            echo -e "\033[32;3mtest-executable-monitor-API-no-success-metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-success-metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
+          echo -e "\033[32;3mtest-executable-monitor-API-no-exe-path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-API-no-exe-path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
+          echo -e "\033[32;3mtest-executable-monitor-action-fail-on-timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
+          else
+            echo "::endgroup::"
+            echo -e "\033[32;31mtest-executable-monitor-action-fail-on-timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
+            exit 1
+          fi
+          echo "::endgroup::"
+          echo -e "All failure tests failed correctly"
+
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
