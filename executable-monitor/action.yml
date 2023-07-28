@@ -13,9 +13,9 @@ inputs:
     required: false
     default: ""
   timeout-seconds:
-    description: 'Maximum amount of time to run the executable. Default is 600.'
+    description: 'Maximum amount of time to run the executable. Default is 180.'
     required: false
-    default: 300
+    default: 180
   retry-attempts:
     description: 'Number of times to re-launch the binary to check for success.'
     required: false
@@ -54,22 +54,25 @@ runs:
             exit 1
           fi
 
+          echo "Adding --exe-path=${{ inputs.exe-path }}"
+          echo "Adding --timeout-seconds=${{ inputs.timeout-seconds }}"
+
           # Check if an exit code was provided
           if [ "${{ inputs.success-exit-code }}" != "" ]; then
             optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
-            echo "Adding --success-exit-code=${{ inputs.success-exit-code }} to the call"
+            echo "Adding --success-exit-code=${{ inputs.success-exit-code }}"
           fi
 
           # Check for log directory/if a log file should be created
           if [ "${{ inputs.log-dir }}" != "" ]; then
             optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
-            echo "Adding --log-dir=${{ inputs.log-dir}} to the call"
+            echo "Adding --log-dir=${{ inputs.log-dir}}"
           fi
 
           # Check for retry attempts
           if [ "${{ inputs.retry-attempts }}" != "" ]; then
             optArgs="--retry-attempts=${{ inputs.retry-attempts }} $optArgs"
-            echo "Adding --retry-attempts=${{ inputs.retry-attempts }} to the call"
+            echo "Adding --retry-attempts=${{ inputs.retry-attempts }}"
           fi
 
           # Check if a success line was provided. Converting the github input to a bash variable
@@ -79,7 +82,7 @@ runs:
           set +e
           if [ "${{ inputs.success-line }}" != "" ]; then
             successLineArgs="--success-line=\"${{ inputs.success-line}}\" $optArgs"
-            echo "Adding --success-line=${{ inputs.success-line}} to the call"
+            echo "Adding --success-line=${{ inputs.success-line}}"
             echo "::endgroup::"
             echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs  \033[0m"
             echo "::group::Executable Output"

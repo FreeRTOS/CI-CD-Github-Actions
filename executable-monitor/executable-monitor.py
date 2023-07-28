@@ -16,7 +16,6 @@ def runAndMonitor(args):
     stdout_logging_handler.setLevel(logging.DEBUG)
     stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     stdout_logging_handler.setFormatter(stdout_logging_formatter)
-    #logging.getLogger().addHandler(stdout_logging_handler)
 
     exe_abs_path = os.path.abspath(args.exe_path)
     if args.log_dir is not None:
@@ -69,7 +68,8 @@ def runAndMonitor(args):
                 exe.kill()
                 time.sleep(.05)
             else:
-                logging.info(exe_stdout_line)
+                # Making an assumption that device output is adding a \n already
+                logging.info(exe_stdout_line.rstrip("\r\n"))
 
         # Check for timeout
         cur_time_seconds = time.time()
