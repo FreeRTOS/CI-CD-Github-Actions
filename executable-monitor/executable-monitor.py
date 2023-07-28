@@ -16,7 +16,7 @@ def runAndMonitor(args):
     stdout_logging_handler.setLevel(logging.DEBUG)
     stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     stdout_logging_handler.setFormatter(stdout_logging_formatter)
-    logging.getLogger().addHandler(stdout_logging_handler)
+    #logging.getLogger().addHandler(stdout_logging_handler)
 
     exe_abs_path = os.path.abspath(args.exe_path)
     if args.log_dir is not None:
