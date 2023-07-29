@@ -268,7 +268,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: '3.11.0'
       - uses: actions/checkout@v3
@@ -360,7 +360,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup python environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.11.0'
       - name: Test link verifier action
@@ -374,7 +374,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup python environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
       - name: Checkout the FreeRTOS/FreeRTOS repository for testing action on.
