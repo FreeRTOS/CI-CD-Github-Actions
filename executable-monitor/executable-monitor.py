@@ -106,7 +106,7 @@ def runAndMonitor(args):
             logging.info(exe_stdout_line)
             if args.success_line is not None and args.success_line in exe_stdout_line:
                 success_line_found = True
-                logging.info(f"SUCCESS_LINE_FOUND: {exe_stdout_line}")
+                logging.info(f"{bashPass}SUCCESS_LINE_FOUND: {exe_stdout_line}{bashEnd}")
 
     logging.info("END OF DEVICE OUTPUT")
     logging.info("EXECUTABLE RUN SUMMARY:")
