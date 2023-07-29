@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1m
+  bashWarn:   \033[33;1m
+  bashFail:   \033[31;1m
+  bashEnd:    \033[0m
+
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
@@ -31,28 +38,44 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Install Windows Build tools
+        if: runner.os == 'Windows'
+        id: install-windows-build-tools
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Install Ubuntu Build Tools
+        if: runner.os == 'Ubuntu'
+        id: install-ubuntu-build--tools
+        run: |
+          # Install Ubuntu Build Tools
+          echo "::group:: Install Ubuntu Build Tools"
+          sudo apt install build-essential
+          exitStatus=$?
+          echo "::endgroup::"
+          if [ "$exitStatus" = "0" ]; then
+            echo -e "${{ env.bashPass }}Installed build-essential${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }}Install build-essential failed...${{ env.bashEnd }}"
+            exit 1
+          fi
+
       - name: Compile executable monitor test
         id: compile-executable-monitor-test
         shell: bash
         run: |
           # Compile executable monitor test
           echo "::group::Compile executable monitor test"
-          sudo apt install build-essential
-          if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mInstalled build-essential\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mInstall build-essential failed...\033[0m"
-            exit 1
-          fi
           gcc executable-monitor/test.c -o executable-monitor/test.out
           gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
+          readlink -f executable-monitor/test.out
+          readlink -f executable-monitor/test_exit_current_minutes.out
+          exitStatus=$?
           echo "::endgroup::"
-          if [ "$?" = "0" ]; then
-            readlink -f executable-monitor/test.out
-            echo -e "\033[32;3mCompiled executable-monitor/test.c\033[0m"
+          if [ "$exitStatus" = "0" ]; then
+            echo -e "${{ env.bashPass }}Compiled executable-monitor/test.c${{ env.bashEnd }}"
           else
-            echo -e "\033[32;31mCompilation of executable-monitor/test.c failed...\033[0m"
+            echo -e "${{ env.bashFail }}Compilation of executable-monitor/test.c failed...${{ env.bashEnd }}"
             exit 1
           fi
 
@@ -196,32 +219,35 @@ jobs:
 
       - name: Check Failure Test Cases
         id: check-failure-test-cases
+        shell: bash
         run: |
-          # Check Last Step Failed
-          echo "::group::Check Failure Test Cases"
+          # Check Failure Test Cases
+          set +e
+          exitStatus=0
           if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mFunctional Test | Failure Case | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
+            echo -e "${{ env.bashPass }}Functional Test | Failure Case | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended${{ env.bashEnd }}"
           else
-            echo "::endgroup::"
-            echo -e "\033[32;31mFunctional Test | Failure Case | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
-            exit 1
+            echo -e "${{ env.bashFail }}Functional Test | Failure Case | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition${{ env.bashEnd }}"
+            exitStatus=1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
+            echo -e "${{ env.bashPass }}API Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended${{ env.bashEnd }}"
           else
-            echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
-            exit 1
+            echo -e "${{ env.bashFail }}API Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition${{ env.bashEnd }}"
+            exitStatus=1
           fi
           if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
+            echo -e "${{ env.bashPass }}API Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended${{ env.bashEnd }}"
           else
-            echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
+            echo -e "${{ env.bashFail }}API Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "$exitStatus" = "0" ]; then
+            echo -e "${{ env.bashPass }}All tests failed as intended${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }}A test that should have failed passed${{ env.bashEnd }}"
             exit 1
           fi
-          echo "::endgroup::"
-          echo -e "All failure tests failed correctly"
 
   test-complexity-check:
     runs-on: ubuntu-latest
