@@ -7,15 +7,28 @@ import time
 import logging
 from multiprocessing import Process
 
+# Set up logging
+logging.getLogger().setLevel(logging.NOTSET)
+
+# Add stdout handler to logging
+stdout_logging_handler = logging.StreamHandler(sys.stdout)
+stdout_logging_handler.setLevel(logging.DEBUG)
+stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stdout_logging_handler.setFormatter(stdout_logging_formatter)
+logging.getLogger().addHandler(stdout_logging_handler)
+
 def runAndMonitor(args):
     # Set up logging
-    logging.getLogger().setLevel(logging.NOTSET)
+    #logging.getLogger().setLevel(logging.NOTSET)
 
     # Add stdout handler to logging
-    stdout_logging_handler = logging.StreamHandler(sys.stdout)
-    stdout_logging_handler.setLevel(logging.DEBUG)
-    stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    stdout_logging_handler.setFormatter(stdout_logging_formatter)
+    #stdout_logging_handler = logging.StreamHandler(sys.stdout)
+    #stdout_logging_handler.setLevel(logging.DEBUG)
+    #stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    #stdout_logging_handler.setFormatter(stdout_logging_formatter)
+
+    if os.name == 'nt':
+        logging.getLogger().addHandler(stdout_logging_handler)
 
     exe_abs_path = os.path.abspath(args.exe_path)
     if args.log_dir is not None:
@@ -122,16 +135,6 @@ def runAndMonitor(args):
     exit(exit_status)
 
 if __name__ == '__main__':
-    # Set up logging
-    logging.getLogger().setLevel(logging.NOTSET)
-
-    # Add stdout handler to logging
-    stdout_logging_handler = logging.StreamHandler(sys.stdout)
-    stdout_logging_handler.setLevel(logging.DEBUG)
-    stdout_logging_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    stdout_logging_handler.setFormatter(stdout_logging_formatter)
-    logging.getLogger().addHandler(stdout_logging_handler)
-
     # Parse arguments
     parser = ArgumentParser(description='Executable monitor.')
     parser.add_argument('--exe-path',
