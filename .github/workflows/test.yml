@@ -25,7 +25,10 @@ jobs:
           exclude-dirs: build,docs
 
   test-executable-monitor:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Compile executable monitor test
@@ -137,6 +140,7 @@ jobs:
       # Get future times from now, then look for that in the executable
       - name: Get Future Times
         id: future-time
+        shell: bash
         run: |
           # Get times for future demos
           echo "time_success_line=$(date --date='2 minutes' +%H:%M)" >> "$GITHUB_ENV"
