@@ -10,6 +10,8 @@ from multiprocessing import Process
 # Set up logging
 logging.getLogger().setLevel(logging.NOTSET)
 
+# This script is meant for FreeRTOS PR checks, which all run using bash shells
+# So wrap the important lines in bash escaped colours.
 bashPass="\033[32;1m"
 bashWarn="\033[33;1m"
 bashFail="\033[31;1m"
@@ -103,9 +105,12 @@ def runAndMonitor(args):
         logging.info(f"PARSING REST OF LOG")
         # Capture remaining output and check for the successful line
         for exe_stdout_line in exe.stdout.readlines():
-            logging.info(exe_stdout_line)
+            # Making an assumption that device output is adding a \n already
+            logging.info(exe_stdout_line.rstrip("\r\n"))
             if args.success_line is not None and args.success_line in exe_stdout_line:
                 success_line_found = True
+                # Insert a blank line to make the log look better
+                print()
                 logging.info(f"{bashPass}SUCCESS_LINE_FOUND: {exe_stdout_line}{bashEnd}")
 
     logging.info("END OF DEVICE OUTPUT")
