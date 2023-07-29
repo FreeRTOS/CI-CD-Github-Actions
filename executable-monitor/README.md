@@ -14,7 +14,7 @@
 python3 executable-monitor.py --success-line "SLEEPING FOR 6 SECONDS"  --retry-attempts 2 --timeout-seconds 10 --exe-path test.out; echo $?
 
 # Success Test | Test the case where the success line is not found, but the exe exits, ensure exit status is 0
-python3 executable-monitor.py --success-line "SLEEPING FOR 27 SECONDS"  --retry-attempts 2 --timeout-seconds 50 --exe-path test.out; echo $?
+python3 executable-monitor.py --success-line "THIS WILL NEVER PRINT" --success-exit-code 0 --retry-attempts 2 --timeout-seconds 60 --exe-path test.out; echo $?
 
 # Failure Test | Test the case where exit status code and success line are given but hit timeout, ensure exit status is 1
-python3 executable-monitor.py --success-exit-status 0 --success-line "SLEEPING FOR 12 SECONDS"  --retry-attempts 2 --timeout-seconds 10 --exe-path test.out ; echo $?
+python3 executable-monitor.py --success-exit-code 0 --success-line "SLEEPING FOR 12 SECONDS"  --retry-attempts 2 --timeout-seconds 10 --exe-path test.out ; echo $?

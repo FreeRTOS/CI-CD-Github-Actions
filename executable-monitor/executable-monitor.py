@@ -10,6 +10,10 @@ from multiprocessing import Process
 # Set up logging
 logging.getLogger().setLevel(logging.NOTSET)
 
+bashPass="\033[32;1m"
+bashWarn="\033[33;1m"
+bashFail="\033[31;1m"
+bashEnd="\033[0m"
 # Add stdout handler to logging
 stdout_logging_handler = logging.StreamHandler(sys.stdout)
 stdout_logging_handler.setLevel(logging.DEBUG)
@@ -110,7 +114,7 @@ def runAndMonitor(args):
     exit_status = 1
     # Check if a success line was found if that is an option
     if ( args.success_line is not None) and (not success_line_found ):
-        logging.error("Success Line: Success line not output.")
+        logging.error(f"{bashFail}Success Line: Success line not output.{bashEnd}")
         exit_status = 1
     elif( args.success_line is not None) and ( success_line_found ):
         exit_status = 0
@@ -120,15 +124,15 @@ def runAndMonitor(args):
     if ( ( exit_status != 0 ) and ( args.success_exit_code is not None) ):
         # If the executable had to be force killed mark it as a failure
         if( not exe_exitted):
-            logging.error("Exit Code: Executable did not exit by itself.\n")
+            logging.error(f"{bashFail}Exit Code: Executable did not exit by itself.{bashEnd}\n")
             exit_status = 1
         # If the executable exited with a different status mark it as a failure
         elif ( ( exe_exitted ) and ( exe_exit_status != args.success_exit_code ) ):
-            logging.error(f"Exit Code: {exe_exit_status} is not equal to requested exit code of {args.success_exit_code}\n")    
+            logging.error(f"{bashFail}Exit Code: {exe_exit_status} is not equal to requested exit code of {args.success_exit_code}{bashEnd}\n")
             exit_status = 1
         # If the executable exited with the same code as requested mark a success
         elif ( ( exe_exitted ) and ( exe_exit_status == args.success_exit_code ) ):
-            logging.info(f"Exit Code: Executable exited with requested exit code")
+            logging.info(f"{bashPass}Exit Code: Executable exited with requested exit code{bashEnd}")
             exit_status = 0
 
     logging.info(f"Runner thread exiting with status {exit_status}\n")
@@ -165,15 +169,15 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.success_exit_code is None and args.success_line is None:
-        logging.error("Must specify at least one of the following: --success-line, --success-exit-code.")
+        logging.error(f"{bashFail}Must specify at least one of the following: --success-line, --success-exit-code.{bashEnd}")
         sys.exit(1)
 
     elif args.success_exit_code is not None and args.success_line is not None:
-        logging.warning("Received an option for success-line and success-exit-code.")
-        logging.warning("Be aware: This program will report SUCCESS on either of these conditions being met")
+        logging.warning(f"{bashWarn}Received an option for success-line and success-exit-code.{bashEnd}")
+        logging.warning(f"{bashWarn}Be aware: This program will report SUCCESS on either of these conditions being met{bashEnd}")
 
     if not os.path.exists(args.exe_path):
-        logging.error(f'Input executable path \"{args.exe_path}\" does not exist.')
+        logging.error(f"{bashFail}Input executable path \"{args.exe_path}\" does not exist.{bashEnd}")
         sys.exit(1)
 
     # Convert any relative path (like './') in passed argument to absolute path.
@@ -221,7 +225,7 @@ if __name__ == '__main__':
         # If the thread is still alive, the join() call timed out.       
         if ( ( thread.exitcode is None ) and ( thread.is_alive() ) ):
             # Print the thread timeout they passed in to the log
-            logging.warning(f"EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 3} SECONDS: FORCE KILLING THREAD")
+            logging.warning(f"{bashWarn}EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 3} SECONDS: FORCE KILLING THREAD")
             thread.kill()
             exit_status = 1
         else:
@@ -229,7 +233,7 @@ if __name__ == '__main__':
             logging.info(f"THREAD EXITED WITH EXITCODE {exit_status}")
 
         if( ( attempts  < args.retry_attempts ) and exit_status != 0 ):
-            logging.warning(f"DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {args.retry_attempts}\n")
+            logging.warning(f"{bashWarn}DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {args.retry_attempts}\n")
         else:
             break
 
