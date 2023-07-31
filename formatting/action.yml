@@ -37,12 +37,12 @@ runs:
           for file in ${files[@]}; do
             echo -e "\033[33;1mParsing File:$file\033[0m"
             fileOut=""
-            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file)
+            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file > $file_log.txt 2>&1)
             if [ "$?" = "0" ]; then
               echo -e "\033[32;1mParsed File:$file with no errors\033[0m"
             else
               echo -e "\033[31;1mError parsing $file\n\033[0m"
-              echo -e "$fileOut"
+              echo -e "\033[31;1m $(cat $file_log.txt)\033[0m"
             fi
           done
           echo "::endgroup::"
