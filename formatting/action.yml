@@ -29,11 +29,14 @@ runs:
           # Uncrustify on C files while ignoring symlinks.
           # Make a collapsible section in the log to run uncrustify
           echo "::group::Uncrustify Check"
+
           # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
           # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
-          # Format all the files using the common config file.
-          files=$(grep --include={*.[ch],${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
+
+          # Get all files that end in .c or .h. Exclude any files or directories that we were asked to.
+          # Then limit the search to files that have the amazon copyright on them
+          files=$(grep --include={*.[ch],} --exclude={${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
           for file in ${files[@]}; do
             echo -e "\033[33;1mParsing File:$file\033[0m"
             fileOut=""
@@ -46,7 +49,8 @@ runs:
             fi
           done
           echo "::endgroup::"
-          : # Run a git diff to print the differences if any exist, return an error code if there are any
+
+          # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
           if [ "$?" = "0" ]; then
             echo -e "\033[32;3mUncrustify check passed\033[0m"
@@ -57,6 +61,7 @@ runs:
             set -e
             exit 1
           fi
+
         shell: bash
       - name: Check For Trailing Whitespace
         working-directory: ${{ inputs.path }}
