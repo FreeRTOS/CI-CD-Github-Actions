@@ -26,14 +26,25 @@ runs:
       - name: Run Uncrustify
         working-directory: ${{ inputs.path }}
         run: |
-          : # Uncrustify on C files while ignoring symlinks.
-          : # Make a collapsible section in the log to run uncrustify
+          # Uncrustify on C files while ignoring symlinks.
+          # Make a collapsible section in the log to run uncrustify
           echo "::group::Uncrustify Check"
-          : # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
-          : # This would mean the first time a file fails the check that we exit without formatting all files.
+          # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
+          # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
-          : # Format all the files using the common config file.
-          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          # Format all the files using the common config file.
+          files=$(grep --include={*.[ch],${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
+          for file in ${files[@]}; do
+            echo -e "\033[33;1mParsing File:$file\033[0m"
+            fileOut=""
+            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file)
+            if [ "$?" = "0" ]; then
+              echo -e "\033[32;1mParsed File:$file with no errors\033[0m"
+            else
+              echo -e "\033[31;1mError parsing $file\n\033[0m"
+              echo -e "$fileOut"
+            fi
+          done
           echo "::endgroup::"
           : # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
