@@ -677,5 +677,5 @@ jobs:
         uses: ./formatting
         with:
           path: ${{ matrix.inputs.repository }}
-          exclude-files: lexicon.txt
-          exclude-dirs: build,docs
+          exclude-files: ${{ matrix.inputs.exclude-files}}
+          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
