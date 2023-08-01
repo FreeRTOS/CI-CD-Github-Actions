@@ -39,15 +39,21 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
+          set +e
+          exitStatus=0
           # Check exclude dirs for possible input issues
           if [[ "${{ inputs.exclude-dirs }}" = *" "* ]]; then
-            echo -e "${{ env.bashWarn }} YOU HAVE A SPACE IN YOUR EXCLUDE-DIRS. THIS PROGRAM STRIPS ALL WHITESPACE ON INPUTS ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFAIL }} YOU HAVE WHITESPACE IN YOUR EXCLUDE-DIRS. ${{ env.bashEnd }}"
+            exitStatus=1
           fi
 
           # Check exclude-files  for possible input issues
           if [[ "${{ inputs.exclude-files }}" = *" "* ]]; then
-            echo -e "${{ env.bashWarn }} YOU HAVE A SPACE IN YOUR EXCLUDE-DIRS. THIS PROGRAM STRIPS ALL WHITESPACE ON INPUTS ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} YOU HAVE WHITESPACE IN YOUR EXCLUDE-FILES. ${{ env.bashEnd }}"
+            exitStatus=1
           fi
+          set -e
+          exit $exitStatus
 
       - env:
           stepName: Run Uncrustify
@@ -63,15 +69,23 @@ runs:
           set +e
           set -v
 
-          # Strip all the whitespace from the inputs
-          # Yes this breaks the ability to have files/directories with spaces.
-          # But that breaks most UNIX commands. Including the following grep glob.
-          excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
-          excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
+          # Break the option out of the glob
+          # Doing something like:
+          # excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
+          # excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
+          # To remove potential spaces doesn't
+          for file in ${{inputs.exclude-files}}; do
+            exclude-file="$exclude-file --exclude-file=$file"
+          done
+
+          for dir in ${{inputs.exclude-dirs}}; do
+            exclude-dirs="$exclude-dirs --exclude-dir=$dir"
+          done
 
           # Get all files that end in .c or .h. Exclude any files or directories that we were asked to.
           # Then limit the search to files that have the amazon copyright on them.
-          files=$(grep --include={*.[ch],} --exclude={$excludeFiles,} --exclude-dir={$excludeDirs,} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
+          set -x
+          files=$(grep --include={*.[ch],} --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
 
           # Loop over the files that matched the above conditions
           for file in ${files[@]}; do
@@ -121,7 +135,7 @@ runs:
           # But that breaks most UNIX commands. Including the following grep glob.
           excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
           excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
-          grep --exclude={README.md,$excludeFiles,} --exclude-dir={$excludeDirs,'.git'} -rnIe "[[:blank:]]$" .
+          grep --exclude={README.md,${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},'.git'} -rnIe "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -145,7 +159,7 @@ runs:
           # But that breaks most UNIX commands. Including the following grep glob.
           excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
           excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
-          grep --exclude={$excludeFiles,} --exclude-dir={$excludeDirs,'.git'} -rnl $'\r'
+          grep --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},'.git'} -rnl $'\r'
           if [ "$?" = "0" ]; then
             set -e
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"

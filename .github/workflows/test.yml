@@ -14,6 +14,7 @@ env:
   bashFail:   \033[31;1mFAILED -
   bashEnd:    \033[0m
  
+
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
@@ -63,21 +64,22 @@ jobs:
                 test-status: failure,
                 description: "Formatting Error",
                 path: formatting,
-                exclude-dirs: "filesWithTrailingWhitespace, filesWithCRLFEndings"
+                exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "Whitespace Error",
                 path: formatting,
-                exclude-dirs: "filesWithFormattingErrors, filesWithCRLF"
+                exclude-dirs: "filesWithFormattingErrors,filesWithCRLF"
               },
               {
                 test-type: Functional,
                 test-status: success,
                 description: "No Errors",
                 path: formatting,
-                exclude-dirs: "filesWithFormattingErrors, filesWithCRLF, filesWithTrailingWhitespace"
+                exclude-dirs: "filesWithFormattingErrors,filesWithCRLF,filesWithTrailingWhitespace",
+                exclude-files: "badFile.c"
               },
             ]
     steps:
