@@ -53,8 +53,8 @@ runs:
           # Yes this breaks the ability to have files/directories with spaces.
           # But that breaks most UNIX commands. Including the following grep glob.
           # These variables can then be seen in the log, as well as accessed from future steps
-          echo "excludeFiles$(tr -d '[:space:]' ${{inputs.exclude-files}})" >> "$GITHUB_ENV"
-          echo "excludeDirs=$(tr -d '[:space:]' ${{inputs.exclude-files}})" >> "$GITHUB_ENV"
+          echo "excludeFiles$(echo "${{inputs.exclude-files}})" | sed 's/ //g') >> "$GITHUB_ENV"
+          echo "excludeDirs=$(echo "${{inputs.exclude-dirs}})" | sed 's/ //g')" >> "$GITHUB_ENV"
 
       - env:
           stepName: Run Uncrustify
