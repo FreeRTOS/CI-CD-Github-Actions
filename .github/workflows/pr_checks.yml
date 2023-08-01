@@ -1,0 +1,201 @@
+name: Test actions
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashWarn:   \033[33;1mWARN -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
+ 
+
+jobs:
+
+  PR-repo-checks:
+    runs-on: ubuntu-20.04
+    if: ${{ github.event.pull_request }}
+    strategy:
+      fail-fast: false
+      matrix: 
+        inputs:
+          [ 
+            {
+              org: FreeRTOS,
+              repository: coreHTTP,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: FreeRTOS,
+              repository: coreJSON,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: FreeRTOS,
+              repository: coreMQTT,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: FreeRTOS,
+              repository: corePKCS11,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs,portable"
+            },
+            {
+              org: FreeRTOS,
+              repository: coreSNTP,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: FreeRTOS,
+              repository: FreeRTOS-Cellular-Interface,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: Device-Defender-for-AWS-IoT-embedded-sdk,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: Jobs-for-AWS-IoT-embedded-sdk,
+              exclude-files: "lexicon.txt",
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: ota-for-AWS-IoT-embedded-sdk,
+              exclude-files: "lexicon.txt",
+              exclude-dirs: "build,docs",
+            },
+            {
+              org: aws,
+              repository: SigV4-for-AWS-IoT-embedded-sdk,
+              exclude-files: lexicon.txt,
+              exclude-dirs: "build,docs",
+            },
+          ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11.0'
+
+      - name: "Clone: ${{ matrix.inputs.repository }}"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
+          ref: main
+          path: ${{ matrix.inputs.repository }}
+
+      - name: "Formatting Check : ${{ matrix.inputs.repository }}"
+        uses: ./formatting
+        with:
+          path: ${{ matrix.inputs.repository }}
+          exclude-files: ${{ matrix.inputs.exclude-fles}}
+          exclude-dirs: ${{matrix.inputs.exclude-dirs}}
+
+      - name: "Complexity Check: ${{ matrix.inputs.repository }}"
+        uses: ./complexity
+        with:
+          path: ${{ matrix.inputs.repository }}
+          # For coreMQTT the code complexity threshold is 10.
+          horrid_threshold: 10
+
+      - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
+        uses: ./doxygen
+        with:
+          path: ${{ matrix.inputs.repository }}
+
+      - name: "Doxygen Zip Check: ${{ matrix.inputs.repository }}"
+        uses: ./doxygen
+        with:
+          path: ${{ matrix.inputs.repository }}
+          libs_parent_dir_path: libraries/standard,libraries/aws
+          generate_zip: true
+
+
+      - name: "Spelling Check: ${{ matrix.inputs.repository }} "
+        uses: ./spellings
+        with:
+          path: ${{ matrix.inputs.repository }}
+  
+#    test-coverage-cop:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/checkout@v3
+#        with:
+#          repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
+#          ref: main
+#          path: ${{ matrix.inputs.repository }}
+#      - name: Build
+#        run: |
+#          sudo apt-get install -y lcov
+#          cmake -S ./coreMQTT/test -B build/ \
+#          -G "Unix Makefiles" \
+#          -DCMAKE_BUILD_TYPE=Debug \
+#          -DBUILD_CLONE_SUBMODULES=ON \
+#          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
+#          make -C build/ all
+#      - name: Test
+#        run: |
+#          cd build/
+#          ctest -E system --output-on-failure
+#          cd ..
+#      - name: Run Coverage
+#        run: |
+#          make -C build/ coverage
+#          declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
+#          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+#          lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+#      - name: Test coverage cop action
+#        uses: ./coverage-cop
+#        with:
+#          path: ./build/coverage.info
+#          branch-coverage-min: 70
+#          line-coverage-min: 100
+  
+      - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
+        uses: ./memory_statistics
+        with:
+          path: memory_statistics/test
+          config: ./memory_statistics_config.json
+          output: ./size_table_new.html
+          check_against: ./size_table_expected.html
+
+      - name: "Link Verifier Check: ${{ matrix.inputs.repository }} "
+        uses: ./link-verifier
+        with:
+          path: ${{ matrix.inputs.repository }}
+          exclude-dirs: complexity,formatting
+          include-file-types: .c,.html
+
+      - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
+        uses: ./manifest-verifier
+        with:
+          path: ${{ matrix.inputs.repository }}
+          exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
+          fail-on-incorrect-version: true
+
