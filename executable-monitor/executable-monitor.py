@@ -140,7 +140,7 @@ def runAndMonitor(args):
             logging.info(f"{bashPass}Exit Code: Executable exited with requested exit code{bashEnd}")
             exit_status = 0
 
-    logging.info(f"Runner thread exiting with status {exit_status}\n")
+    logging.info(f"Runner thread exiting with status {exit_status}")
     exit(exit_status)
 
 if __name__ == '__main__':
