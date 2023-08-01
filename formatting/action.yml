@@ -23,33 +23,69 @@ runs:
           sudo apt-get install uncrustify
           echo "::endgroup::"
         shell: bash
-      - name: Run Uncrustify
+
+      - env:
+          stepName: Validate Inputs
+          # The bash escape character is \033
+          # At time of writing, you can't add a global environment
+          # to an action file so stuck with this. If this gets changed
+          # Please move this
+          bashPass:   \033[32;1mPASSED -
+          bashWarn:   \033[33;1mINFO -
+          bashFail:   \033[31;1mFAILED -
+          bashEnd:    \033[0m
+        name: ${{ env.stepName }}
+        id: compile-executable-monitor-test-files
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          # Check exclude dirs for possible input issues
+          if [[ ${{ inputs.exclude-dirs }} = *" "* ]]; then
+            echo -e "${{ env.bashWARN }} YOU HAVE A SPACE IN YOUR EXCLUDE-DIRS. THIS PROGRAM STRIPS ALL WHITESPACE ON INPUTS ${{ env.bashEnd }}"
+          fi
+
+          # Check exclude-files  for possible input issues
+          if [[ ${{ inputs.exclude-files }} = *" "* ]]; then
+            echo -e "${{ env.bashWARN }} YOU HAVE A SPACE IN YOUR EXCLUDE-DIRS. THIS PROGRAM STRIPS ALL WHITESPACE ON INPUTS ${{ env.bashEnd }}"
+          fi
+          # Strip all the whitespace from the inputs
+          # Yes this breaks the ability to have files/directories with spaces.
+          # But that breaks most UNIX commands. Including the following grep glob.
+          # These variables can then be seen in the log, as well as accessed from future steps
+          echo "excludeFiles$(tr -d '[:space:]' ${{inputs.exclude-files}})" >> "$GITHUB_ENV"
+          echo "excludeDirs=$(tr -d '[:space:]' ${{inputs.exclude-files}})" >> "$GITHUB_ENV"
+
+      - env:
+          stepName: Run Uncrustify
+        name: ${{ env.stepName }}
         working-directory: ${{ inputs.path }}
+        shell: bash
         run: |
           # Uncrustify on C files while ignoring symlinks.
-          # Make a collapsible section in the log to run uncrustify
           echo "::group::Uncrustify Check"
+
           # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
           # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
 
           # Get all files that end in .c or .h. Exclude any files or directories that we were asked to.
           # Then limit the search to files that have the amazon copyright on them.
-          files=$(grep --include={*.[ch],} --exclude={${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
+          files=$(grep --include={*.[ch],} --exclude={${{ env.excludeFiles }},} --exclude-dir={${{ env.excludeDirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
 
           # Loop over the files that matched the above conditions
           for file in ${files[@]}; do
             # Print them out for future debugging
-            echo -e "\033[33;1mParsing File:$file\033[0m"
+            echo -e "${{ env.bashWarn }}Parsing File:$file ${{ env.bashEnd }}
 
             # Pipe the output of the command to a variable
-            fileOut=""
+            # This way we can print the command only if it fails
             fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file 2>&1)
 
             # If the previous command failed then print out an error message as well as the output
             if [ "$?" != "0" ]; then
               # On an error print out the message
-              echo -e "\033[31;1mError parsing $file:\n\033[0m"
+              echo -e "${{ env.bashFail }}Error parsing $file:\n${{ env.bashEnd }}"
               echo -e "$fileOut"
             fi
           done
@@ -58,43 +94,53 @@ runs:
           # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
           if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mUncrustify check passed\033[0m"
+            echo -e "${{ env.bashPass }}Uncrustify check passed${{ env.bashEnd }}"
           else
             filesWithErrors=$(git diff --name-only)
-            echo -e "\033[32;31mList of files with formatting errors:$filesWithErrors\033[0m"
-            echo -e "\033[32;31mFormatting check (using Uncrustify) failed...\033[0m"
+            echo -e "${{ env.bashFail }}List of files with formatting errors:$filesWithErrors${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }}Formatting check (using Uncrustify) failed...${{ env.bashEnd }}"
             # If there is an error, set this flag high again so the exit 1 fails the run instantly
             set -e
             exit 1
           fi
+
+      - env:
+          stepName: Check For Trailing Whitespace
+        name: ${{ env.stepName }}
         shell: bash
-      - name: Check For Trailing Whitespace
+        # Use this so that even if we fail formatting these checks run
+        # Solves the issue of "Make commit to fix formatting, to then learn
+        # You need to fix whitespace
+        if: success() || failure()
         working-directory: ${{ inputs.path }}
         run: |
-          : # Trailing Whitespace Check
+          # ${{ env.stepName }}
           set +e
-          grep --exclude={README.md,${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnIe "[[:blank:]]$" .
+          grep --exclude={README.md,${{ env.excludeFiles }},} --exclude-dir={${{ inputs.excludeDirs }},'.git'} -rnIe "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
-            echo -e "\033[32;31mFiles have trailing whitespace.\033[0m"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           else
-            echo -e "\033[32;3mTrailing whitespace check passed\033[0m"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 0
           fi
-        shell: bash
-      - name: Check for CRLF
+
+      - env:
+          stepName: Check for CRLF
+        name: ${{ env.stepName }}
+        if: success() || failure()
         working-directory: ${{ inputs.path }}
+        shell: bash
         run: |
-          : # Check for CRLF Line Ending
+          # ${{ env.stepName }}
           set +e
           grep --exclude={${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnl $'\r'
           if [ "$?" = "0" ]; then
             set -e
-            echo -e "\033[32;31mFiles have CRLF line endings.\033[0m"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           else
-            echo -e "\033[32;3mLine ending check passed\033[0m"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 0
           fi
-        shell: bash

@@ -17,21 +17,186 @@ env:
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix: 
+          # Checks for a commit
+          inputs:
+            [
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "Whitespace, CRLF, and Format Failure",
+                path: formatting
+                # Also the test that not using exclude dirs/files throws no API errors
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "CRLF and Formatting Error",
+                path: formatting,
+                exclude-dir: filesWithTrailingWhitespace
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "CRLF and Whitespace Error",
+                path: formatting,
+                exclude-dir: filesWithFormattingErrors
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "CRLF Error",
+                path: formatting,
+                exclude-dir: filesWithFormattingIssues,filesWithWTrailingWhitespace
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "Formatting and Whitespace Errror",
+                path: formatting,
+                exclude-dir: filesWithCRLFEndings,
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "Formatting Error",
+                path: formatting,
+                exclude-dir: filesWithTrailingWhitespace, filesWithCRLFEndings
+              },
+              {
+                test-type: Functional,
+                test-status: failure,
+                description: "Whitespace Error",
+                path: formatting,
+                exclude-dir: filesWithFormattingErrors, filesWithCRLF
+              },
+              {
+                test-type: Functional,
+                test-status: success,
+                description: "No Errors",
+                path: formatting,
+                exclude-dir: filesWithFormattingErrors, filesWithCRLF, filesWithTrailingWhitespace
+              },
+              {
+                org: FreeRTOS,
+                repository: coreHTTP,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: FreeRTOS,
+                repository: coreJSON,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: FreeRTOS,
+                repository: coreMQTT,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: FreeRTOS,
+                repository: corePKCS11,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: FreeRTOS,
+                repository: coreSNTP,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: FreeRTOS,
+                repository: FreeRTOS-Cellular-Interface_Soren,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: Device-Defender-for-AWS-IoT-embedded-sdk,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk_Soren,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: Jobs-for-AWS-IoT-embedded-sdk_Soren,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: ota-for-AWS-IoT-embedded-sdk_Soren,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+              {
+                org: aws,
+                repository: SigV4-for-AWS-IoT-embedded-sdk_Soren,
+                exclude-files: lexicon.txt,
+                exclude-dirs: build,docs,
+              },
+          ]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
+      - env:
+          stepName: "${{ matrix.inputs.test-type }} | ${{ matrix.inputs.test-status }} | ${{matrix.inputs.description }}"
+        name: ${{ env.stepName }}
+        uses: ./formatting
+        continue-on-error: true
         with:
-          repository: FreeRTOS/coreMQTT
+          path: ${{ matrix.inputs.path }}
+          exclude-files: ${{ matrix.inputs.exclude-files }}
+          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
+
+      - env:
+          stepName: Check Failure Test Cases
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # Check Failure Test Cases
+          set +e
+          exitStatus=0
+          if [ "${{ steps.test-failure-condition.outcome}}" = "${{ matrix.inputs.test-status }}" ]; then
+              echo -e "${{ env.bashPass }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Expected ${{ matrix.inputs.test-status }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Unexpected ${{ matrix.inputs.test-status }} ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+      - name: "Clone: ${{ matrix.inputs.repository }}"
+        if: ${{ github.event.pull_request }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
           ref: main
-          path: coreMQTT
-      - name: Test formatting check action
+          path: ${{ matrix.inputs.repository }}
+
+      - name: "Formatting Check : ${{ matrix.inputs.repository }}"
+        if: ${{ github.event.pull_request }}
         uses: ./formatting
         with:
-          path: coreMQTT
+          path: ${{ matrix.inputs.repository }}
           exclude-files: lexicon.txt
           exclude-dirs: build,docs
 
-  test-executable-monitor-success-cases:
+  test-exe-monitor-success-cases:
     strategy:
       fail-fast: false
       matrix: 
@@ -201,7 +366,7 @@ jobs:
           retry-attempts: ${{ matrix.inputs.retry-attempts }}
           log-dir: ${{ matrix.inputs.log-dir}}
 
-  test-executable-monitor-failure-cases:
+  test-exe-monitor-failure-cases:
     strategy:
       fail-fast: false
       matrix:
