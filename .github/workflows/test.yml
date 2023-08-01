@@ -595,73 +595,73 @@ jobs:
               org: FreeRTOS,
               repository: coreHTTP,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: FreeRTOS,
               repository: coreJSON,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: FreeRTOS,
               repository: coreMQTT,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: FreeRTOS,
               repository: corePKCS11,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,portable
+              exclude-dirs: "build,docs,portable"
             },
             {
               org: FreeRTOS,
               repository: coreSNTP,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: FreeRTOS,
               repository: FreeRTOS-Cellular-Interface,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: Jobs-for-AWS-IoT-embedded-sdk,
-              exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-files: "lexicon.txt",
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: ota-for-AWS-IoT-embedded-sdk,
-              exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-files: "lexicon.txt",
+              exclude-dirs: "build,docs",
             },
             {
               org: aws,
               repository: SigV4-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: "build,docs",
             },
           ]
     steps:
@@ -677,5 +677,5 @@ jobs:
         uses: ./formatting
         with:
           path: ${{ matrix.inputs.repository }}
-          exclude-files: ${{ matrix.inputs.exclude-files}}
-          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
+          exclude-files: ${{ matrix.inputs.exclude-fles}}
+          exclude-dirs: ${{matrix.inputs.exclude-dirs}}
