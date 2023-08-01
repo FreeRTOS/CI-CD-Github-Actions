@@ -35,49 +35,49 @@ jobs:
                 test-status: failure,
                 description: "CRLF and Formatting Error",
                 path: formatting,
-                exclude-dir: filesWithTrailingWhitespace
+                exclude-dirs: filesWithTrailingWhitespace
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "CRLF and Whitespace Error",
                 path: formatting,
-                exclude-dir: filesWithFormattingErrors
+                exclude-dirs: filesWithFormattingErrors
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "CRLF Error",
                 path: formatting,
-                exclude-dir: filesWithFormattingIssues,filesWithWTrailingWhitespace
+                exclude-dirs: filesWithFormattingIssues,filesWithWTrailingWhitespace
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "Formatting and Whitespace Errror",
                 path: formatting,
-                exclude-dir: filesWithCRLFEndings,
+                exclude-dirs: filesWithCRLFEndings,
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "Formatting Error",
                 path: formatting,
-                exclude-dir: filesWithTrailingWhitespace, filesWithCRLFEndings
+                exclude-dirs: filesWithTrailingWhitespace, filesWithCRLFEndings
               },
               {
                 test-type: Functional,
                 test-status: failure,
                 description: "Whitespace Error",
                 path: formatting,
-                exclude-dir: filesWithFormattingErrors, filesWithCRLF
+                exclude-dirs: filesWithFormattingErrors, filesWithCRLF
               },
               {
                 test-type: Functional,
                 test-status: success,
                 description: "No Errors",
                 path: formatting,
-                exclude-dir: filesWithFormattingErrors, filesWithCRLF, filesWithTrailingWhitespace
+                exclude-dirs: filesWithFormattingErrors, filesWithCRLF, filesWithTrailingWhitespace
               },
             ]
     steps:
