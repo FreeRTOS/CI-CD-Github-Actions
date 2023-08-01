@@ -157,6 +157,7 @@ jobs:
       - env:
           stepName: "${{ matrix.inputs.test-type }} | ${{ matrix.inputs.test-status }} | ${{matrix.inputs.description }}"
         name: ${{ env.stepName }}
+        if: ! ${{ matrix.inputs.org }}
         uses: ./formatting
         id: format-test
         continue-on-error: true
@@ -168,6 +169,7 @@ jobs:
       - env:
           stepName: Check Failure Test Cases
         name: ${{ env.stepName }}
+        if: ! ${{ matrix.inputs.org }}
         id: check-failure-test-cases
         shell: bash
         run: |
