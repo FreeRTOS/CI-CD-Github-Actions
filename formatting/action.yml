@@ -29,39 +29,44 @@ runs:
           # Uncrustify on C files while ignoring symlinks.
           # Make a collapsible section in the log to run uncrustify
           echo "::group::Uncrustify Check"
-
           # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
           # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
 
           # Get all files that end in .c or .h. Exclude any files or directories that we were asked to.
-          # Then limit the search to files that have the amazon copyright on them
+          # Then limit the search to files that have the amazon copyright on them.
           files=$(grep --include={*.[ch],} --exclude={${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},} -lrniE "copyright (.*) [0-9]{4} amazon.com" )
+
+          # Loop over the files that matched the above conditions
           for file in ${files[@]}; do
+            # Print them out for future debugging
             echo -e "\033[33;1mParsing File:$file\033[0m"
+
+            # Pipe the output of the command to a variable
             fileOut=""
-            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file > $file_log.txt 2>&1)
-            if [ "$?" = "0" ]; then
-              echo -e "\033[32;1mParsed File:$file with no errors\033[0m"
-            else
-              echo -e "\033[31;1mError parsing $file\n\033[0m"
-              echo -e "\033[31;1m $(cat $file_log.txt)\033[0m"
+            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file 2>&1)
+
+            # If the previous command failed then print out an error message as well as the output
+            if [ "$?" != "0" ]; then
+              # On an error print out the message
+              echo -e "\033[31;1mError parsing $file:\n\033[0m"
+              echo -e "$fileOut"
             fi
           done
-          echo "::endgroup::"
 
+          echo "::endgroup::"
           # Run a git diff to print the differences if any exist, return an error code if there are any
           git diff --exit-code
           if [ "$?" = "0" ]; then
             echo -e "\033[32;3mUncrustify check passed\033[0m"
-            exit 0
           else
+            filesWithErrors=$(git diff --name-only)
+            echo -e "\033[32;31mList of files with formatting errors:$filesWithErrors\033[0m"
             echo -e "\033[32;31mFormatting check (using Uncrustify) failed...\033[0m"
-            : # If there is an error, set this flag high again so the exit 1 fails the run
+            # If there is an error, set this flag high again so the exit 1 fails the run instantly
             set -e
             exit 1
           fi
-
         shell: bash
       - name: Check For Trailing Whitespace
         working-directory: ${{ inputs.path }}
