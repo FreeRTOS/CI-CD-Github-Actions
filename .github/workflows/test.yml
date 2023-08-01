@@ -158,6 +158,7 @@ jobs:
           stepName: "${{ matrix.inputs.test-type }} | ${{ matrix.inputs.test-status }} | ${{matrix.inputs.description }}"
         name: ${{ env.stepName }}
         uses: ./formatting
+        id: format-test
         continue-on-error: true
         with:
           path: ${{ matrix.inputs.path }}
@@ -172,12 +173,12 @@ jobs:
         run: |
           # Check Failure Test Cases
           set +e
-          exitStatus=0
-          if [ "${{ steps.test-failure-condition.outcome}}" = "${{ matrix.inputs.test-status }}" ]; then
+          if [ "${{ steps.format-test.outcome}}" = "${{ matrix.inputs.test-status }}" ]; then
               echo -e "${{ env.bashPass }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Expected ${{ matrix.inputs.test-status }} ${{ env.bashEnd }}"
           else
             echo -e "${{ env.bashFail }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Unexpected ${{ matrix.inputs.test-status }} ${{ env.bashEnd }}"
-            exitStatus=1
+            set -e
+            exit 1
           fi
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
@@ -517,13 +518,11 @@ jobs:
       shell: bash
       run: |
         # Check Failure Test Cases
-        set +e
-        exitStatus=0
         if [ "${{ steps.test-failure-condition.outcome}}" = "failure" ]; then
           echo -e "${{ env.bashPass }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Failed As Intended ${{ env.bashEnd }}"
         else
           echo -e "${{ env.bashFail }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Unexpected Pass ${{ env.bashEnd }}"
-        exitStatus=1
+          exit 1
         fi
 
   test-complexity-check:
