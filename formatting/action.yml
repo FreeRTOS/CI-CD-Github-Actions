@@ -73,7 +73,7 @@ runs:
         run: |
           : # Trailing Whitespace Check
           set +e
-          grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
+          grep --exclude={README.md,${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnIe "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
             echo -e "\033[32;31mFiles have trailing whitespace.\033[0m"
@@ -88,7 +88,7 @@ runs:
         run: |
           : # Check for CRLF Line Ending
           set +e
-          find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
+          grep --exclude={${{ inputs.exclude-files }},} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnl $'\r'
           if [ "$?" = "0" ]; then
             set -e
             echo -e "\033[32;31mFiles have CRLF line endings.\033[0m"

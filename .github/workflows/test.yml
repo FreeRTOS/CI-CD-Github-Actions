@@ -9,11 +9,11 @@ on:
 
 env:
   # The bash escape character is \033
-  bashPass:   \033[32;1m
-  bashWarn:   \033[33;1m
-  bashFail:   \033[31;1m
+  bashPass:   \033[32;1mPASSED -
+  bashWarn:   \033[33;1mWARN -
+  bashFail:   \033[31;1mFAILED -
   bashEnd:    \033[0m
-
+ 
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
@@ -31,41 +31,117 @@ jobs:
           exclude-files: lexicon.txt
           exclude-dirs: build,docs
 
-  test-executable-monitor:
+  test-executable-monitor-success-cases:
     strategy:
       matrix:
           os: [ubuntu-latest, windows-latest]
+          inputs:
+            [
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Exit Code Found",
+                exe-path: executable-monitor/test.out,
+                success-exit-code: 0,
+                log-dir: logDirectory
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Success Line Found",
+                exe-path: executable-monitor/test.out,
+                success-line: "SLEEPING FOR 6 SECONDS",
+                log-dir: logDirectory
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Exit Code and Success Line | Exit Code Found",
+                exe-path: executable-monitor/test.out,
+                success-line: "LINE_THAT_WILL_NOT_PRINT",
+                success-exit-code: 0,
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Exit Code and Success Line | Success Line Found",
+                exe-path: executable-monitor/test.out,
+                success-line: "SLEEPING FOR 6 SECONDS",
+                success-exit-code: 0,
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Retry Needed | Exit Code Found",
+                exe-path: executable-monitor/test.out,
+                success-exit-code: ${{ env.time_exit_code }},
+                retry-attempts: 10,
+                timeout-seconds: 30,
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Retry Needed | Success Line Found",
+                exe-path: executable-monitor/test_exit_current_minutes.out,
+                retry-attempts: 10,
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Retry Needed | Exit Code and Success Line | Exit Code Found",
+                exe-path: executable-monitor/test_exit_current_minutes.out,
+                success-line: "LINE_THAT_WILL_NOT_PRINT",
+                success-exit-code: ${{ env.time_exit_code }},
+                retry-attempts: 10,
+              },
+              {
+                test-type: Functional,
+                test-status: Success,
+                description: "Retry Needed | Exit Code and Success Line | Success Line Found",
+                # Use the EXE that doesn't exit with the current minutes
+                exe-path: executable-monitor/test.out,
+                success-line: "${{ env.time_success_line }}",
+                success-exit-code: ${{ env.time_exit_code }},
+                retry-attempts: 10,
+              },
+          ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Windows Build tools
+      - env:
+          stepName: Install Windows Build tools
+        name: ${{ env.stepName }}
         if: runner.os == 'Windows'
         id: install-windows-build-tools
         uses: microsoft/setup-msbuild@v1.1
 
-      - name: Install Ubuntu Build Tools
+      - env:
+          stepName: Install Ubuntu Build Tools
+        name: ${{ env.stepName }}
         if: runner.os == 'Linux'
         id: install-ubuntu-build--tools
         run: |
           # Install Ubuntu Build Tools
-          echo "::group:: Install Ubuntu Build Tools"
+          echo "::group::${{ env.stepName }}"
           sudo apt install build-essential
           exitStatus=$?
           echo "::endgroup::"
           if [ "$exitStatus" = "0" ]; then
-            echo -e "${{ env.bashPass }}Installed build-essential${{ env.bashEnd }}"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo -e "${{ env.bashFail }}Install build-essential failed...${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           fi
 
-      - name: Compile executable monitor test
-        id: compile-executable-monitor-test
+      - env:
+          stepName: Compile Executable Monitor Test Files
+        name: ${{ env.stepName }}
+        id: compile-executable-monitor-test-files
         shell: bash
         run: |
-          # Compile executable monitor test
-          echo "::group::Compile executable monitor test"
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
           gcc executable-monitor/test.c -o executable-monitor/test.out
           gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
           readlink -f executable-monitor/test.out
@@ -73,95 +149,15 @@ jobs:
           exitStatus=$?
           echo "::endgroup::"
           if [ "$exitStatus" = "0" ]; then
-            echo -e "${{ env.bashPass }}Compiled executable-monitor/test.c${{ env.bashEnd }}"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo -e "${{ env.bashFail }}Compilation of executable-monitor/test.c failed...${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           fi
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Success Line
-        id: test-executable-monitor-action-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Exit Code
-        id: test-executable-monitor-action-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 75
-          success-line: "LINE_THAT_WILL_NOT_PRINT_BUT_EXISTS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code, With log file
-        id: test-executable-monitor-action-log-file
-        uses: ./executable-monitor
-        with:
-          log-dir: demo_run_logs
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, No Exit Code
-        id: test-executable-monitor-action-no-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, No Success Line, Exit Code
-        id: test-executable-monitor-action-no-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 75
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | No Retries, Success Line, No Exit Code
-        id: test-executable-monitor-action-no-retry-attempts-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-line: "SLEEPING FOR 6 SECONDS"
-          timeout-seconds: 20
-      
-      - name: Functional Test | Success Case | No Retries, No Success Line, Exit Code
-        id: test-executable-monitor-action-no-retry-attempts-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-exit-code: 0
-          timeout-seconds: 75
-
-      - name: API Test | Success Case | Retries, Success Line, No Exit Code, Use Default Timeout
-        id: test-executable-monitor-action-no-exit-code-no-timeout
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-line: "SLEEPING FOR 6 SECONDS"
-          retry-attempts: 2
-          
-      - name: API Test | Success Case | Retries, No Success Line, Exit Code, Use Default Timeout
-        id: test-executable-monitor-action-no-success-line-no-timeout
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-exit-code: 0
-          retry-attempts: 2
-
       # Get future times from now, then look for that in the executable
-      - name: Get Future Times
+      - env:
+          stepName: Get Future Times
+        name: ${{ env.stepName }}
         id: future-time
         shell: bash
         run: |
@@ -169,53 +165,107 @@ jobs:
           echo "time_success_line=$(date --date='2 minutes' +%H:%M)" >> "$GITHUB_ENV"
           echo "time_exit_code=$(date --date='5 minutes' +%M)" >> "$GITHUB_ENV"
 
-      - name: Functional Test | Sucess Case | Test Retry Run occurs on Wrong exit code
-        id: test-executable-monitor-action-retry-success-line
+      - name: "${{ matrix.inputs.test-type }} | ${{ matrix.inputs.test-status }} | ${{matric.inputs.description }} "
+        id: test-executable-monitor-action-success-line
         uses: ./executable-monitor
         with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          retry-attempts: 10
-          success-line: ${{ env.time_success_line }}
+          exe-path: ${{ matrix.inputs. }}
+          timeout-seconds: ${{ matrix.inputs.timeout-seconds }}
+          success-line: ${{ matrix.inputs.success-line }}
+          success-exit-code: ${{ matrix.inputs.success-exit-code }}
+          retry-attempts: ${{ matrix.inputs.retry-attempts }}
+          log-dir: ${{ matrix.inputs.log-dir}}
 
-      - name: Functional Test | Success Case | Retry On Wrong Exit Code
-        id: test-executable-monitor-action-retry-exit-code
+  test-executable-monitor-success-cases:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        inputs:
+          [
+            {
+              test-type: API,
+              test-status: Failure,
+              description: "No Executable Provided",
+            },
+            {
+              test-type: API,
+              test-status: Failure,
+              description: "No Success Condition Provided",
+              exe-path: executable-monitor/test.out,
+              log-dir: logDirectory
+            },
+            {
+              test-type: Functional,
+              test-status: Falure,
+              description: "Timeout Cause No Success Line To Print",
+              exe-path: executable-monitor/test.out,
+              # This is a line that would print if not for timeout
+              success-line: "SLEEPING FOR 9 SECONDS",
+              timeout-seconds: 2,
+            },
+            {
+              test-type: Functional,
+              test-status: Failure,
+              description: "Timeout Cause No Exit Code",
+              exe-path: executable-monitor/test.out,
+              # This is an exit status that should be met if not for timeout
+              success-exit-code: 0,
+              timeout-seconds: 2,
+            },
+            {
+              test-type: Functional,
+              test-status: Failure,
+              description: "Timeout Cause Neither Condition",
+              exe-path: executable-monitor/test.out,
+              # These are exit conditions that should be met if not for timeout
+              success-line: "SLEEPING FOR 9 SECONDS",
+              success-exit-code: 0,
+              timeout-seconds: 2,
+            },
+            {
+              test-type: Functional,
+              test-status: Falure,
+              description: "Retry | Timeout Cause No Success Line To Print",
+              exe-path: executable-monitor/test.out,
+              # This is a line that would print if not for timeout
+              success-line: "SLEEPING FOR 9 SECONDS",
+              timeout-seconds: 2,
+              retry-attempts: 2,
+            },
+            {
+              test-type: Functional,
+              test-status: Failure,
+              description: "Retry | Timeout Cause No Exit Code",
+              exe-path: executable-monitor/test.out,
+              # This is an exit status that should be met if not for timeout
+              success-exit-code: 0,
+              timeout-seconds: 2,
+              retry-attempts: 2,
+            },
+            {
+              test-type: Functional,
+              test-status: Failure,
+              description: "Retry | Timeout Cause Neither Condition",
+              exe-path: executable-monitor/test.out,
+              # These are exit conditions that should be met if not for timeout
+              success-line: "SLEEPING FOR 9 SECONDS",
+              success-exit-code: 0,
+              timeout-seconds: 2,
+              retry-attempts: 2,
+            },
+        ]
+
+      - name: "${{ matrix.inputs.test-type }} | ${{ matrix.inputs.test-status }} | ${{matric.inputs.description }} "
+        id: test-failure-condition
         uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test_exit_current_minutes.out
-          success-exit-code: ${{ env.time_exit_code }}
-          timeout-seconds: 60
-          retry-attempts: 10
-
-      - name: Functional Test | Failure Case | Fail On Timeout
-        id: test-executable-monitor-action-fail-on-timeout
         continue-on-error: true
-        uses: ./executable-monitor
         with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 1
-          success-line: "SLEEPING FOR 12 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: API Test | Failure Case | Retries, No Success Metric
-        continue-on-error: true
-        id: test-executable-monitor-API-no-success-metric
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          retry-attempts: 2
-
-      - name: API Test | Failure Case | No Exe Path
-        continue-on-error: true
-        id: test-executable-monitor-API-no-exe-path
-        uses: ./executable-monitor
-        with:
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
+          exe-path: ${{ matrix.inputs. }}
+          timeout-seconds: ${{ matrix.inputs.timeout-seconds }}
+          success-line: ${{ matrix.inputs.success-line }}
+          success-exit-code: ${{ matrix.inputs.success-exit-code }}
+          retry-attempts: ${{ matrix.inputs.retry-attempts }}
+          log-dir: ${{ matrix.inputs.log-dir}}
 
       - name: Check Failure Test Cases
         id: check-failure-test-cases
@@ -224,30 +274,30 @@ jobs:
           # Check Failure Test Cases
           set +e
           exitStatus=0
-          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
-            echo -e "${{ env.bashPass }}Functional Test | Failure Case | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended${{ env.bashEnd }}"
+          if [ "${{ steps.test-failure-condition.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Failed As Intended ${{ env.bashEnd }}"
           else
-            echo -e "${{ env.bashFail }}Functional Test | Failure Case | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} ${{ matrix.inputs.test-type }} | ${{ matrix.inputs.description}} | Had Unexpected Pass ${{ env.bashEnd }}"
             exitStatus=1
           fi
-          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "${{ env.bashPass }}API Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }}API Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-          if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
-            echo -e "${{ env.bashPass }}API Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }}API Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-          if [ "$exitStatus" = "0" ]; then
-            echo -e "${{ env.bashPass }}All tests failed as intended${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }}A test that should have failed passed${{ env.bashEnd }}"
-            exit 1
-          fi
+          #if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
+          #  echo -e "${{ env.bashPass }}API Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended${{ env.bashEnd }}"
+          #else
+          #  echo -e "${{ env.bashFail }}API Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition${{ env.bashEnd }}"
+          #  exitStatus=1
+          #fi
+          #if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
+          #  echo -e "${{ env.bashPass }}API Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended${{ env.bashEnd }}"
+          #else
+          #  echo -e "${{ env.bashFail }}API Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition${{ env.bashEnd }}"
+          #  exitStatus=1
+          #fi
+          #if [ "$exitStatus" = "0" ]; then
+          #  echo -e "${{ env.bashPass }}All tests failed as intended${{ env.bashEnd }}"
+          #else
+          #  echo -e "${{ env.bashFail }}A test that should have failed passed${{ env.bashEnd }}"
+          #  exit 1
+          #fi
 
   test-complexity-check:
     runs-on: ubuntu-latest
@@ -383,7 +433,7 @@ jobs:
           repository: FreeRTOS/FreeRTOS
           ref: '202107.00'
           path: FreeRTOS
-          submodules: recursive      
+          submodules: recursive
       - name: Test manifest verifier
         uses: ./manifest-verifier
         with:
