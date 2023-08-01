@@ -114,8 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          #os: [ubuntu-latest, windows-latest]
-          os: [ubuntu-latest]
+          os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -328,8 +327,7 @@ jobs:
         fi
 
     - env:
-        stepName: "API | Failure |  No Executable Provided "
-      name: ${{ env.stepName }}
+        stepName: "API | Failure | No Executable Provided"
       id: exe-monitor-fail-no-exe
       uses: ./executable-monitor
       continue-on-error: true
@@ -348,7 +346,7 @@ jobs:
         timeout-seconds: 30
 
     - env:
-        stepName: "Functional | Failure | Timeout Cause No Success Line To Print "
+        stepName: "Functional | Failure | Timeout Cause No Success Line To Print"
       name: ${{ env.stepName }}
       id: exe-monitor-fail-timeout-no-success-line
       uses: ./executable-monitor
@@ -360,7 +358,7 @@ jobs:
         timeout-seconds: 2
 
     - env:
-        stepName: "Functional | Failure | Timeout Cause No Exit Code "
+        stepName: "Functional | Failure | Timeout Cause No Exit Code"
       name: ${{ env.stepName }}
       id: exe-monitor-fail-timeout-no-exit-code
       uses: ./executable-monitor
@@ -373,7 +371,7 @@ jobs:
         timeout-seconds: 2
 
     - env:
-        stepName: "Functional | Failure | Timeout Cause Neither Condition "
+        stepName: "Functional | Failure | Timeout Cause Neither Condition"
       name: ${{ env.stepName }}
       id: exe-monitor-fail-timeout-no-condition
       uses: ./executable-monitor
@@ -399,7 +397,7 @@ jobs:
         retry-attempts: 2
 
     - env:
-        stepName: "Functional | Failure | Retries Timeout Cause No Exit Code "
+        stepName: "Functional | Failure | Retries Timeout Cause No Exit Code"
       name: ${{ env.stepName }}
       id: exe-monitor-fail-retries-no-exit-code
       uses: ./executable-monitor
@@ -433,51 +431,58 @@ jobs:
       run: |
         # Check Failure Test Cases
         if [ "${{ steps.exe-monitor-fail-no-exe.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  | ${{ steps.exe-monitor-fail-no-exe.stepName }} | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | No Executable Provided | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  | ${{ steps.exe-monitor-fail-no-exe.stepName }} | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | No Executable Provided | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-no-success-condition.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  | ${{ steps.exe-monitor-fail-no-exe.stepName }} | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | No Success Condition Provided | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  | ${{ steps.exe-monitor-fail-no-exe.stepName }} | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | No Success Condition Provided | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-timeout-no-success-line.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  |  | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  |  | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-timeout-no-exit-code.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  |  | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  |  | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-timeout-no-condition.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  |  | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  |  | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-retries-timeout-no-success-line.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  |  | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  |  | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-no-exit-code.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
         if [ "${{ steps.exe-monitor-fail-retries-no-success-condition.outcome}}" = "failure" ]; then
-          echo -e "${{ env.bashPass }}  |  | Failed As Intended ${{ env.bashEnd }}"
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }}  |  | Had Unexpected Pass ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
           exit 1
         fi
 
