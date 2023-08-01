@@ -1,4 +1,4 @@
-name: Test actions
+name: Repository Pull Request Checks
 
 on:
   pull_request:
@@ -132,7 +132,6 @@ jobs:
         uses: ./doxygen
         with:
           path: ${{ matrix.inputs.repository }}
-          libs_parent_dir_path: libraries/standard,libraries/aws
           generate_zip: true
 
 
