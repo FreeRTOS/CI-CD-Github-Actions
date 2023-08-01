@@ -366,7 +366,7 @@ jobs:
           ]
     runs-on: ${{ matrix.os }}
     steps:
-#    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 #    - env:
 #        stepName: Install Windows Build tools
 #      name: ${{ env.stepName }}
@@ -613,7 +613,7 @@ jobs:
               org: FreeRTOS,
               repository: corePKCS11,
               exclude-files: lexicon.txt,
-              exclude-dirs: build,docs,
+              exclude-dirs: build,docs,portable
             },
             {
               org: FreeRTOS,
@@ -623,7 +623,7 @@ jobs:
             },
             {
               org: FreeRTOS,
-              repository: FreeRTOS-Cellular-Interface_Soren,
+              repository: FreeRTOS-Cellular-Interface,
               exclude-files: lexicon.txt,
               exclude-dirs: build,docs,
             },
@@ -641,25 +641,25 @@ jobs:
             },
             {
               org: aws,
-              repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk_Soren,
+              repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
               exclude-dirs: build,docs,
             },
             {
               org: aws,
-              repository: Jobs-for-AWS-IoT-embedded-sdk_Soren,
+              repository: Jobs-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
               exclude-dirs: build,docs,
             },
             {
               org: aws,
-              repository: ota-for-AWS-IoT-embedded-sdk_Soren,
+              repository: ota-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
               exclude-dirs: build,docs,
             },
             {
               org: aws,
-              repository: SigV4-for-AWS-IoT-embedded-sdk_Soren,
+              repository: SigV4-for-AWS-IoT-embedded-sdk,
               exclude-files: lexicon.txt,
               exclude-dirs: build,docs,
             },
