@@ -130,12 +130,13 @@ runs:
         run: |
           # ${{ env.stepName }}
           set +e
+          set -x
           # Strip all the whitespace from the inputs
           # Yes this breaks the ability to have files/directories with spaces.
           # But that breaks most UNIX commands. Including the following grep glob.
           excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
           excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
-          grep --exclude={README.md,${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},'.git'} -rnIe "[[:blank:]]$" .
+          grep --exclude={README.md,${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnIe "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -154,12 +155,13 @@ runs:
         run: |
           # ${{ env.stepName }}
           set +e
+          set -x
           # Strip all the whitespace from the inputs
           # Yes this breaks the ability to have files/directories with spaces.
           # But that breaks most UNIX commands. Including the following grep glob.
           excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
           excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
-          grep --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},'.git'} -rnl $'\r'
+          grep --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnl $'\r'
           if [ "$?" = "0" ]; then
             set -e
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
