@@ -67,20 +67,6 @@ runs:
           # GitHub automatically use "set -e" which causes scripts to fail on the first exit code
           # This would mean the first time a file fails the check that we exit without formatting all files.
           set +e
-          set -v
-
-          # Break the option out of the glob
-          # Doing something like:
-          # excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
-          # excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
-          # To remove potential spaces doesn't
-          for file in ${{inputs.exclude-files}}; do
-            exclude-file="$exclude-file --exclude-file=$file"
-          done
-
-          for dir in ${{inputs.exclude-dirs}}; do
-            exclude-dirs="$exclude-dirs --exclude-dir=$dir"
-          done
 
           # Get all files that end in .c or .h. Exclude any files or directories that we were asked to.
           # Then limit the search to files that have the amazon copyright on them.
@@ -90,7 +76,7 @@ runs:
           # Loop over the files that matched the above conditions
           for file in ${files[@]}; do
             # Print them out for future debugging
-            echo -e "${{ env.bashWarn }}Parsing File:$file ${{ env.bashEnd }}
+            echo -e "${{ env.bashWarn }}Parsing File:$file ${{ env.bashEnd }}"
 
             # Pipe the output of the command to a variable
             # This way we can print the command only if it fails
@@ -98,7 +84,6 @@ runs:
 
             # If the previous command failed then print out an error message as well as the output
             if [ "$?" != "0" ]; then
-              # On an error print out the message
               echo -e "${{ env.bashFail }}Error parsing $file:\n${{ env.bashEnd }}"
               echo -e "$fileOut"
             fi
@@ -130,12 +115,6 @@ runs:
         run: |
           # ${{ env.stepName }}
           set +e
-          set -x
-          # Strip all the whitespace from the inputs
-          # Yes this breaks the ability to have files/directories with spaces.
-          # But that breaks most UNIX commands. Including the following grep glob.
-          excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
-          excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
           grep --exclude={README.md,${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnIe "[[:blank:]]$" .
           if [ "$?" = "0" ]; then
             set -e
@@ -155,12 +134,6 @@ runs:
         run: |
           # ${{ env.stepName }}
           set +e
-          set -x
-          # Strip all the whitespace from the inputs
-          # Yes this breaks the ability to have files/directories with spaces.
-          # But that breaks most UNIX commands. Including the following grep glob.
-          excludeFiles=$(echo ${{inputs.exclude-files}} | sed 's/ //g')
-          excludeDirs=$(echo ${{inputs.exclude-dirs}} | sed 's/ //g')
           grep --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnl $'\r'
           if [ "$?" = "0" ]; then
             set -e

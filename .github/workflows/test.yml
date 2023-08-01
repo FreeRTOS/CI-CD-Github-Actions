@@ -71,14 +71,14 @@ jobs:
                 test-status: failure,
                 description: "Whitespace Error",
                 path: formatting,
-                exclude-dirs: "filesWithFormattingErrors,filesWithCRLF"
+                exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings"
               },
               {
                 test-type: Functional,
                 test-status: success,
                 description: "No Errors",
                 path: formatting,
-                exclude-dirs: "filesWithFormattingErrors,filesWithCRLF,filesWithTrailingWhitespace",
+                exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace",
                 exclude-files: "badFile.c"
               },
             ]
