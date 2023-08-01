@@ -110,6 +110,7 @@ jobs:
           path: ${{ matrix.inputs.repository }}
 
       - name: "Formatting Check : ${{ matrix.inputs.repository }}"
+        if: success() || failure()
         uses: ./formatting
         with:
           path: ${{ matrix.inputs.repository }}
@@ -117,6 +118,7 @@ jobs:
           exclude-dirs: ${{matrix.inputs.exclude-dirs}}
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
         uses: ./complexity
         with:
           path: ${{ matrix.inputs.repository }}
@@ -124,11 +126,13 @@ jobs:
           horrid_threshold: 10
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
+        if: success() || failure()
         uses: ./doxygen
         with:
           path: ${{ matrix.inputs.repository }}
 
       - name: "Doxygen Zip Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()  
         uses: ./doxygen
         with:
           path: ${{ matrix.inputs.repository }}
@@ -136,6 +140,7 @@ jobs:
 
 
       - name: "Spelling Check: ${{ matrix.inputs.repository }} "
+        if: success() || failure()
         uses: ./spellings
         with:
           path: ${{ matrix.inputs.repository }}
@@ -177,6 +182,7 @@ jobs:
 #          line-coverage-min: 100
   
       - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()  
         uses: ./memory_statistics
         with:
           path: memory_statistics/test
@@ -186,12 +192,14 @@ jobs:
 
       - name: "Link Verifier Check: ${{ matrix.inputs.repository }} "
         uses: ./link-verifier
+        if: success() || failure()
         with:
           path: ${{ matrix.inputs.repository }}
           exclude-dirs: complexity,formatting
           include-file-types: .c,.html
 
       - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
+        if: success() || failure()  
         uses: ./manifest-verifier
         with:
           path: ${{ matrix.inputs.repository }}
