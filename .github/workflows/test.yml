@@ -115,7 +115,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix: 
-          os: [ubuntu-latest, windows-latest]
+          #os: [ubuntu-latest, windows-latest]
+          os: [ubuntu-latest]
           inputs:
             [
               {
@@ -198,12 +199,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - env:
-          stepName: Install Windows Build tools
-        name: ${{ env.stepName }}
-        if: runner.os == 'Windows'
-        id: install-windows-build-tools
-        uses: microsoft/setup-msbuild@v1.1
+#      - env:
+#          stepName: Install Windows Build tools
+#        name: ${{ env.stepName }}
+#        if: runner.os == 'Windows'
+#        id: install-windows-build-tools
+        
 
       - env:
           stepName: Install Ubuntu Build Tools
@@ -285,7 +286,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        #os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         inputs:
           [
             {
@@ -364,13 +366,13 @@ jobs:
           ]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - env:
-        stepName: Install Windows Build tools
-      name: ${{ env.stepName }}
-      if: runner.os == 'Windows'
-      id: install-windows-build-tools
-      uses: microsoft/setup-msbuild@v1.1
+#    - uses: actions/checkout@v3
+#    - env:
+#        stepName: Install Windows Build tools
+#      name: ${{ env.stepName }}
+#      if: runner.os == 'Windows'
+#      id: install-windows-build-tools
+#      uses: setup-msbuild@v1.1
   
     - env:
         stepName: Install Ubuntu Build Tools
