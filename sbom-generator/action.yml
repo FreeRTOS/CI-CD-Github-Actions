@@ -14,7 +14,7 @@ runs:
   steps:
       - name: Install dependencies
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
-        shell: bash 
+        shell: bash
       - name: Run generator script
         working-directory: ${{ inputs.repo_path }}
         run: |

@@ -8,7 +8,7 @@ FreeRTOS libraries.
 * **Complexity** - Uses [GNU Complexity](https://www.gnu.org/software/complexity/manual/complexity.html)
   to verify that the complexity score of library functions is less than 9.
 * **Formatting** - Validates all C files of a FreeRTOS library repository comply to the formatting
-  standard defined in [uncrustify.cfg](formatting/uncrustify.cfg).
+  standard defined in [clang-format](formatting/.clang-format).
 * **Doxygen** - Validates that the doxygen manual of the FreeRTOS library can be built without
   warnings.
 * **Spellings** - Checks spellings across all files of the FreeRTOS library repository. Each

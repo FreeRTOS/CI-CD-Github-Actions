@@ -1,0 +1,118 @@
+#!/bin/bash
+bashPass="\033[32;1mPASSED -"
+bashInfo="\033[33;1mINFO -"
+bashFail="\033[31;1mFAILED -"
+bashEnd="\033[0m"
+
+output=$(getopt -V)
+if [[ *"getopt"* == "$output" ]] && [ $# != 0 ]; then
+    echo -e "$bashInfo This script cannot parse options from Mac command line's default 'getopt' $bashEnd"
+    echo -e "$bashInfo Run \"brew install gnu-getopt\" and then add it to your path using $bashEnd"
+    echo -e "$bashInfo export PATH=\"/opt/homebrew/opt/gnu-getopt/bin:\$PATH\" $bashEnd"
+    echo -e "$bashInfo At which point you can then use this script with options $bashEnd"
+    exit 1;
+fi
+# Check number of arguments
+files=""
+file=""
+excludeDirs=""
+excludeFiles=""
+includeExtensions=""
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [ $# != 0 ]; then
+        VALID_ARGS=$(getopt -o h,ed:,ef:,if: --long help,exclude-dirs:,exclude-files:,include-extensions: -- "$@")
+        eval set -- "$VALID_ARGS"
+        while [ : ]; do
+            case "$1" in
+                ed | --exclude-dirs )
+                    # $2 Holds the argument passed after --exclude-files or --ed
+                    # Use sed to replace the commas with the exclude flag
+                    if ! [ -z "$2" ]; then
+                        excludeDirs="-E $(echo "$2" | sed -r 's/,/ -E /g' )"
+                    fi
+                    shift 2
+                    ;;
+
+                ef | --exclude-files )
+                    # $2 Holds the argument passed after --exclude-files or --ed
+                    # Use sed to replace the commas with the exclude flag
+                    if ! [ -z "$2" ]; then
+                        excludeFiles="-E $( echo "$2" | sed -r 's/,/ -E /g' )"
+                    fi
+                    shift 2
+                    ;;
+
+                if | --include-extensions )
+                    # $2 Holds the argument passed after --exclude-files or --ed
+                    # Use sed to replace the commas with the exclude flag
+                    if ! [ -z "$2" ]; then
+                        includeExtensions="-e $( echo "$2" | sed -r 's/,/ -E /g' )"
+                    fi
+                    shift 2
+                    ;;
+
+                h | --help )
+                    echo -e "$bashInfo Find all .c and .h files with the Amazon copyright in them $bashEnd"
+                    echo -e "$bashInfo It exports this to a bash array variable called \"files\" $bashEnd"
+                    echo -e "$bashInfo This script can take in two optional arguments $bashEnd"
+                    echo -e "$bashInfo --exclude-files:       A comma seperated list of files to exclude $bashEnd"
+                    echo -e "$bashInfo --exclude-dir:         A comma seperated list of directories to exclude $bashEnd"
+                    echo -e "$bashInfo --include-extensions:  Any additional exstensions to search for $bashEnd"
+                    exit 0
+                    ;;
+                -- )
+                    shift
+                    break
+                    ;;
+                esac
+        done
+    fi
+
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --exclude-dirs=* )
+            excludeDirs="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
+            shift
+            ;;
+        --exclude-files=* )
+            excludeFiles="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
+            shift
+            ;;
+        --include-extensions=* )
+            includeExtensions="-e $(echo "${1#*=}" | sed -E 's/,/ -e /g')"
+            shift
+            ;;
+        -h | --help )
+            echo "Usage: $0 [options]"
+            echo "Options:"
+            echo "  --exclude-dirs=<dirs>     Comma separated list of directories to exclude"
+            echo "  --exclude-files=<files>   Comma separated list of files to exclude"
+            echo "  --include-extensions=<ext> Comma separated list of additional extensions"
+            echo "  -h, --help                Display this help message"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+        esac
+    done
+fi
+# We know we just want the .c and .h files
+# It's just way easier to do this then it is to write
+# A complicated thing to handle parsing the arguments
+#echo "Hello"
+#echo "fdfind -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) [0-9]{4} amazon.com\" "
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lriE "copyright (.*) [0-9]{4} amazon.com" )
+else
+    files=$(fd -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lrie "copyright (.*) 20\d\d amazon.com" )
+fi
+
+finalFiles=("")
+for file in ${files[@]}; do
+    if ! [ -z "$file" ]; then
+        echo "$file"
+    fi
+done

@@ -7,223 +7,1072 @@ on:
     branches: [main]
   workflow_dispatch:
 
-jobs:
-  test-format-check:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
-        with:
-          repository: FreeRTOS/coreMQTT
-          ref: main
-          path: coreMQTT
-      - name: Test formatting check action
-        uses: ./formatting
-        with:
-          path: coreMQTT
-          exclude-files: lexicon.txt
-          exclude-dirs: build,docs
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashInfo:   \033[33;1mINFO -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
 
-  test-executable-monitor:
+jobs:
+
+  get-files-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Compile executable monitor test
-        id: compile-executable-monitor-test
+
+      - env:
+          stepName: "Install Dependencies"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          echo "$(pwd)" >> $GITHUB_PATH
+
+          sudo apt install fd-find
+          fdfind --version
+
+          exitStatus=$?
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() No Arguments"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          allFiles=$(grep -sril "copyright.*amazon" --include="*.c" --include="*.h")
+          files=$(getFiles)
+          echo -e "${{ env.bashInfo }} allFiles:\n$allFiles ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
+          exitStatus=0
+          # Loop through all the files we found using grep
+          for file in ${allFiles[@]} ; do
+            echo -e "${{ env.bashInfo }} Checking File: $file ${{ env.bashEnd }}"
+            # Check if they're in the flattened version of getFiles() search
+            if ! [[ $files == *"$file"* ]]; then
+              echo -e "${{ env.bashFail }} Get Files did not find file: $file ${{ env.bashEnd }}"
+              exitStatus=1
+            fi
+          done
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() Exclude Single File"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          files=$(getFiles --exclude-files="test.c")
+          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
+          exitStatus=0
+          if [[ "$files" == *"test.c"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a file it should have skipped: test.c ${{ env.bashEnd }}"
+            exitStatus=1
+          elif [[ "$files" != *"tasks.c"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Did not find a file it should have: tasks.c ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() Exclude Single Directory"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          files=$(getFiles --exclude-dirs="goodFiles")
+          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
+          exitStatus=0
+          if [[ "$files" == *"goodFiles"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() Exclude Single Directory and File"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          files=$(getFiles --exclude-dirs="goodFiles" --exclude-files="test.c")
+          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashInfo }}"
+          exitStatus=0
+          if [[ "$files" == *"test.c"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() Include Extra Type"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+
+          files=$(getFiles --include-extensions="md")
+          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
+
+          exitStatus=0
+          if [[ "$files" != *"README.md"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: "Functional | Success | getFiles() Exclude Two Directories and Two Files"
+        name: ${{ env.stepName }}
+        shell: bash
+        working-directory: formatting
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          files=""
+          files=$(getFiles --exclude-dirs="filesWithCRLFEndings,include" --exclude-files="fileFormattedWithClangFormatV16.c,badFile.c")
+
+          echo -e "${{ env.bashInfo }} files:\n"$files" ${{ env.bashEnd }}"
+          exitStatus=0
+          if [[ "$files" == *"fileFormattedWithClangFormatV16.c"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a File it should have skipped: fileFormattedWithClangFormatV16.c ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+          if [[ "$files" == *"badFile.c"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a File it should have skipped: badFile.c ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+          if [[ "$files" == *"filesWithCRLFEndings"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: filesWithCRLFEndings ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+          if [[ "$files" == *"include"* ]]; then
+            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: include ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+  uncrustify-formatting-success-cases:
+      runs-on: ubuntu-20.04
+      steps:
+      - uses: actions/checkout@v3
+
+      - env:
+          stepName: "Functional | Success | Exclude All Error Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-dirs-with-errors
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace"
+          exclude-files: "badFile.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude Files"
+        name: ${{ env.stepName }}
+        id: exclude-files-with-errors
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: ",,,"
+          exclude-files: "badFile.c,cgc_error.h,main-blinky.c,test.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude File and Exclude Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-single-dir-multiple-files
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "goodFiles"
+          exclude-files: "cgc_error.h,main-blinky.c,test.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude Files and Exclude Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-two-files-two-dirs
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
+          exclude-files: "test.c,cgc_error.h,main-blinky.c,badFile.c"
+
+  uncrustify-formatting-error-cases:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - env:
+          stepName: "Functional | Failure | Whitespace, CRLF, and Format Failure"
+        name: ${{ env.stepName }}
+        id: all-format-errors
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Formatting Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-format-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithTrailingWhitespace"
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Whitespace Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-whitespace-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrors"
+
+      - env:
+          stepName: "Functional | Failure | CRLF Error"
+        name: ${{ env.stepName }}
+        id: crlf-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
+          exclude-files: "badFile.c"
+
+      - env:
+          stepName: "Functional | Failure | Formatting and Whitespace Errror"
+        name: ${{ env.stepName }}
+        id: formatting-and-whitespace-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithCRLFEndings"
+
+      - env:
+          stepName: "Functional | Failure | Formatting Errror"
+        name: ${{ env.stepName }}
+        id: formatting-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
+
+      - env:
+          stepName: "Functional | Failure | Whitespace Errror"
+        name: ${{ env.stepName }}
+        id: whitespace-error
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrrors,filesWithCRLFEndings"
+
+      - env:
+          stepName: "API | Failure | Exclude Dirs Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-dirs
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-dirs: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+
+      - env:
+          stepName: "API | Failure | Exclude Files Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-files
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-files: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+
+      - env:
+          stepName: "API | Failure | Exclude Option Errors"
+        name: ${{ env.stepName }}
+        id: error-in-both
+        continue-on-error: true
+        uses: ./uncrustify-formatting
+        with:
+          path: uncrustify-formatting
+          exclude-files: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+          exclude-dirs: "filesWithFormattingErrrors,
+                          filesWithCRLFEndings"
+
+      - env:
+          stepName: Check Failure Test Cases
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
         shell: bash
         run: |
-          # Compile executable monitor test
-          echo "::group::Compile executable monitor test"
-          sudo apt install build-essential
-          if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mInstalled build-essential\033[0m"
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.all-format-errors.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace, CRLF, and Format Failure |  Had Expected "failure" ${{ env.bashEnd }}"
           else
-            echo "::endgroup::"
-            echo -e "\033[32;31mInstall build-essential failed...\033[0m"
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace, CRLF, and Format Failure | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-format-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Formatting Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Formatting Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting and Whitespace Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting and Whitespace Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-dirs.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Dirs Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Dirs Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-files.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Files Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Files Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-both.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Option Errors | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Option Errors | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
+  clang-formatting-success-cases:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v3
+
+      - env:
+          stepName: "Functional | Success | Exclude All Error Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-dirs-with-errors
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace"
+          exclude-files: "badFile.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude Files"
+        name: ${{ env.stepName }}
+        id: exclude-files-with-errors
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: ",,,"
+          exclude-files: "badFile.c,cgc_error.h,main-blinky.c,test.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude File and Exclude Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-single-dir-multiple-files
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "goodFiles"
+          exclude-files: "cgc_error.h,main-blinky.c,test.c"
+
+      - env:
+          stepName: "Functional | Success | Exclude Files and Exclude Dirs"
+        name: ${{ env.stepName }}
+        id: exclude-two-files-two-dirs
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
+          exclude-files: "test.c,cgc_error.h,main-blinky.c,badFile.c"
+
+  clang-formatting-error-cases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - env:
+          stepName: "Functional | Failure | Whitespace, CRLF, and Format Failure"
+        name: ${{ env.stepName }}
+        id: all-format-errors
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Formatting Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-format-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithTrailingWhitespace"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Whitespace Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-whitespace-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrors"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF Error"
+        name: ${{ env.stepName }}
+        id: crlf-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
+          exclude-files: "badFile.c"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Formatting and Whitespace Errror"
+        name: ${{ env.stepName }}
+        id: formatting-and-whitespace-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Formatting Errror"
+        name: ${{ env.stepName }}
+        id: formatting-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Whitespace Errror"
+        name: ${{ env.stepName }}
+        id: whitespace-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrrors,filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Dirs Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-dirs
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Files Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-files
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-files: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Option Errors"
+        name: ${{ env.stepName }}
+        id: error-in-both
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-files: "filesWithFormattingErrrors,    filesWithCRLFEndings"
+          exclude-dirs: "filesWithFormattingErrrors,
+                          filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: Check Failure Test Cases
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.all-format-errors.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace, CRLF, and Format Failure |  Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace, CRLF, and Format Failure | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-format-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Formatting Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Formatting Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting and Whitespace Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting and Whitespace Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace Errror | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace Errror | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-dirs.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Dirs Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Dirs Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-files.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Files Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Files Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-both.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Option Errors | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Option Errors | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
+  test-exe-monitor-success-cases:
+    strategy:
+      fail-fast: false
+      matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - env:
+          stepName: Install Windows Build tools
+        name: ${{ env.stepName }}
+        if: runner.os == 'Windows'
+        id: install-windows-build-tools
+        uses: microsoft/setup-msbuild@v1.1
+
+      - env:
+          stepName: Install Ubuntu Build Tools
+        name: ${{ env.stepName }}
+        if: runner.os == 'Linux'
+        id: install-ubuntu-build--tools
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          sudo apt install build-essential
+          exitStatus=$?
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           fi
+
+      - env:
+          stepName: Compile Executable Monitor Test Files
+        name: ${{ env.stepName }}
+        id: compile-executable-monitor-test-files
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
           gcc executable-monitor/test.c -o executable-monitor/test.out
           gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
+          readlink -f executable-monitor/test.out
+          readlink -f executable-monitor/test_exit_current_minutes.out
+          exitStatus=$?
           echo "::endgroup::"
-          if [ "$?" = "0" ]; then
-            readlink -f executable-monitor/test.out
-            echo -e "\033[32;3mCompiled executable-monitor/test.c\033[0m"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo -e "\033[32;31mCompilation of executable-monitor/test.c failed...\033[0m"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           fi
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Success Line
-        id: test-executable-monitor-action-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code | Pass on Exit Code
-        id: test-executable-monitor-action-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 75
-          success-line: "LINE_THAT_WILL_NOT_PRINT_BUT_EXISTS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, and Exit Code, With log file
-        id: test-executable-monitor-action-log-file
-        uses: ./executable-monitor
-        with:
-          log-dir: demo_run_logs
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, Success Line, No Exit Code
-        id: test-executable-monitor-action-no-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | Retries, No Success Line, Exit Code
-        id: test-executable-monitor-action-no-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 75
-          success-exit-code: 0
-          retry-attempts: 2
-
-      - name: Functional Test | Success Case | No Retries, Success Line, No Exit Code
-        id: test-executable-monitor-action-no-retry-attempts-success-line
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-line: "SLEEPING FOR 6 SECONDS"
-          timeout-seconds: 20
-      
-      - name: Functional Test | Success Case | No Retries, No Success Line, Exit Code
-        id: test-executable-monitor-action-no-retry-attempts-exit-code
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-exit-code: 0
-          timeout-seconds: 75
-
-      - name: API Test | Success Case | Retries, Success Line, No Exit Code, Use Default Timeout
-        id: test-executable-monitor-action-no-exit-code-no-timeout
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-line: "SLEEPING FOR 6 SECONDS"
-          retry-attempts: 2
-          
-      - name: API Test | Success Case | Retries, No Success Line, Exit Code, Use Default Timeout
-        id: test-executable-monitor-action-no-success-line-no-timeout
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          success-exit-code: 0
-          retry-attempts: 2
-
       # Get future times from now, then look for that in the executable
-      - name: Get Future Times
+      - env:
+          stepName: Get Future Times
+        name: ${{ env.stepName }}
         id: future-time
+        shell: bash
         run: |
-          # Get times for future demos
-          echo "time_success_line=$(date --date='2 minutes' +%H:%M)" >> "$GITHUB_ENV"
-          echo "time_exit_code=$(date --date='5 minutes' +%M)" >> "$GITHUB_ENV"
+            # {{ env.stepName }}
+            set -x
+            echo -e "${{ env.bashInfo }} Getting Future Times to Compare Against ${{ env.bashEnd }}"
+            echo      "exitCodeTwoMinutes=$(date --date='2 minutes' +%M)" >> "$GITHUB_ENV"
+            echo "successLineThreeMinutes=$(date --date='3 minutes' +%H:%M)" >> "$GITHUB_ENV"
+            echo  "successLineFiveMinutes=$(date --date='5 minutes' +%H:%M)" >> "$GITHUB_ENV"
+            echo    "exitCodeFourMinutes=$(date --date='4 minutes' +%M)" >> "$GITHUB_ENV"
 
-      - name: Functional Test | Sucess Case | Test Retry Run occurs on Wrong exit code
-        id: test-executable-monitor-action-retry-success-line
+      - env:
+          stepName: "Functional | Exit Code | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-exit-code
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          retry-attempts: 10
-          success-line: ${{ env.time_success_line }}
+          success-exit-code: 0
+          log-dir: logDirectory
+          timeout-seconds: 60
 
-      - name: Functional Test | Success Case | Retry On Wrong Exit Code
-        id: test-executable-monitor-action-retry-exit-code
+      - env:
+          stepName: "Functional | Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          log-dir: logDirectory
+          timeout-seconds: 30
+
+      - env:
+          stepName: "Functional | Exit Code and Success Line | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-find-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "LINE_THAT_WILL_NOT_PRINT"
+          success-exit-code: 0
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Exit Code and Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-find-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          timeout-seconds: 30
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-find-exit-code
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test_exit_current_minutes.out
-          success-exit-code: ${{ env.time_exit_code }}
-          timeout-seconds: 60
+          success-exit-code: ${{ env.exitCodeTwoMinutes }}
           retry-attempts: 10
+          timeout-seconds: 60
 
-      - name: Functional Test | Failure Case | Fail On Timeout
-        id: test-executable-monitor-action-fail-on-timeout
-        continue-on-error: true
+      - env:
+          stepName: "Functional | Retry Needed | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-find-success-line
         uses: ./executable-monitor
         with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-line: ${{ env.successLineThreeMinutes }}
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code and Success Line | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-both-inputs-find-exit
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-line: "LINE_THAT_WILL_NOT_PRINT"
+          success-exit-code: ${{ env.exitCodeFourMinutes }}
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code and Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-both-inputs-find-success-line
+        uses: ./executable-monitor
+        with:
+          # Use the EXE that doesn't exit with the current minutes
           exe-path: executable-monitor/test.out
-          timeout-seconds: 1
-          success-line: "SLEEPING FOR 12 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
+          success-line: ${{ env.successLineFiveMinutes }}
+          success-exit-code: 1
+          retry-attempts: 10
+          timeout-seconds: 60
 
-      - name: API Test | Failure Case | Retries, No Success Metric
-        continue-on-error: true
-        id: test-executable-monitor-API-no-success-metric
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test.out
-          timeout-seconds: 20
-          retry-attempts: 2
+  test-exe-monitor-failure-cases:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
-      - name: API Test | Failure Case | No Exe Path
-        continue-on-error: true
-        id: test-executable-monitor-API-no-exe-path
-        uses: ./executable-monitor
-        with:
-          timeout-seconds: 20
-          success-line: "SLEEPING FOR 6 SECONDS"
-          success-exit-code: 0
-          retry-attempts: 2
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - env:
+        stepName: Install Windows Build tools
+      name: ${{ env.stepName }}
+      if: runner.os == 'Windows'
+      id: install-windows-build-tools
+      uses: microsoft/setup-msbuild@v1.1
 
-      - name: Check Failure Test Cases
-        id: check-failure-test-cases
-        run: |
-          # Check Last Step Failed
-          echo "::group::Check Failure Test Cases"
-          if [ "${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mFunctional Test | Failure Case | Fail On Timeout had outcome '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mFunctional Test | Failure Case | Fail On Timeout had unexpected '${{ steps.test-executable-monitor-action-fail-on-timeout.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-API-no-success-metric.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | Retries, No Success Metric had outcome '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | Retries, No Success Metric had unexpected '${{ steps.test-executable-monitor-API-no-success-metric.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          if [ "${{ steps.test-executable-monitor-API-no-exe-path.outcome}}" = "failure" ]; then
-            echo -e "\033[32;3mAPI Test | Failure Case | No Exe Path had outcome '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' as intended\033[0m"
-          else
-            echo "::endgroup::"
-            echo -e "\033[32;31mAPI Test | Failure Case | No Exe Path had unexpected '${{ steps.test-executable-monitor-API-no-exe-path.outcome}}' exit condition\033[0m"
-            exit 1
-          fi
-          echo "::endgroup::"
-          echo -e "All failure tests failed correctly"
+    - env:
+        stepName: Install Ubuntu Build Tools
+      name: ${{ env.stepName }}
+      if: runner.os == 'Linux'
+      id: install-ubuntu-build--tools
+      run: |
+        # Install Ubuntu Build Tools
+        echo "::group::${{ env.stepName }}"
+        sudo apt install build-essential
+        exitStatus=$?
+        echo "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+    - env:
+        stepName: Compile Executable Monitor Test Files
+      name: ${{ env.stepName }}
+      id: compile-executable-monitor-test-files
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo "::group::${{ env.stepName }}"
+        gcc executable-monitor/test.c -o executable-monitor/test.out
+        gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
+        readlink -f executable-monitor/test.out
+        readlink -f executable-monitor/test_exit_current_minutes.out
+        exitStatus=$?
+        echo "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+    - env:
+        stepName: "API | Failure | No Executable Provided"
+      id: exe-monitor-fail-no-exe
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        timeout-seconds: 30
+
+    - env:
+        stepName: "API | Failure | No Success Condition Provided"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-no-success-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        log-dir: logDirectory
+        timeout-seconds: 30
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause No Success Line To Print"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-success-line
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is a line that would print if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        timeout-seconds: 2
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause No Exit Code"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-exit-code
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is an exit status that should be met if not for timeou
+        success-exit-code: 0
+        timeout-seconds: 2
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause Neither Condition"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # These are exit conditions that should be met if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        success-exit-code: 0
+        timeout-seconds: 2
+
+    - env:
+       stepName: "Functional | Failure | Retries Timeout Cause No Success Line To Print"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-timeout-no-success-line
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is a line that would print if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: "Functional | Failure | Retries Timeout Cause No Exit Code"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-no-exit-code
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is an exit status that should be met if not for timeout
+        success-exit-code: 0
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: "Functional | Failure | Retries Timeout Cause Neither Condition "
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-no-success-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # These are exit conditions that should be met if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        success-exit-code: 0
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: Check Failure Test Cases
+      name: ${{ env.stepName }}
+      id: check-failure-test-cases
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        if [ "${{ steps.exe-monitor-fail-no-exe.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | No Executable Provided | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | No Executable Provided | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-no-success-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | No Success Condition Provided | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | No Success Condition Provided | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-success-line.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-exit-code.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-timeout-no-success-line.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-no-exit-code.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-no-success-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
 
   test-complexity-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -234,14 +1083,15 @@ jobs:
           path: coreMQTT
           # For coreMQTT the code complexity threshold is 10.
           horrid_threshold: 10
+
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
         with:
           python-version: '3.11.0'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: aws/aws-iot-device-sdk-embedded-C
           submodules: recursive
@@ -253,11 +1103,12 @@ jobs:
           path: ./aws-iot-device-sdk-embedded-C
           libs_parent_dir_path: libraries/standard,libraries/aws
           generate_zip: true
+
   test-doxygen-non-zip-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -266,24 +1117,102 @@ jobs:
         uses: ./doxygen
         with:
           path: coreMQTT
+
   test-spell-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
+          repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
+
       - name: Test spell check action
         uses: ./spellings
         with:
           path: coreMQTT
+
+  test-rust-spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: skptak/coreMQTT
+          ref: main
+          path: coreMQTT
+
+      - name: Test spell check action
+        uses: ./rust-spell-check
+        with:
+          path: coreMQTT
+
+  test-rust-spell-checker-needs-to-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: skptak/coreMQTT
+          ref: main
+          path: coreMQTT
+
+      - name: Delete the pre-built spell-checker
+        shell: bash
+        run: file=$(find . -name spell-checker); readlink -f "$file" ; rm "$file"
+
+      - name: Test Spell Check Build and Run
+        uses: ./rust-spell-check
+        with:
+          path: coreMQTT
+
+  test-rust-spell-checker-find-mistake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v3
+        with:
+          repository: skptak/coreMQTT
+          ref: main
+          path: coreMQTT
+
+      - name: Empty the lexicon
+        shell: bash
+        working-directory: coreMQTT
+        run: file=$(find . -name .cSpellWords.txt); readlink -f "$file" ; > "$file"
+
+      - name: Test Spell Check Fails on Misspelled Word
+        id: test-spell-check-find-mistake
+        continue-on-error: true
+        uses: ./rust-spell-check
+        with:
+          path: coreMQTT
+
+      - env:
+          stepName: Check Failure Test Case
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.test-spell-check-find-mistake.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Fail on Misspelled Word | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Fail on Misspelled Word | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
   test-coverage-cop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -314,10 +1243,11 @@ jobs:
           path: ./build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100
+
   test-memory-statistics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Test memory statistics action
         uses: ./memory_statistics
         with:
@@ -325,12 +1255,13 @@ jobs:
           config: ./memory_statistics_config.json
           output: ./size_table_new.html
           check_against: ./size_table_expected.html
+
   test-link-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup python environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.11.0'
       - name: Test link verifier action
@@ -339,25 +1270,25 @@ jobs:
           path: ./
           exclude-dirs: complexity,formatting
           include-file-types: .c,.html
+
   test-manifest-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup python environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: '3.x'
       - name: Checkout the FreeRTOS/FreeRTOS repository for testing action on.
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: FreeRTOS/FreeRTOS
           ref: '202107.00'
           path: FreeRTOS
-          submodules: recursive      
+          submodules: recursive
       - name: Test manifest verifier
         uses: ./manifest-verifier
         with:
           path: ./FreeRTOS
           exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
           fail-on-incorrect-version: true
-

@@ -12,10 +12,10 @@ inputs:
   horrid_threshold:
     description: 'The horrid threshold parameter passed to the invocation of complexity'
     required: false
-    default: 8
+    default: 18
 runs:
   using: "composite"
-  steps: 
+  steps:
       - name: Setup
         run: sudo apt-get install complexity
         shell: bash

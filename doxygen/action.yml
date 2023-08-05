@@ -21,7 +21,7 @@ inputs:
     description: 'Flag to indicate whether a ZIP output should be created.'
     required: false
     default: 'false'
-  
+
 runs:
   using: "composite"
   steps:

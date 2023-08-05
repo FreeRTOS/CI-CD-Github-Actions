@@ -13,9 +13,9 @@ inputs:
     required: false
     default: ""
   timeout-seconds:
-    description: 'Maximum amount of time to run the executable. Default is 600.'
+    description: 'Maximum amount of time to run the executable. Default is 180.'
     required: false
-    default: 300
+    default: 180
   retry-attempts:
     description: 'Number of times to re-launch the binary to check for success.'
     required: false
@@ -27,22 +27,33 @@ inputs:
 
 runs:
   using: "composite"
-  steps: 
-      - name: Install Dependencies
+  steps:
+      - env:
+          # The bash escape character is \033
+          # At time of writing, you can't add a global environment to an
+          # action so stuck with this. If this gets changed please move this
+          bashPass:   \033[32;1mPASSED -
+          bashInfo:   \033[33;1mINFO -
+          bashFail:   \033[31;1mFAILED -
+          bashEnd:    \033[0m
+          stepName: Install Dependencies
+        name: ${{ env.stepName }}
+        shell: bash
         run: |
-          # Install Dependencies
+          # ${{ env.stepName }}
           echo "::group::Install Dependencies"
           pip install -r $GITHUB_ACTION_PATH/requirements.txt
+          exitStatus=$?
           echo "::endgroup::"
-          if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mInstalled all dependencies\033[0m"
-            exit 0
-          else
-            echo -e "\033[32;31mDependencies Install failed...\033[0m"
-            exit 1
-          fi
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: ${{ env.stepName }}
         shell: bash
-      - name: Run Executable with Monitoring
         run: |
           # Run Executable with Monitoring
           echo "::group::Argument Parsing"
@@ -50,55 +61,57 @@ runs:
           # Make sure we have an exit condition to look for
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
-            echo -e "\033[32;31mDid not supply an input of success-line or success-exit-code to search for\033[0m"
+            echo -e "${{ env.bashFail}}Did not supply an input of success-line or success-exit-code to search for ${{ env.bashEnd }}"
             exit 1
           fi
+
+          echo "Adding --exe-path=${{ inputs.exe-path }}"
+          echo "Adding --timeout-seconds=${{ inputs.timeout-seconds }}"
 
           # Check if an exit code was provided
           if [ "${{ inputs.success-exit-code }}" != "" ]; then
             optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
-            echo "Adding --success-exit-code=${{ inputs.success-exit-code }} to the call"
+            echo "Adding --success-exit-code=${{ inputs.success-exit-code }}"
           fi
 
           # Check for log directory/if a log file should be created
           if [ "${{ inputs.log-dir }}" != "" ]; then
             optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
-            echo "Adding --log-dir=${{ inputs.log-dir}} to the call"
+            echo "Adding --log-dir=${{ inputs.log-dir}}"
           fi
 
           # Check for retry attempts
           if [ "${{ inputs.retry-attempts }}" != "" ]; then
             optArgs="--retry-attempts=${{ inputs.retry-attempts }} $optArgs"
-            echo "Adding --retry-attempts=${{ inputs.retry-attempts }} to the call"
+            echo "Adding --retry-attempts=${{ inputs.retry-attempts }}"
           fi
+
+          # set +e so if the run fails we can capture that and print custom error message
+          set +e
 
           # Check if a success line was provided. Converting the github input to a bash variable
           # Will cause it to tokenize on spaces when passed into python
           # So just only add the success line if it exits.
-          # set +e so if the run fails we can capture that and print custom error message
-          set +e
           if [ "${{ inputs.success-line }}" != "" ]; then
             successLineArgs="--success-line=\"${{ inputs.success-line}}\" $optArgs"
-            echo "Adding --success-line=${{ inputs.success-line}} to the call"
+            echo "Adding --success-line=${{ inputs.success-line}}"
             echo "::endgroup::"
-            echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs  \033[0m"
+            echo -e " ${{ env.bashInfo }}Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs ${{ env.bashEnd }}"
             echo "::group::Executable Output"
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs --success-line="${{ inputs.success-line}}"
           else
             echo "::endgroup::"
-            echo -e "\033[1;33mRunning Command: python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs \033[0m"
+            echo -e " ${{ env.bashInfo }}Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs ${{ env.bashEnd }}"
             echo "::group::Executable Output"
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
           fi
           # Store status as the echo group will overwrite it
           exitStatus=$?
           echo "::endgroup::"
-          if [ "$exitStatus" = "0" ]; then
-            echo -e "\033[32;3mValid exit status found\033[0m"
-            exit 0
+          if [ exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo -e "\033[32;31mDid not find a valid exit condition\033[0m"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             set -e
-            exit 1
           fi
-        shell: bash
+          exit $exitStatus
