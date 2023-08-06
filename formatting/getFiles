@@ -11,9 +11,45 @@ excludeDirs=""
 excludeFiles=""
 includeExtensions=""
 
-# Check if we're using gnu getopt or FreeBSD getopt
-output=$(getopt -V)
-if [[ *"getopt"* == "$output" ]]; then
+# Make the assumption that Mac users will be using FreeBSD Get Opt
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    while [ $# -gt 0 ]; do
+    case "$1" in
+        -ed= | --exclude-dirs=* )
+            excludeDirs="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
+            shift
+            ;;
+        -ef= | --exclude-files=* )
+            excludeFiles="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
+            shift
+            ;;
+        -ie= | --include-extensions* )
+            includeExtensions="-e $(echo "${1#*=}" | sed -E 's/,/ -e /g')"
+            shift
+            ;;
+        -h | --help )
+                echo -e "$bashInfo Find all .c and .h files with the Amazon copyright in them $bashEnd"
+                echo -e "$bashInfo It exports this to a bash array variable called \"files\" $bashEnd"
+                echo -e "$bashInfo This script can take in two optional arguments $bashEnd"
+                echo -e "$bashInfo -ef= | --exclude-files=:       A comma seperated list of files to exclude $bashEnd"
+                echo -e "$bashInfo -ed= | --exclude-dir=:         A comma seperated list of directories to exclude $bashEnd"
+                echo -e "$bashInfo -ie= | --include-extensions=:  Any additional exstensions to search for $bashEnd"
+                exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+        esac
+    done
+    # For FreeBSD (default MacOS shell) assume that you have fd
+    # By default only grab the c and h files. Only grab the files with amazon copyright
+    # Put all the files in an array. Uncomment the following line to see the command run.
+    # echo "fd -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) 20[0-9]{2} amazon.com\" "
+    files=$(fd -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lrie "copyright (.*) 20\d\d amazon.com")
+
+# Making the assumption that anybody else running this is a gnu getopt user
+else
     VALID_ARGS=$(getopt -o h,ed:,ef:,if: --long help,exclude-dirs:,exclude-files:,include-extensions: -- "$@")
     eval set -- "$VALID_ARGS"
     while [ $# -gt 0 ]; do
@@ -65,42 +101,6 @@ if [[ *"getopt"* == "$output" ]]; then
     # Put all the files in an array. Uncomment the following line to see the command run.
     # echo "fdfind -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) 20[0-9]{2} amazon.com\" "
     files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lriE "copyright (.*) 20[0-9]{2} amazon.com" )
-
-else
-    while [ $# -gt 0 ]; do
-    case "$1" in
-        -ed= | --exclude-dirs=* )
-            excludeDirs="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
-            shift
-            ;;
-        -ef= | --exclude-files=* )
-            excludeFiles="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
-            shift
-            ;;
-        -ie= | --include-extensions* )
-            includeExtensions="-e $(echo "${1#*=}" | sed -E 's/,/ -e /g')"
-            shift
-            ;;
-        -h | --help )
-                echo -e "$bashInfo Find all .c and .h files with the Amazon copyright in them $bashEnd"
-                echo -e "$bashInfo It exports this to a bash array variable called \"files\" $bashEnd"
-                echo -e "$bashInfo This script can take in two optional arguments $bashEnd"
-                echo -e "$bashInfo -ef= | --exclude-files=:       A comma seperated list of files to exclude $bashEnd"
-                echo -e "$bashInfo -ed= | --exclude-dir=:         A comma seperated list of directories to exclude $bashEnd"
-                echo -e "$bashInfo -ie= | --include-extensions=:  Any additional exstensions to search for $bashEnd"
-                exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-        esac
-    done
-# For FreeBSD (default MacOS shell) assume that you have fd
-# By default only grab the c and h files. Only grab the files with amazon copyright
-# Put all the files in an array. Uncomment the following line to see the command run.
-# echo "fd -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) 20[0-9]{2} amazon.com\" "
-files=$(fd -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lrie "copyright (.*) 20\d\d amazon.com")
 fi
 
 # For future FreeBSD users:
