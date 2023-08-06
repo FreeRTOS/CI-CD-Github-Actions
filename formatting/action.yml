@@ -22,6 +22,9 @@ runs:
   using: "composite"
   steps:
       - env:
+          # At time of writing, you can't add a global environment
+          # to an action file so stuck with this. If this gets changed
+          # Please move this
           bashPass: \033[32;1mPASSED -
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
@@ -56,10 +59,6 @@ runs:
 
       - env:
           stepName: Validate Inputs
-          # The bash escape character is \033
-          # At time of writing, you can't add a global environment
-          # to an action file so stuck with this. If this gets changed
-          # Please move this
           bashPass:   \033[32;1mPASSED -
           bashInfo:   \033[33;1mINFO -
           bashFail:   \033[31;1mFAILED -
@@ -76,6 +75,10 @@ runs:
           fi
 
       - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
           stepName: Run Clang Format
         name: ${{ env.stepName }}
         if: ${{ steps.validate-inputs.outcome}} = "success"
