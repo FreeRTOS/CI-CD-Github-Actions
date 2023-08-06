@@ -95,21 +95,21 @@ runs:
               exit 1
           fi
 
-          # set +e
           # Loop over the files that matched the above conditions
           for file in ${files[@]}; do
-            # Print them out for future debugging
-            echo -e "${{ env.bashInfo }} Parsing File: "$file" ${{ env.bashEnd }}"
+
+            # set +e so we don't exit on the first file with an error
+            # Doing it here instead of over the whole loop incase there
+            # Is an error that gets raised in the loop (somehow)
+            set +e
 
             # Pipe the output of the command to a variable
             # This way we can print the command only if it fails
-            fileOut=$(clang-format -i --verbose --style=file $file)
-            # If the previous command failed then print out an error message as well as the output
-            if [ ! $? -eq 0 ]; then
-              echo -e "${{ env.bashFail }} Error parsing "$file" ${{ env.bashEnd }}"
-              echo -e "$fileOut"
-              clangError=1
-            fi
+            clang-format -i --verbose --style=file $file
+
+            # Re-enable failing or error
+            set -e
+
           done
 
           echo "::endgroup::"
