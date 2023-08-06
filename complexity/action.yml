@@ -17,18 +17,51 @@ runs:
   using: "composite"
   steps:
       - name: Setup
-        run: sudo apt-get install complexity
+        run: sudo apt-get install complexity fd-find
         shell: bash
 
       - uses: actions/checkout@v3
-      - name: Swap to Uncrustify formatting for Complexity Check
-        uses: Skptak/CI-CD-Github-Actions/formatting@main
-        with:
-          path: ${{ inputs.path }}
 
       - name: Complexity
         working-directory: ${{ inputs.path }}
+        continue-on-error: true
+        shell: bash
         run: |
           find ${{ inputs.source_path }}/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Swap to Uncrustify Fomratting For Complexity
+        name: ${{ env.stepName }}
+        working-directory: ${{ inputs.path }}
+        continue-on-error: true
         shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
+          echo "::group::${{ env.stepName }}"
+
+          set +e
+
+          # Get all files that end in .c or .h.
+          # Exclude any files or directories that we were asked to.
+          # Then limit the search to files that have the amazon copyright on them.
+          # -l Provides a list of the files
+          # -r Means do a recursive search
+          # -i tells it to ignore the case
+          cd inputs.source_path
+          fd -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
+      - name: Complexity
+        working-directory: ${{ inputs.path }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          find ${{ inputs.source_path }}/ -iname '*.c' |\
+          xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
