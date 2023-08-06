@@ -118,8 +118,10 @@ runs:
           # Run a git diff to print the differences if any exist, return an error code if there are any
 
           echo "::group::File Difference"
+          set +e
           git diff --exit-code
           exitCode=$?
+          set -e
           echo "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then
