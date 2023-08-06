@@ -86,10 +86,9 @@ runs:
           echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
           echo "::group::${{ env.stepName }}"
           exitCode=0
-          clangError=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
           files=$(getFiles --exclude-files="${{inputs.exclude-files}}" --exclude-dir="${{inputs.exclude-dirs}}" )
-          if [ ! $? -eq 0 ]; then
+          if ! [ $? -eq 0 ]; then
               echo -e "${{ env.bashFail }} Error calling getFiles() ${{ env.bashEnd }}"
               echo -e "$fileOut"
               exit 1
@@ -105,7 +104,7 @@ runs:
 
             # Pipe the output of the command to a variable
             # This way we can print the command only if it fails
-            clang-format -i --verbose --style=file $file
+            fileOut=$(clang-format -i --verbose --style=file $file)
 
             # Re-enable failing or error
             set -e
@@ -119,16 +118,12 @@ runs:
           git diff --exit-code
           exitCode=$?
           echo "::endgroup::"
-          # set -e
-          if [ $clangError -eq 1 ]; then
-            echo -e "${{ env.bashFail }} Clang Encountered an Error ${{ env.bashEnd }}"
-          fi
 
           if [ $exitCode -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
-            echo -e "${{ env.bashFail }} ${{env.stepName }} ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
-          exit $exitCode || $clangError
+          exit $exitCode
