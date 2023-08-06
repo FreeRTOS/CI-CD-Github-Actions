@@ -29,8 +29,7 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
-          echo "::group::${{ env.stepName }}"
-
+          echo "::group::Swap to Uncrustify for Formatting"
           set +e
 
           # Get all files that end in .c or .h.
@@ -43,8 +42,13 @@ runs:
           fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
           popd
           echo "::endgroup::"
+          echo -e "${{ env.bashPass }} Swapped to Uncrustify ${{ env.bashEnd }}"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
+          echo "::group::${{ env.stepName }}"
           find ${{ inputs.source_path }}/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
         shell: bash
