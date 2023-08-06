@@ -12,34 +12,20 @@ inputs:
   horrid_threshold:
     description: 'The horrid threshold parameter passed to the invocation of complexity'
     required: false
-    default: 8
+    default: 18
 runs:
   using: "composite"
   steps:
       - name: Setup
-        run: sudo apt-get install complexity fd-find
+        run: sudo apt-get install complexity fd-find uncrustify
         shell: bash
-
-      - uses: actions/checkout@v3
-
-      - name: Complexity
-        working-directory: ${{ inputs.path }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          find ${{ inputs.source_path }}/ -iname '*.c' |\
-          xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
-
       - env:
+          stepName: Complexity
           bashPass: \033[32;1mPASSED -
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0m
-          stepName: Swap to Uncrustify Fomratting For Complexity
-        name: ${{ env.stepName }}
         working-directory: ${{ inputs.path }}
-        continue-on-error: true
-        shell: bash
         run: |
           # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
@@ -53,15 +39,12 @@ runs:
           # -l Provides a list of the files
           # -r Means do a recursive search
           # -i tells it to ignore the case
-          cd inputs.source_path
-          fd -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          pushd ${{ inputs.source_path }}
+          fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          popd
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
-      - name: Complexity
-        working-directory: ${{ inputs.path }}
-        continue-on-error: true
-        shell: bash
-        run: |
           find ${{ inputs.source_path }}/ -iname '*.c' |\
           xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+        shell: bash
