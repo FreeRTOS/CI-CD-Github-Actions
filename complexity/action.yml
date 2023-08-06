@@ -40,6 +40,7 @@ runs:
           # -i tells it to ignore the case
           pushd ${{ inputs.source_path }}
           fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          git diff
           popd
           set -e
           echo "::endgroup::"
