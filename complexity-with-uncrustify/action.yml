@@ -29,9 +29,9 @@ runs:
         working-directory: ${{ inputs.path }}
         run: |
           # ${{ env.stepName }}
-          #echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
-          #echo "::group::Swap to Uncrustify for Formatting"
-          #set +e
+          echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
+          echo "::group::Swap to Uncrustify for Formatting"
+          set +e
 
           # Get all files that end in .c or .h.
           # Exclude any files or directories that we were asked to.
@@ -39,14 +39,14 @@ runs:
           # -l Provides a list of the files
           # -r Means do a recursive search
           # -i tells it to ignore the case
-          #pushd ${{ inputs.source_path }}
-          #fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
-          #git diff
-          #popd
-          #set -e
-          #echo "::endgroup::"
-          #echo -e "${{ env.bashPass }} Swapped to Uncrustify ${{ env.bashEnd }}"
-          #echo -e "${{ env.bashInfo }} Starting Complexit Check ${{ env.bashEnd }}"
+          pushd ${{ inputs.source_path }}
+          fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          git diff
+          popd
+          set -e
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} Swapped to Uncrustify ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Starting Complexit Check ${{ env.bashEnd }}"
 
           echo "::group::${{ env.stepName }}"
           find ${{ inputs.source_path }}/ -iname '*.c' |\
