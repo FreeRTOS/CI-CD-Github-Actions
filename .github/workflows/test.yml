@@ -1089,7 +1089,7 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          repository: skptak/SigV4-for-AWS-IoT-embedded-sdk/
+          repository: skptak/SigV4-for-AWS-IoT-embedded-sdk
           ref: main
           path: SigV4-for-AWS-IoT-embedded-sdk
 
