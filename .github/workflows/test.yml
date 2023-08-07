@@ -1074,7 +1074,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
+          repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
       - name: Test complexity check action
@@ -1083,6 +1083,17 @@ jobs:
           path: coreMQTT
           # For coreMQTT the code complexity threshold is 10.
           horrid_threshold: 10
+      - uses: actions/checkout@v3
+        with:
+          repository: skptak/SigV4-for-AWS-IoT-embedded-sdk/
+          ref: main
+          path: SigV4-for-AWS-IoT-embedded-sdk
+      - name: Test complexity check action
+        uses: ./complexity
+        with:
+          path: SigV4-for-AWS-IoT-embedded-sdk
+          # For coreMQTT the code complexity threshold is 10.
+          horrid_threshold: 8
 
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
@@ -1110,7 +1121,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
+          repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
       - name: Test doxygen build action
@@ -1214,7 +1225,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
+          repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
       - name: Build

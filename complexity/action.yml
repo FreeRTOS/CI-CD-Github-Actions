@@ -12,7 +12,8 @@ inputs:
   horrid_threshold:
     description: 'The horrid threshold parameter passed to the invocation of complexity'
     required: false
-    default: 18
+    default: 8
+
 runs:
   using: "composite"
   steps:
