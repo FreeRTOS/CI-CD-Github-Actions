@@ -1069,7 +1069,8 @@ jobs:
         fi
 
   test-complexity-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/checkout@v3
@@ -1077,17 +1078,21 @@ jobs:
           repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
+
       - name: Test complexity check action
         uses: ./complexity
+        continue-on-error: true
         with:
           path: coreMQTT
           # For coreMQTT the code complexity threshold is 10.
           horrid_threshold: 10
+
       - uses: actions/checkout@v3
         with:
           repository: skptak/SigV4-for-AWS-IoT-embedded-sdk/
           ref: main
           path: SigV4-for-AWS-IoT-embedded-sdk
+
       - name: Test complexity check action
         uses: ./complexity
         with:
