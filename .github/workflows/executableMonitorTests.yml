@@ -1,0 +1,391 @@
+name: Executable Monitor Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashInfo:   \033[33;1mINFO -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
+
+jobs:
+
+  test-exe-monitor-success-cases:
+    strategy:
+      fail-fast: false
+      matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - env:
+          stepName: Install Windows Build tools
+        name: ${{ env.stepName }}
+        if: runner.os == 'Windows'
+        id: install-windows-build-tools
+        uses: microsoft/setup-msbuild@v1.1
+
+      - env:
+          stepName: Install Ubuntu Build Tools
+        name: ${{ env.stepName }}
+        if: runner.os == 'Linux'
+        id: install-ubuntu-build--tools
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          sudo apt install build-essential
+          exitStatus=$?
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+
+      - env:
+          stepName: Compile Executable Monitor Test Files
+        name: ${{ env.stepName }}
+        id: compile-executable-monitor-test-files
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          gcc executable-monitor/test.c -o executable-monitor/test.out
+          gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
+          readlink -f executable-monitor/test.out
+          readlink -f executable-monitor/test_exit_current_minutes.out
+          exitStatus=$?
+          echo "::endgroup::"
+          if [ $exitStatus -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          fi
+      # Get future times from now, then look for that in the executable
+      - env:
+          stepName: Get Future Times
+        name: ${{ env.stepName }}
+        id: future-time
+        shell: bash
+        run: |
+            # {{ env.stepName }}
+            set -x
+            echo -e "${{ env.bashInfo }} Getting Future Times to Compare Against ${{ env.bashEnd }}"
+            echo      "exitCodeTwoMinutes=$(date --date='2 minutes' +%M)" >> "$GITHUB_ENV"
+            echo "successLineThreeMinutes=$(date --date='3 minutes' +%H:%M)" >> "$GITHUB_ENV"
+            echo  "successLineFiveMinutes=$(date --date='5 minutes' +%H:%M)" >> "$GITHUB_ENV"
+            echo    "exitCodeFourMinutes=$(date --date='4 minutes' +%M)" >> "$GITHUB_ENV"
+
+      - env:
+          stepName: "Functional | Exit Code | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-exit-code: 0
+          log-dir: logDirectory
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          log-dir: logDirectory
+          timeout-seconds: 30
+
+      - env:
+          stepName: "Functional | Exit Code and Success Line | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-find-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "LINE_THAT_WILL_NOT_PRINT"
+          success-exit-code: 0
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Exit Code and Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-find-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test.out
+          success-line: "SLEEPING FOR 6 SECONDS"
+          success-exit-code: 0
+          timeout-seconds: 30
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-find-exit-code
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-exit-code: ${{ env.exitCodeTwoMinutes }}
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-find-success-line
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-line: ${{ env.successLineThreeMinutes }}
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code and Success Line | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-both-inputs-find-exit
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-line: "LINE_THAT_WILL_NOT_PRINT"
+          success-exit-code: ${{ env.exitCodeFourMinutes }}
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code and Success Line | Success Line Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-both-inputs-find-success-line
+        uses: ./executable-monitor
+        with:
+          # Use the EXE that doesn't exit with the current minutes
+          exe-path: executable-monitor/test.out
+          success-line: ${{ env.successLineFiveMinutes }}
+          success-exit-code: 1
+          retry-attempts: 10
+          timeout-seconds: 60
+
+  test-exe-monitor-failure-cases:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - env:
+        stepName: Install Windows Build tools
+      name: ${{ env.stepName }}
+      if: runner.os == 'Windows'
+      id: install-windows-build-tools
+      uses: microsoft/setup-msbuild@v1.1
+
+    - env:
+        stepName: Install Ubuntu Build Tools
+      name: ${{ env.stepName }}
+      if: runner.os == 'Linux'
+      id: install-ubuntu-build--tools
+      run: |
+        # Install Ubuntu Build Tools
+        echo "::group::${{ env.stepName }}"
+        sudo apt install build-essential
+        exitStatus=$?
+        echo "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+    - env:
+        stepName: Compile Executable Monitor Test Files
+      name: ${{ env.stepName }}
+      id: compile-executable-monitor-test-files
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo "::group::${{ env.stepName }}"
+        gcc executable-monitor/test.c -o executable-monitor/test.out
+        gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
+        readlink -f executable-monitor/test.out
+        readlink -f executable-monitor/test_exit_current_minutes.out
+        exitStatus=$?
+        echo "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+    - env:
+        stepName: "API | Failure | No Executable Provided"
+      id: exe-monitor-fail-no-exe
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        timeout-seconds: 30
+
+    - env:
+        stepName: "API | Failure | No Success Condition Provided"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-no-success-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        log-dir: logDirectory
+        timeout-seconds: 30
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause No Success Line To Print"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-success-line
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is a line that would print if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        timeout-seconds: 2
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause No Exit Code"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-exit-code
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is an exit status that should be met if not for timeou
+        success-exit-code: 0
+        timeout-seconds: 2
+
+    - env:
+        stepName: "Functional | Failure | Timeout Cause Neither Condition"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-timeout-no-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # These are exit conditions that should be met if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        success-exit-code: 0
+        timeout-seconds: 2
+
+    - env:
+       stepName: "Functional | Failure | Retries Timeout Cause No Success Line To Print"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-timeout-no-success-line
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is a line that would print if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: "Functional | Failure | Retries Timeout Cause No Exit Code"
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-no-exit-code
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # This is an exit status that should be met if not for timeout
+        success-exit-code: 0
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: "Functional | Failure | Retries Timeout Cause Neither Condition "
+      name: ${{ env.stepName }}
+      id: exe-monitor-fail-retries-no-success-condition
+      uses: ./executable-monitor
+      continue-on-error: true
+      with:
+        exe-path: executable-monitor/test.out
+        # These are exit conditions that should be met if not for timeout
+        success-line: "SLEEPING FOR 9 SECONDS"
+        success-exit-code: 0
+        timeout-seconds: 2
+        retry-attempts: 2
+
+    - env:
+        stepName: Check Failure Test Cases
+      name: ${{ env.stepName }}
+      id: check-failure-test-cases
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        if [ "${{ steps.exe-monitor-fail-no-exe.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | No Executable Provided | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | No Executable Provided | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-no-success-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | No Success Condition Provided | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | No Success Condition Provided | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-success-line.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-exit-code.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-timeout-no-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-timeout-no-success-line.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Success Line To Print | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Success Line To Print | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-no-exit-code.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause No Exit Code | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause No Exit Code | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        if [ "${{ steps.exe-monitor-fail-retries-no-success-condition.outcome}}" = "failure" ]; then
+          echo -e "${{ env.bashPass }}  | Retries Timeout Cause Neither Condition | Failed As Intended ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }}  | Retries Timeout Cause Neither Condition | Had Unexpected Pass ${{ env.bashEnd }}"
+          exit 1
+        fi
