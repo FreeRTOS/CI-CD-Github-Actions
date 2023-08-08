@@ -131,8 +131,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-        with:
-          python-version: '3.11.0'
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         uses: actions/checkout@v3
@@ -200,14 +198,20 @@ jobs:
           ref: main
           path: ${{ matrix.inputs.repository }}_Recursive
           submodules: recursive
-          fetch-depth: 0
+          fetch-depth: 1
+
+      - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        shell: bash
+        working-directory: ${{ matrix.inputs.repository }}_Recursive
+        run: | # Init Submodules
+          git submodule update --checkout --init
 
       - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./manifest-verifier
         with:
           path: ${{ matrix.inputs.repository }}_Recursive
-          exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
           fail-on-incorrect-version: true
 
       - name: Build ${{matrix.inputs.repository}}
