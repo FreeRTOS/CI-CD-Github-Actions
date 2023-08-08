@@ -72,7 +72,7 @@ fi
 # A complicated thing to handle parsing the arguments
 #echo "Hello"
 #echo "fdfind -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) [0-9]{4} amazon.com\" "
-files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lriE "copyright (.*) [0-9]{4} amazon.com" )
+files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -liE "copyright (.*) [0-9]{4} amazon.com" )
 
 finalFiles=("")
 for file in ${files[@]}; do

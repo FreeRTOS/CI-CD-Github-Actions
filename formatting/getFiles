@@ -46,7 +46,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # By default only grab the c and h files. Only grab the files with amazon copyright
     # Put all the files in an array. Uncomment the following line to see the command run.
     # echo "fd -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) 20[0-9]{2} amazon.com\" "
-    files=$(fd -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lrie "copyright (.*) 20\d\d amazon.com")
+    files=$(fd -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lie "copyright (.*) 20\d\d amazon.com")
 
 # Making the assumption that anybody else running this is a gnu getopt user
 else
@@ -100,7 +100,7 @@ else
     # By default only grab the c and h files. Only grab the files with amazon copyright
     # Put all the files in an array. Uncomment the following line to see the command run.
     # echo "fdfind -e c -e h "$excludeDirs" "$excludeFiles" "$includeExtensions" --exec grep -lriE \"copyright (.*) 20[0-9]{2} amazon.com\" "
-    files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -lriE "copyright (.*) 20[0-9]{2} amazon.com" )
+    files=$(fdfind -e c -e h $excludeDirs $excludeFiles $includeExtensions --exec grep -liE "copyright (.*) 20[0-9]{2} amazon.com" )
 fi
 
 # For future FreeBSD users:
