@@ -17,9 +17,22 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Setup
-        run: sudo apt-get install complexity fd-find uncrustify
+
+      - env:
+          stepName: Install Dependencies
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0
+        name: ${{ env.stepName }}
         shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          sudo apt-get install complexity fd-find
+          echo "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
       - env:
           stepName: Complexity
           bashPass: \033[32;1mPASSED -
@@ -27,31 +40,13 @@ runs:
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0m
         working-directory: ${{ inputs.path }}
+        shell: bash
         run: |
           # ${{ env.stepName }}
-          #echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
-          #echo "::group::Swap to Uncrustify for Formatting"
-          #set +e
-
-          # Get all files that end in .c or .h.
-          # Exclude any files or directories that we were asked to.
-          # Then limit the search to files that have the amazon copyright on them.
-          # -l Provides a list of the files
-          # -r Means do a recursive search
-          # -i tells it to ignore the case
-          #pushd ${{ inputs.source_path }}
-          #fdfind -e c -e h --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
-          #git diff
-          #popd
-          #set -e
-          #echo "::endgroup::"
-          #echo -e "${{ env.bashPass }} Swapped to Uncrustify ${{ env.bashEnd }}"
-          #echo -e "${{ env.bashInfo }} Starting Complexit Check ${{ env.bashEnd }}"
-
           echo "::group::${{ env.stepName }}"
-          find ${{ inputs.source_path }}/ -iname '*.c' |\
-          xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+
+          fdfind -e c --base-directory ${{ inputs.source_path }} --exec \
+            complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
-
-        shell: bash

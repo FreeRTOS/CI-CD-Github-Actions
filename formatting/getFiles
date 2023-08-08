@@ -23,7 +23,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
             excludeFiles="-E $(echo "${1#*=}" | sed -E 's/,/ -E /g')"
             shift
             ;;
-        -ie= | --include-extensions* )
+        -ie= | --include-extensions=* )
             includeExtensions="-e $(echo "${1#*=}" | sed -E 's/,/ -e /g')"
             shift
             ;;
