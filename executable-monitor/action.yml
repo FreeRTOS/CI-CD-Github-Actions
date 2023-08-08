@@ -57,7 +57,7 @@ runs:
         run: |
           # Run Executable with Monitoring
           echo "::group::Argument Parsing"
-          optArgs=("")
+          optArgs=" "
           # Make sure we have an exit condition to look for
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
@@ -70,19 +70,19 @@ runs:
 
           # Check if an exit code was provided
           if [ "${{ inputs.success-exit-code }}" != "" ]; then
-            optArgs+="--success-exit-code=${{ inputs.success-exit-code }} "
+            optArgs="--success-exit-code=${{ inputs.success-exit-code }} $optArgs"
             echo "Adding --success-exit-code=${{ inputs.success-exit-code }}"
           fi
 
           # Check for log directory/if a log file should be created
           if [ "${{ inputs.log-dir }}" != "" ]; then
-            optArgs+=("--log-dir=${{ inputs.log-dir}} ")
+            optArgs="--log-dir=${{ inputs.log-dir}} $optArgs"
             echo "Adding --log-dir=${{ inputs.log-dir}}"
           fi
 
           # Check for retry attempts
           if [ "${{ inputs.retry-attempts }}" != "" ]; then
-            optArgs+=("--retry-attempts=${{ inputs.retry-attempts }} ")
+            optArgs="--retry-attempts=${{ inputs.retry-attempts }} $optArgs"
             echo "Adding --retry-attempts=${{ inputs.retry-attempts }}"
           fi
 
@@ -96,21 +96,21 @@ runs:
             successLineArgs="--success-line=\"${{ inputs.success-line}}\" $optArgs"
             echo "Adding --success-line=${{ inputs.success-line}}"
             echo "::endgroup::"
-            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" {$optArgs} ${{ env.bashEnd }}"
+            echo -e " ${{ env.bashInfo }}Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs ${{ env.bashEnd }}"
             echo "::group::Executable Output"
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs} --success-line="${{ inputs.success-line}}"
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs --success-line="${{ inputs.success-line}}"
           else
             echo "::endgroup::"
-            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} {$optArgs} ${{ env.bashEnd }}"
+            echo -e " ${{ env.bashInfo }}Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs ${{ env.bashEnd }}"
             echo "::group::Executable Output"
-            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs}
+            python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs
           fi
 
           # Store status as the echo group will overwrite it
           exitStatus=$?
           set -e
-
           echo "::endgroup::"
+
           if [ $exitStatus -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else

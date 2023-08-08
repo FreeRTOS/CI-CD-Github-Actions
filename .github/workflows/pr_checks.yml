@@ -150,7 +150,7 @@ jobs:
           exclude-dirs: ${{matrix.inputs.exclude-dirs }}
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
-        if: success() || failure()
+        if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         uses: ./complexity
         with:
           path: ${{ matrix.inputs.repository }}
@@ -217,7 +217,7 @@ jobs:
         working-directory: ${{matrix.inputs.repository}}_Recursive
         run: |
           sudo apt-get install -y lcov
-          cmake -S ./coreMQTT/test -B build/ \
+          cmake -S ./test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \

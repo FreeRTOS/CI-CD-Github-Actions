@@ -70,6 +70,7 @@ jobs:
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           fi
+
       # Get future times from now, then look for that in the executable
       - env:
           stepName: Get Future Times
