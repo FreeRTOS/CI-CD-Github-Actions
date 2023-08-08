@@ -140,6 +140,7 @@ jobs:
         run: file=$(find . -name .cSpellWords.txt); readlink -f "$file" ; > "$file"
 
       - name: Test Spell Check Fails on Misspelled Word
+        continue-on-error: true
         id: test-spell-check-find-mistake
         uses: ./rust-spell-check
         with:
