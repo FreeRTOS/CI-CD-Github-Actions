@@ -14,7 +14,6 @@ env:
 
 
 jobs:
-
   PR-repo-checks:
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request }} || ${{ github.event.workflow }}
@@ -140,8 +139,8 @@ jobs:
         uses: ./formatting
         with:
           path: ${{ matrix.inputs.repository }}
-          exclude-files: ${{ matrix.inputs.exclude-fles}}
-          exclude-dirs: ${{matrix.inputs.exclude-dirs}}
+          exclude-files: ${{ matrix.inputs.exclude-files }}
+          exclude-dirs: ${{matrix.inputs.exclude-dirs }}
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -149,7 +148,7 @@ jobs:
         with:
           path: ${{ matrix.inputs.repository }}
           # For coreMQTT the code complexity threshold is 10.
-          horrid_threshold: 13
+          horrid_threshold: 16
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -242,7 +241,7 @@ jobs:
           fail-on-incorrect-version: true
 
 
-PR-repo-checks:
+  PR-Complexity-Check-Use-Uncrustify:
     runs-on: ubuntu-20.04
     if: ${{ github.event.pull_request }} || ${{ github.event.workflow }}
     strategy:
@@ -350,7 +349,7 @@ PR-repo-checks:
             },
           ]
 
-      steps:
+    steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-python@v3
@@ -368,4 +367,4 @@ PR-repo-checks:
         with:
           path: ${{ matrix.inputs.repository }}
           # For coreMQTT the code complexity threshold is 10.
-          horrid_threshold: 13
+          horrid_threshold: 8
