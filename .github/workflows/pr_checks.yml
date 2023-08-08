@@ -181,15 +181,6 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
 
-      - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
-        if: success() || failure()
-        uses: ./memory_statistics
-        with:
-          path: repo/${{ matrix.inputs.repository }}
-          config: .github/memory_statistics_config.json
-          output: size_table_new.html
-          check_against: docs/doxygen/include/size_table.md
-
       - name: "Clone: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: actions/checkout@v3
@@ -208,6 +199,15 @@ jobs:
           git submodule update --checkout --init
           git submodule foreach git fetch
           git submodule foreach git describe --tags
+
+      - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./memory_statistics
+        with:
+          path: repo/${{ matrix.inputs.repository }}_Recursive
+          config: .github/memory_statistics_config.json
+          output: size_table_new.html
+          check_against: docs/doxygen/include/size_table.md
 
       - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
         if: success() || failure()
