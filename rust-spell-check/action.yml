@@ -87,6 +87,14 @@ runs:
         # Only get to here if nothing above fails
 
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        sudo apt-get install tree
+        set +e
+        ls ./${{inputs.path}}
+        ls $GITHUB_ACTION_PATH
+        tree $GITHUB_ACTION_PATH
+        tree ${{inputs.path}}
+        set -e
+        exit 0
 
     - env:
         bashPass: \033[32;1mPASSED -
@@ -96,7 +104,7 @@ runs:
         stepName: Run Spell Checker
       name: ${{ env.stepName }}
       id: run-spell-checker
-      working-directory: ${{ inputs.path }}
+      working-directory: ./${{ inputs.path }}
       shell: bash
       run: |
         # ${{ env.stepName }}

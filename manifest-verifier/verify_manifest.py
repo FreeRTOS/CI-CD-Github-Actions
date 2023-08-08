@@ -108,7 +108,6 @@ if __name__ == '__main__':
     # Check that manifest.yml contains entries for all submodules
     # present in repository.
     if submodule_path_from_manifest != submodule_path_from_git:
-        print("{0} manifest.yml is missing entries for: {1} {2}".format(bashFail, submodule_path_from_manifest, bashEnd))
         # Find list of library submodules missing in manifest.yml
         for git_path in submodule_path_from_git:
             if git_path not in submodule_path_from_manifest:
