@@ -80,10 +80,10 @@ jobs:
             # {{ env.stepName }}
             set -x
             echo -e "${{ env.bashInfo }} Getting Future Times to Compare Against ${{ env.bashEnd }}"
-            echo      "exitCodeTwoMinutes=$(date --date='2 minutes' +%M)" >> "$GITHUB_ENV"
-            echo "successLineThreeMinutes=$(date --date='3 minutes' +%H:%M)" >> "$GITHUB_ENV"
+            echo      "exitCodeThreeMinutes=$(date --date='3 minutes' +%M)" >> "$GITHUB_ENV"
+            echo "successLineFourMinutes=$(date --date='4 minutes' +%H:%M)" >> "$GITHUB_ENV"
             echo  "successLineFiveMinutes=$(date --date='5 minutes' +%H:%M)" >> "$GITHUB_ENV"
-            echo    "exitCodeFourMinutes=$(date --date='4 minutes' +%M)" >> "$GITHUB_ENV"
+            echo    "exitCodeSixMinutes=$(date --date='6 minutes' +%M)" >> "$GITHUB_ENV"
 
       - env:
           stepName: "Functional | Exit Code | Exit Code Found"
@@ -136,7 +136,7 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test_exit_current_minutes.out
-          success-exit-code: ${{ env.exitCodeTwoMinutes }}
+          success-exit-code: ${{ env.exitCodeThreeMinutes }}
           retry-attempts: 10
           timeout-seconds: 60
 
@@ -147,19 +147,7 @@ jobs:
         uses: ./executable-monitor
         with:
           exe-path: executable-monitor/test_exit_current_minutes.out
-          success-line: ${{ env.successLineThreeMinutes }}
-          retry-attempts: 10
-          timeout-seconds: 60
-
-      - env:
-          stepName: "Functional | Retry Needed | Exit Code and Success Line | Exit Code Found"
-        name: ${{ env.stepName }}
-        id: exe-monitor-retry-both-inputs-find-exit
-        uses: ./executable-monitor
-        with:
-          exe-path: executable-monitor/test_exit_current_minutes.out
-          success-line: "LINE_THAT_WILL_NOT_PRINT"
-          success-exit-code: ${{ env.exitCodeFourMinutes }}
+          success-line: ${{ env.successLineFourMinutes }}
           retry-attempts: 10
           timeout-seconds: 60
 
@@ -173,6 +161,18 @@ jobs:
           exe-path: executable-monitor/test.out
           success-line: ${{ env.successLineFiveMinutes }}
           success-exit-code: 1
+          retry-attempts: 10
+          timeout-seconds: 60
+
+      - env:
+          stepName: "Functional | Retry Needed | Exit Code and Success Line | Exit Code Found"
+        name: ${{ env.stepName }}
+        id: exe-monitor-retry-both-inputs-find-exit
+        uses: ./executable-monitor
+        with:
+          exe-path: executable-monitor/test_exit_current_minutes.out
+          success-line: "LINE_THAT_WILL_NOT_PRINT"
+          success-exit-code: ${{ env.exitCodeSixMinutes }}
           retry-attempts: 10
           timeout-seconds: 60
 

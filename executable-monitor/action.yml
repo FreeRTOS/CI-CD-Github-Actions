@@ -96,12 +96,12 @@ runs:
             successLineArgs="--success-line=\"${{ inputs.success-line}}\" $optArgs"
             echo "Adding --success-line=${{ inputs.success-line}}"
             echo "::endgroup::"
-            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" $optArgs ${{ env.bashEnd }}"
+            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} --success-line="${{ inputs.success-line }}" {$optArgs} ${{ env.bashEnd }}"
             echo "::group::Executable Output"
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs} --success-line="${{ inputs.success-line}}"
           else
             echo "::endgroup::"
-            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} $optArgs ${{ env.bashEnd }}"
+            echo -e " ${{ env.bashInfo }} Running Command: python3 executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} {$optArgs} ${{ env.bashEnd }}"
             echo "::group::Executable Output"
             python3 $GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }} --timeout-seconds=${{ inputs.timeout-seconds }} ${optArgs}
           fi
