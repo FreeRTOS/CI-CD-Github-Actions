@@ -28,25 +28,26 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
-        stepName: Install Dependencies
+        stepName: Set-Up The Spell Checker
       name: ${{ env.stepName }}
       id: spell-checker-setup
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
+        echo "::group::Install Dependencies"
 
         # Install the Dependencies we need to run the spell-checker
         sudo apt-get install util-linux -y
         sudo apt-get install fd-find -y
         sudo apt-get install aspell -y
         sudo apt-get install spell -y
+        echo "::endgroup::"
 
         # Check if we can use the current spell checker
         # This is not added to the path by default.
         # I honestly do not know why
         export PATH="$GITHUB_ACTION_PATH:$PATH"
-        echo -e " ${{ env.bashInfo }} Check for pre-build spell checker ${{ env.bashEnd }}"
+        echo -e " ${{ env.bashInfo }} Try Using the pre-built spell checker ${{ env.bashEnd }}"
 
         # Wrap the check to use if in a set +e so we don't error out if it fails
         # Save the exit code to check later, as "set -e" will overwrite it
@@ -107,7 +108,7 @@ runs:
         # The various exclude dir/file options
         # files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs}}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions }}")
         files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
-
+        echo "${{ env.bashInfo }} Checking spelling of $files ${{ env.bashEnd }}"
         set +e
         spell-checker -c -w .cSpellWords.txt $files
         exitStatus=$?
