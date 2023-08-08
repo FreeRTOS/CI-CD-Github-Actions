@@ -85,6 +85,7 @@ runs:
         fi
         echo "::endgroup::"
         # Only get to here if nothing above fails
+
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -101,7 +102,7 @@ runs:
         # ${{ env.stepName }}
         #echo "::group::${{ env.stepName }}"
         export PATH="$PATH:$GITHUB_ACTION_PATH"
-
+        pwd
         # So here's the deal. At time of writing this spell checker can check
         # every word in every folder in FreeRTOS/FreeRTOS in like 10 seconds.
         # So I just let it do that. If this changes in the future, feel free to use
