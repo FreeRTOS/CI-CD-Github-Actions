@@ -107,8 +107,11 @@ runs:
         # The various exclude dir/file options
         # files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs}}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions }}")
         files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
+
+        set +e
         spell-checker -c -w .cSpellWords.txt $files
         exitStatus=$?
+        set -e
 
         #echo "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
