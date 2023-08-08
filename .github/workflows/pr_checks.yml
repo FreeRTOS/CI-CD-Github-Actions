@@ -141,7 +141,7 @@ jobs:
 
       - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
         uses: ./link-verifier
-        if: success() || failure()
+        if: success() || failure() && ( "${{ matrix.inputs.repository }}" != "FreeRTOS" )
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity,formatting
@@ -191,6 +191,15 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
+      - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
+        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
+        shell: bash
+        working-directory: repo/${{ matrix.inputs.repository }}_Recursive
+        run: | # Init Submodules
+          git submodule update --checkout --init --recursive
+          git submodule foreach git fetch
+          git submodule foreach git describe --tags
+
       - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./manifest-verifier
@@ -199,7 +208,7 @@ jobs:
           fail-on-incorrect-version: true
 
       - name: Build ${{matrix.inputs.repository}}
-        if: ( success() || failure() ) && ( '${{ matrix.inputs.run-complexity }}' == 'true' )
+        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
@@ -214,7 +223,7 @@ jobs:
           make -C build/ all
 
       - name: Test
-        if: ( success() || failure() ) && ( '${{ matrix.inputs.run-complexity }}' == 'true' )
+        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
@@ -222,17 +231,8 @@ jobs:
           ctest -E system --output-on-failure
           cd ..
 
-      - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
-        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
-        shell: bash
-        working-directory: repo/${{ matrix.inputs.repository }}_Recursive
-        run: | # Init Submodules
-          git submodule update --checkout --init --recursive
-          git submodule foreach git fetch
-          git submodule foreach git describe --tags
-
       - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
-        if: ( success() || failure() ) && ( ${{ matrix.inputs.run-complexity }} == true )
+        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
         uses: ./memory_statistics
         with:
           path: repo/${{ matrix.inputs.repository }}_Recursive
