@@ -141,6 +141,14 @@ jobs:
           ref: main
           path: ${{ matrix.inputs.repository }}
 
+      - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
+        uses: ./link-verifier
+        if: success() || failure()
+        with:
+          path: ${{ matrix.inputs.repository }}
+          exclude-dirs: complexity,formatting
+          include-file-types: .c,.html
+
       - name: "Formatting Check : ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./formatting
@@ -183,14 +191,6 @@ jobs:
           config: ./memory_statistics_config.json
           output: ./size_table_new.html
           check_against: ./size_table_expected.html
-
-      - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
-        uses: ./link-verifier
-        if: success() || failure()
-        with:
-          path: ${{ matrix.inputs.repository }}
-          exclude-dirs: complexity,formatting
-          include-file-types: .c,.html
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         if: success() || failure()
