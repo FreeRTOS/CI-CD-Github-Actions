@@ -32,7 +32,7 @@ def read_manifest(git_modules, path_manifest):
         manifest_data = fp.read()
     yml = load(manifest_data, Loader=Loader)
     if "dependencies" not in yml:
-        print("{0} No dependencies in {0}. Exiting {1}".format(bashInfo, path_manifest, bashEnd))
+        print("{0} No dependencies in {1}. Exiting {2}".format(bashInfo, path_manifest, bashEnd))
         exit(0)
 
     # Iterate over all the "dependencies" entries, verify that
