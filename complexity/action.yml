@@ -45,7 +45,9 @@ runs:
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
 
-          fdfind -e c --base-directory ${{ inputs.source_path }} --exec \
+          # Use fdfind to find all files ending with a .c inside of the input directory
+          # From there run the complexity check against them
+          fdfind . -e c ${{ inputs.source_path }} --exec \
             complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
 
           echo "::endgroup::"

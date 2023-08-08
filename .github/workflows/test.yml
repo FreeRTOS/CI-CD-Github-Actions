@@ -29,7 +29,6 @@ jobs:
 
       - name: Test complexity check action
         uses: ./complexity
-        continue-on-error: true
         with:
           path: coreMQTT
           # The default threshold for all repos is 16
@@ -142,7 +141,6 @@ jobs:
 
       - name: Test Spell Check Fails on Misspelled Word
         id: test-spell-check-find-mistake
-        continue-on-error: true
         uses: ./rust-spell-check
         with:
           path: coreMQTT
