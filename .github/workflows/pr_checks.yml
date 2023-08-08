@@ -154,7 +154,6 @@ jobs:
         uses: ./complexity
         with:
           path: ${{ matrix.inputs.repository }}
-          # For coreMQTT the code complexity threshold is 10.
           horrid_threshold: 16
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
@@ -216,7 +215,9 @@ jobs:
         shell: bash
         working-directory: ${{matrix.inputs.repository}}_Recursive
         run: |
+          echo "::group:: Install lcov"
           sudo apt-get install -y lcov
+          echo "::endgroup::"
           cmake -S ./test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
