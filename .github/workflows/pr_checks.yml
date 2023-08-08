@@ -137,13 +137,13 @@ jobs:
         with:
           repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
           ref: main
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
 
       - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
         uses: ./link-verifier
         if: success() || failure()
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity,formatting
           include-file-types: .c,.html
 
@@ -151,7 +151,7 @@ jobs:
         if: success() || failure()
         uses: ./formatting
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
           exclude-files: ${{ matrix.inputs.exclude-files }}
           exclude-dirs: ${{matrix.inputs.exclude-dirs }}
 
@@ -159,36 +159,36 @@ jobs:
         if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         uses: ./complexity
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
           horrid_threshold: 16
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./doxygen
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
 
       - name: "Doxygen Zip Check: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./doxygen
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
           generate_zip: true
 
       - name: "Spelling Check: ${{ matrix.inputs.repository }} "
         if: success() || failure()
         uses: ./rust-spell-check
         with:
-          path: ${{ matrix.inputs.repository }}
+          path: repo/${{ matrix.inputs.repository }}
 
       - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./memory_statistics
         with:
-          path: memory_statistics/test
-          config: ./memory_statistics_config.json
-          output: ./size_table_new.html
-          check_against: ./size_table_expected.html
+          path: repo/${{ matrix.inputs.repository }}
+          config: .github/memory_statistics_config.json
+          output: size_table_new.html
+          check_against: docs/doxygen/include/size_table.md
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -196,28 +196,30 @@ jobs:
         with:
           repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
           ref: main
-          path: ${{ matrix.inputs.repository }}_Recursive
+          path: repo/${{ matrix.inputs.repository }}_Recursive
           submodules: recursive
           fetch-depth: 1
 
       - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
         if: success() || failure()
         shell: bash
-        working-directory: ${{ matrix.inputs.repository }}_Recursive
+        working-directory: repo/${{ matrix.inputs.repository }}_Recursive
         run: | # Init Submodules
           git submodule update --checkout --init
+          git submodule foreach git fetch
+          git submodule foreach git describe --tags
 
       - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
         if: success() || failure()
         uses: ./manifest-verifier
         with:
-          path: ${{ matrix.inputs.repository }}_Recursive
+          path: repo/${{ matrix.inputs.repository }}_Recursive
           fail-on-incorrect-version: true
 
       - name: Build ${{matrix.inputs.repository}}
         if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         shell: bash
-        working-directory: ${{matrix.inputs.repository}}_Recursive
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
           echo "::group:: Install lcov"
           sudo apt-get install -y lcov
@@ -232,7 +234,7 @@ jobs:
       - name: Test
         if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         shell: bash
-        working-directory: ${{matrix.inputs.repository}}_Recursive
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
           cd build/
           ctest -E system --output-on-failure
@@ -241,7 +243,7 @@ jobs:
       - name: Run Coverage ${{matrix.inputs.repository}}
         if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         shell: bash
-        working-directory: ${{matrix.inputs.repository}}_Recursive
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
           make -C build/ coverage
           declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
@@ -252,6 +254,6 @@ jobs:
         if: success() || failure() && ${{ matrix.inputs.run-complexity }} == true
         uses: ./coverage-cop
         with:
-          path: ./${{matrix.inputs.repository}}_Recursive/build/coverage.info
+          path: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100

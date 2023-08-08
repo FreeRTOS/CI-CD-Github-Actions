@@ -49,6 +49,7 @@ runs:
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
         sudo apt install -y gh
+        sudo apt install pandoc -y
         sudo apt-get install -y python3-setuptools python3-pip
         python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
         echo "::endgroup::"
