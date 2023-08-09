@@ -62,6 +62,7 @@ runs:
         bashEnd:  \033[0m
         stepName: Run link verifier script
       name: ${{ env.stepName }}
+      working-directory: ${{ inputs.path }}
       shell: bash
       run: |
         # ${{ env.stepName }}
