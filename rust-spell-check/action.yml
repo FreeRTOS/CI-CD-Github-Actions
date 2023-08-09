@@ -101,7 +101,7 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
-        stepName: Run Spell Checker
+        stepName: Spell Checker
       name: ${{ env.stepName }}
       id: run-spell-checker
       working-directory: ${{ inputs.path }}
@@ -109,26 +109,33 @@ runs:
       run: |
         # ${{ env.stepName }}
         #echo "::group::${{ env.stepName }}"
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
 
         # So here's the deal. At time of writing this spell checker can check
         # every word in every folder in FreeRTOS/FreeRTOS in like 10 seconds.
         # So I just let it do that. If this changes in the future, feel free to use
         # The various exclude dir/file options
         # files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs}}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions }}")
-        echo -e "${{ env.bashInfo }} Adding GITHUB_ACTION_PATH= "$GITHUB_ACTION_PATH" to PATH ${{ env.bashEnd }}"
-        echo -e "${{ env.bashInfo }} PATH= "$PATH" ${{ env.bashEnd }}"
-        export PATH="$PATH:$GITHUB_ACTION_PATH"
-        echo -e "${{ env.bashInfo }} PATH= "$PATH" ${{ env.bashEnd }}"
-        echo -e "${{ env.bashInfo }} Searching for files ${{ env.bashEnd }}"
-        files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
 
-        for file in ${files[@]}; do
-          echo -e "${{ env.bashInfo }} Checking spelling of "$file" ${{ env.bashEnd }}"
-          set +e
-          spell-checker -c -w .cSpellWords.txt $file
-          exitStatus=$?
-          set -e
-        done
+        # The use of exec will return the exit code from the grep command
+        # Grep returns an exit code if a file isn't found
+        # So wrap the search in a set +/- e so github doesn't stop the run on first failure
+        set +e
+        files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
+        set -e
+
+        # If you're onboarding a repo or need better debugging, uncomment this instead
+        # Of the one-line check
+        # for file in ${files[@]}; do
+        #   echo -e "${{ env.bashInfo }} Checking spelling of "$file" ${{ env.bashEnd }}"
+        #   set +e
+        #   spell-checker -c -w .cSpellWords.txt $file
+        #   exitStatus=$?
+        #   set -e
+        # done
+
+        spell-checker -c -w .cSpellWords.txt $files
+        exitStatus=$?
 
         #echo "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
