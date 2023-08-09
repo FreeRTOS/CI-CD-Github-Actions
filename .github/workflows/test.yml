@@ -224,14 +224,17 @@ jobs:
         uses: actions/setup-python@v3
 
       - env:
-          stepName: Test link verifier action
+          stepName: "Functional | Success | Link Verifier Works & Excludes Directory"
+        name: ${{ env.stepName }}
+        id: link-verifier-success-case
         uses: ./link-verifier
         with:
           path: ./
-          exclude-dirs: complexity,formatting, badFiles
+          exclude-dirs: complexity, formatting, badFiles
 
       - env:
-          stepName: Test link verifier action failure case
+          stepName: "Functional | Failure | Link Does Not Exist"
+        name: ${{ env.stepName }}
         id: link-verifier-fail-case
         continue-on-error: true
         uses: ./link-verifier
