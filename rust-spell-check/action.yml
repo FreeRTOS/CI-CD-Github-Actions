@@ -110,19 +110,20 @@ runs:
         # ${{ env.stepName }}
         #echo "::group::${{ env.stepName }}"
         export PATH="$PATH:$GITHUB_ACTION_PATH"
-        pwd
-        fdfind -e c -e h
         # So here's the deal. At time of writing this spell checker can check
         # every word in every folder in FreeRTOS/FreeRTOS in like 10 seconds.
         # So I just let it do that. If this changes in the future, feel free to use
         # The various exclude dir/file options
         # files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs}}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions }}")
         files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
-        echo "${{ env.bashInfo }} Checking spelling of $files ${{ env.bashEnd }}"
-        set +e
-        spell-checker -c -w .cSpellWords.txt $files
-        exitStatus=$?
-        set -e
+
+        for file in ${files[@]}; do
+          echo -e "${{ env.bashInfo }} Checking spelling of "$file" ${{ env.bashEnd }}"
+          set +e
+          spell-checker -c -w .cSpellWords.txt $file
+          exitStatus=$?
+          set -e
+        done
 
         #echo "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
