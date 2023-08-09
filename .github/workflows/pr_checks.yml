@@ -125,7 +125,7 @@ jobs:
               repository: ota-for-AWS-IoT-embedded-sdk,
               exclude-files: ".cSpellWords.txt",
               run-complexity: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               #org: aws,
               org: skptak,
            },
