@@ -45,6 +45,7 @@ runs:
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
           echo -e "${{ env.bashInfo }} Have complexity limit of ${{ inputs.horrid_threshold }} ${{ env.bashEnd }}"
+          exitStatus=0
 
           # Use fdfind to find all files ending with a .c inside of the input directory
           # From there run the complexity check against them
@@ -53,3 +54,4 @@ runs:
 
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+          exit 0
