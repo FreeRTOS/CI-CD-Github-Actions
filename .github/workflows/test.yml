@@ -160,6 +160,7 @@ jobs:
             echo -e "${{ env.bashFail }} Functional | Failure | Fail on Misspelled Word | Had Unexpected "success" ${{ env.bashEnd }}"
             exitStatus=1
           fi
+          exit $exitStatus
 
   test-coverage-cop:
     runs-on: ubuntu-latest
@@ -222,12 +223,37 @@ jobs:
       - name: Setup python environment
         uses: actions/setup-python@v3
 
-      - name: Test link verifier action
+      - env:
+          stepName: Test link verifier action
+        uses: ./link-verifier
+        with:
+          path: ./
+          exclude-dirs: complexity,formatting, badFiles
+
+      - env:
+          stepName: Test link verifier action failure case
+        id: link-verifier-fail-case
+        continue-on-error: true
         uses: ./link-verifier
         with:
           path: ./
           exclude-dirs: complexity,formatting
-          include-file-types: .c,.html
+
+      - env:
+          stepName: Check Failure Test Case
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.link-verifier-fail-case.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Fail on Misspelled Word | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Fail on Misspelled Word | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
 
   test-manifest-verifier:
     runs-on: ubuntu-latest

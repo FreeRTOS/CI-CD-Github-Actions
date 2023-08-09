@@ -166,7 +166,7 @@ def parse_file(html_file):
     return HtmlFile(html_file)
 
 def html_name_from_markdown(filename):
-    md_pattern = re.compile('.md', re.IGNORECASE)
+    md_pattern = re.compile('\.md', re.IGNORECASE)
     return md_pattern.sub('.html', filename)
 
 def create_html(markdown_file):
