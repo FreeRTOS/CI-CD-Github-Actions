@@ -225,6 +225,8 @@ jobs:
           ref: main
           path: repo/${{ matrix.inputs.repository }}_Recursive
           submodules: recursive
+          # Need full history to make sure we get submodules
+          fetch-depth: 0
 
       - name: Build ${{matrix.inputs.repository}}
         if: matrix.inputs.run-complexity && ( success() || failure() )
