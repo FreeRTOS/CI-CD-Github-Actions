@@ -44,107 +44,112 @@ jobs:
               #org: FreeRTOS,
               org: skptak,
             },
-            {
-              repository: coreMQTT,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              build-flags: "-DBUILD_CLONE_SUBMODULES=ON -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG",
-              #org: FreeRTOS,
-              org: skptak,
-            },
-            {
-              repository: corePKCS11,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              build-flags: '-DUNIT_TESTS=1 -DSYSTEM_TESTS=0',
-              #org: FreeRTOS,
-              org: skptak,
-            },
-            {
-              repository: coreSNTP,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              #org: FreeRTOS,
-              org: skptak,
-            },
-            {
-              repository: FreeRTOS-Cellular-Interface,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              #org: FreeRTOS,
-              org: skptak,
-            },
-            {
-              repository: Device-Defender-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
-              #org: aws,
-              org: skptak,
-            },
-            {
-              repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
-              #org: aws,
-              org: skptak,
-            },
-            {
-              repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
-              #org: aws,
-              org: skptak,
-            },
-            {
-              repository: Jobs-for-AWS-IoT-embedded-sdk,
-              exclude-files: ".cSpellWords.txt",
-              run-complexity: true,
-              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
-              #org: aws,
-              org: skptak,
-            },
-            {
-              repository: ota-for-AWS-IoT-embedded-sdk,
-              exclude-files: ".cSpellWords.txt",
-              run-complexity: true,
-              #org: aws,
-              org: skptak,
-            },
-            {
-              repository: SigV4-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: true,
-              #org: aws,
-              org: skptak,
-            },
-            {
-            repository: FreeRTOS-Kernel,
-            exclude-files: .cSpellWords.txt,
-            run-complexity: false,
-            #org: aws,
-            org: skptak,
-            },
-            {
-              repository: FreeRTOS,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: false,
-              #org: FreeRTOS,
-              org: skptak,
-            },
-            {
-              repository: FreeRTOS-Plus-TCP,
-              exclude-files: .cSpellWords.txt,
-              run-complexity: false,
-              #org: FreeRTOS,
-              org: skptak,
-            },
+           #{
+           #  repository: coreMQTT,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  build-flags: "-DBUILD_CLONE_SUBMODULES=ON -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG",
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: corePKCS11,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  build-flags: '-DUNIT_TESTS=1 -DSYSTEM_TESTS=0',
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: coreSNTP,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: FreeRTOS-Cellular-Interface,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: Device-Defender-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: Jobs-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: ".cSpellWords.txt",
+           #  run-complexity: true,
+           #  build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: ota-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: ".cSpellWords.txt",
+           #  run-complexity: true,
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: SigV4-for-AWS-IoT-embedded-sdk,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: true,
+           #  #org: aws,
+           #  org: skptak,
+           #},
+           #{
+           #repository: FreeRTOS-Kernel,
+           #exclude-files: .cSpellWords.txt,
+           #run-complexity: false,
+           ##org: aws,
+           #org: skptak,
+           #},
+           #{
+           #  repository: FreeRTOS,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: false,
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
+           #{
+           #  repository: FreeRTOS-Plus-TCP,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: false,
+           #  #org: FreeRTOS,
+           #  org: skptak,
+           #},
           ]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
+
+      - name: Install Common Tools
+        shell: bash
+        run: |
+          sudo apt-get install -y lcov sed build-essential cmake
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         uses: actions/checkout@v3
@@ -205,8 +210,32 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
+      - name: Build ${{matrix.inputs.repository}}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        shell: bash
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
+        run: |
+          echo "::group:: Install lcov"
+          sudo apt-get install -y lcov
+          echo "::endgroup::"
+          cmake -S ./test -B build/ \
+          -G "Unix Makefiles" \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror' \
+          "${{ matrix.inputs.build-flags }}"
+          make -C build/ all
+
+      - name: Test
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        shell: bash
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
+        run: |
+          cd build/
+          ctest -E system --output-on-failure
+          cd ..
+
       - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
-        if: ( success() || failure() ) && ( matrix.inputs.run-complexity == true )
+        if: success() || failure()
         shell: bash
         working-directory: repo/${{ matrix.inputs.repository }}_Recursive
         run: | # Init Submodules
@@ -221,32 +250,8 @@ jobs:
           path: repo/${{ matrix.inputs.repository }}_Recursive
           fail-on-incorrect-version: true
 
-      - name: Build ${{matrix.inputs.repository}}
-        if: ( success() || failure() ) && ( matrix.inputs.run-complexity )
-        shell: bash
-        working-directory: repo/${{matrix.inputs.repository}}_Recursive
-        run: |
-          echo "::group:: Install lcov"
-          sudo apt-get install -y lcov
-          echo "::endgroup::"
-          cmake -S ./test -B build/ \
-          -G "Unix Makefiles" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror' \
-          ${{ matrix.inputs.build-flags }}
-          make -C build/ all
-
-      - name: Test
-        if: matrix.inputs.run-complexity && ( success() || failure() )
-        shell: bash
-        working-directory: repo/${{matrix.inputs.repository}}_Recursive
-        run: |
-          cd build/
-          ctest -E system --output-on-failure
-          cd ..
-
       - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
-        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
         uses: ./memory_statistics
         with:
           path: repo/${{ matrix.inputs.repository }}_Recursive
@@ -255,7 +260,7 @@ jobs:
           check_against: docs/doxygen/include/size_table.md
 
       - name: Run Coverage ${{matrix.inputs.repository}}
-        if: success() || failure()
+        if: matrix.inputs.run-complexity && ( success() || failure() )
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
@@ -265,7 +270,7 @@ jobs:
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
 
       - name: Test coverage cop action ${{matrix.inputs.repository}}
-        if: success() || failure()
+        if: matrix.inputs.run-complexity && ( success() || failure() )
         uses: ./coverage-cop
         with:
           path: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
