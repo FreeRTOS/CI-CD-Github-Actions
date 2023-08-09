@@ -192,7 +192,7 @@ jobs:
           fetch-depth: 1
 
       - name: "Ensure Recursive Clone of ${{ matrix.inputs.repository }}"
-        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
+        if: ( success() || failure() ) && ( matrix.inputs.run-complexity == true )
         shell: bash
         working-directory: repo/${{ matrix.inputs.repository }}_Recursive
         run: | # Init Submodules
@@ -208,7 +208,7 @@ jobs:
           fail-on-incorrect-version: true
 
       - name: Build ${{matrix.inputs.repository}}
-        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
+        if: ( success() || failure() ) && ( matrix.inputs.run-complexity )
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
@@ -223,7 +223,7 @@ jobs:
           make -C build/ all
 
       - name: Test
-        if: ( success() || failure() ) && ${{ matrix.inputs.run-complexity }}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
