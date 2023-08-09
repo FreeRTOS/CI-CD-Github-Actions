@@ -12,7 +12,7 @@ inputs:
   include-file-types:
     description: 'Comma-separated list of file type patters in repository to test. (Eg .c, .h)'
     required: false
-    default: '.c .h .dox'
+    default: '.c .h .dox .md .html'
   allowlist-file:
     description: 'Path to file containing allowlist of URLs.'
     required: false
@@ -24,6 +24,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup Python for link verifier action
+      uses: actions/setup-python@v3
+
     - env:
         # The bash escape character is \033
         # At time of writing, you can't add a global environment

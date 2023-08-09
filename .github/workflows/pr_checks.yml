@@ -182,7 +182,6 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity,formatting
-          include-file-types: .c,.html
 
       - name: "Formatting Check : ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -226,7 +225,6 @@ jobs:
           ref: main
           path: repo/${{ matrix.inputs.repository }}_Recursive
           submodules: recursive
-          fetch-depth: 1
 
       - name: Build ${{matrix.inputs.repository}}
         if: matrix.inputs.run-complexity && ( success() || failure() )
