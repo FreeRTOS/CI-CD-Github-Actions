@@ -254,13 +254,6 @@ def fetch_issues(repo, issue_type, limit):
         if process.returncode == 0:
             key = issue_type + 's'
             for issue in process.stdout.split():
-                print(f"issue= {issue}")
-                print(f"issue_type= {issue_type}")
-                print(f"main_repo_list= {main_repo_list}")
-                print(f"\n\n\n")
-                print(f"main_repo_list[repo]= {main_repo_list[repo]}")
-                print(f"\n\n\n")
-                print(f"main_repo_list[repo][key]= {main_repo_list[repo][key]}")
                 main_repo_list[repo][key].add(int(issue))
         return 0
     else:
