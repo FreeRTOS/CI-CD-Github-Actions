@@ -134,8 +134,10 @@ runs:
         #   set -e
         # done
 
+        set +e
         spell-checker -c -w .cSpellWords.txt $files
         exitStatus=$?
+        set -e
 
         #echo "::endgroup::"
         if [ $exitStatus -eq 0 ]; then

@@ -40,6 +40,7 @@ jobs:
               repository: coreMQTT,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              build-flags: "-DBUILD_CLONE_SUBMODULES=ON -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG"
               #org: FreeRTOS,
               org: skptak,
             },
@@ -218,8 +219,8 @@ jobs:
           cmake -S ./test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
-          -DBUILD_CLONE_SUBMODULES=ON \
-          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror'
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror' \
+          ${{ matrix.inputs.build-flags }}
           make -C build/ all
 
       - name: Test
