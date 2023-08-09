@@ -78,7 +78,7 @@ jobs:
         id: future-time
         shell: bash
         run: |
-            # {{ env.stepName }}
+            # ${{ env.stepName }}
             set -x
             echo -e "${{ env.bashInfo }} Getting Future Times to Compare Against ${{ env.bashEnd }}"
             echo      "exitCodeThreeMinutes=$(date --date='3 minutes' +%M)" >> "$GITHUB_ENV"
