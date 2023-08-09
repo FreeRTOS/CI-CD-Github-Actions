@@ -23,6 +23,14 @@ jobs:
         inputs:
           [
             {
+              repository: backoffAlgorithm,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: "-DBUILD_UNIT_TESTS=ON",
+              #org: FreeRTOS,
+              org: skptak,
+            },
+            {
               repository: coreHTTP,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
@@ -40,7 +48,7 @@ jobs:
               repository: coreMQTT,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
-              build-flags: "-DBUILD_CLONE_SUBMODULES=ON -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG"
+              build-flags: "-DBUILD_CLONE_SUBMODULES=ON -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG",
               #org: FreeRTOS,
               org: skptak,
             },
@@ -48,6 +56,7 @@ jobs:
               repository: corePKCS11,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              build-flags: '-DUNIT_TESTS=1 -DSYSTEM_TESTS=0',
               #org: FreeRTOS,
               org: skptak,
             },
@@ -69,6 +78,7 @@ jobs:
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
               #org: aws,
               org: skptak,
             },
@@ -76,6 +86,7 @@ jobs:
               repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
               #org: aws,
               org: skptak,
             },
@@ -83,6 +94,7 @@ jobs:
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
               #org: aws,
               org: skptak,
             },
@@ -90,6 +102,7 @@ jobs:
               repository: Jobs-for-AWS-IoT-embedded-sdk,
               exclude-files: ".cSpellWords.txt",
               run-complexity: true,
+              build-flags: '-DBUILD_CLONE_SUBMODULES=ON',
               #org: aws,
               org: skptak,
             },
