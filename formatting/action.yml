@@ -49,7 +49,7 @@ runs:
           getFilesAdded=$?
 
           echo "::endgroup::"
-          if [ $getFilesAdded -eq 1 ] || [ $clangFormatInstalled -eq 1] || [ $fdInstalled -eq 1 ]; then
+          if [ $getFilesAdded -eq 1 ] || [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           else
