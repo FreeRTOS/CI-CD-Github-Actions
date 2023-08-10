@@ -172,28 +172,50 @@ jobs:
           ref: main
           path: coreMQTT
 
-      - name: Build
+      - env:
+          stepName: Build Core MQTT
+        name: ${{ env.stepName }}
         run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+
+          echo "::group::Install Lcov"
           sudo apt-get install -y lcov
+          echo "::endgroup::"
+
+          echo "::group::${{ env.stepName }}"
           cmake -S ./coreMQTT/test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
           -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
           make -C build/ all
+          exitStatus=$?
+          echo "::endgroup::"
 
-      - name: Test
-        run: |
-          cd build/
-          ctest -E system --output-on-failure
-          cd ..
+          # Only get to here if we passed the build
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-      - name: Run Coverage
+
+      - name: Run CTest for CoreMQTT
+        run: ctest --test-dir build -E system --output-on-failure
+
+      - env:
+          stepName: Run Coverage
+        shell: bash
         run: |
+          # ${{ env.stepName }}
+          echo "::group::Build Coverage for coreMQTT"
           make -C build/ coverage
-          EXCLUDE='"\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*"'
-          lcov --rc lcov_branch_coverage=1 --remove build/coverage.info $EXCLUDE -o build/coverage.info
+          echo "::endgroup::"
+
+          echo "::group::${{ env.stepName }}"
+          EXCLUDE="'*test* '*CMakeCCompilerId*' '*mocks*'"
+          lcov --rc lcov_branch_coverage=1 --remove build/coverage.info "$EXCLUDE" -o build/coverage.info
+          echo "::endgroup::"
+
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
       - name: Test Coverage Cop Action
         id: success-coverage-cop

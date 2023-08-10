@@ -39,7 +39,7 @@ runs:
         name: Print Coverage Data
         shell: bash
         run: |
-          # {{ env.stepName }}
+          # ${{ env.stepName }}
           # Print the lcov report that we received
           lcov --list --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
 
