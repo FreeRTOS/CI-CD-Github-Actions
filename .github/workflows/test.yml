@@ -210,8 +210,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::${{ env.stepName }}"
-          EXCLUDE="'*test* '*CMakeCCompilerId*' '*mocks*'"
-          lcov --rc lcov_branch_coverage=1 --remove build/coverage.info "$EXCLUDE" -o build/coverage.info
+          declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
+          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
           echo "::endgroup::"
 
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
@@ -225,18 +225,21 @@ jobs:
           branch-coverage-min: 70
           line-coverage-min: 100
 
+
+
       - name: Test Coverage Cop Failure Action
         id: failure-coverage-cop-action
-        continue-on-error: false
+        continue-on-error: true
         uses: ./coverage-cop
         with:
           coverage-file: ./build/coverage.info
-          branch-coverage-min: 70
-          line-coverage-min: 50
+          branch-coverage-min: 100
+          line-coverage-min: 100
 
       - env:
           stepName: Check Failure Test Case
         name: ${{ env.stepName }}
+        if: success() || failure()
         id: check-failure-test-cases
         shell: bash
         run: |
@@ -249,7 +252,6 @@ jobs:
             exitStatus=1
           fi
           exit $exitStatus
-
 
   test-memory-statistics:
     runs-on: ubuntu-latest
