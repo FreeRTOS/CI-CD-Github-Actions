@@ -22,6 +22,7 @@ runs:
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0
         shell: bash
+        name: ${{ env.stepName }}
         run: |
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
@@ -39,6 +40,8 @@ runs:
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0
+        name: ${{ env.stepName }}
+        id: check-line-and-branch-coverage
         shell: bash
         run: |
           # ${{ env.stepName }}
@@ -60,6 +63,24 @@ runs:
           if [ $RESULT -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
+            # Generate the HTML Report of the lcov run
+            genhtml --ignore-errors source build/coverage.info --legend --title "$(git rev-parse HEAD)" --output-directory=lcovHTMLReport;
+            zip -r lcovReport.zip htmlOutput
+            mv htmlOutput $GITHUB_ACTION_PATH
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
+
+      - env:
+          stepName: Upload Line and Branch Report
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0
+        name: ${{ env.stepName }}
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: lcovReport
+          path: $GITHUB_ACTION_PATH/lcovReport.zip
+          retention-days: 5
