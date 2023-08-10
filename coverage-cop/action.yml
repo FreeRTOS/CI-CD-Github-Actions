@@ -1,7 +1,7 @@
 name: 'coverage-cop'
 description: 'CI Check Coverage results of unit tests (using lcov)'
 inputs:
-  path:
+  coverage-file:
     description: 'Path to lcov output file containing coverage data.'
     required: true
   branch-coverage-min:
@@ -63,17 +63,36 @@ runs:
           if [ $RESULT -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
+            genhtml --ignore-errtos source ${{ inputs.path }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=htmlCodecovReport
+            zip $GITHUB_ACTION_PATH/htmlCodecovReport.zip htmlCodecovReport
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
 
-      - env:
-          stepName: Upload Line and Branch Report
-        name: ${{ env.stepName }}
-        if: failure()
-        uses: codecov/codecov-action@v3
+      - name: Upload Failed Codecov HTML Report
+        if: failure() && steps.check-line-and-brach-coverage.outcome == 'failure'
+        uses: actions/upload-artifact@v3
         with:
-          files: ${{ inputs.path }}
-          flags: unit_tests
-          fail_ci_if_error: false
-          verbose: false
+          name: CodecovHTMLReport.zip
+          path: $GITHUB_ACTION_PATH/htmlCodecovReport.zip
+          retention-days: 5
+
+
+
+# We should use this - it creates a link on their website that you can access
+# And it displays the results there, which is great.
+# But it means we need to set up a Codecov dashboard for each repo and then
+# Add that to a secret to use by default when using it.
+# CorePKCS11 evidently has this, but I don't know who set that up or what approvals it took
+# So For now I'm going to create the html report and add it to the run.
+# More info here: https://about.Codecov.io/blog/how-to-set-up-Codecov-with-c-and-github-actions/
+#      - env:
+#          stepName: Upload Line and Branch Report
+#        name: ${{ env.stepName }}
+#        if: failure()
+#        uses: Codecov/Codecov-action@v3
+#        with:
+#          files: ${{ inputs.path }}
+#          flags: unit_tests
+#          fail_ci_if_error: false
+#          verbose: false

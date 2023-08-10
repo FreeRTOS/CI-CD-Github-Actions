@@ -29,7 +29,7 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
-          sudo apt-get install complexity fd-find -y
+          sudo apt-get install complexity -y
           echo "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
@@ -47,7 +47,7 @@ runs:
           echo -e "${{ env.bashInfo }} Have complexity limit of ${{ inputs.horrid_threshold }} ${{ env.bashEnd }}"
           exitStatus=0
 
-          # Use fdfind to find all files ending with a .c inside of the input directory
+          # Use find to find all files ending with a .c inside of the input directory
           # From there run the complexity check against them
           find ${{ inputs.source_path }}/ -iname '*.c' |\
             xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}

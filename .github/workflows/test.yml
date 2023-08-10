@@ -191,16 +191,43 @@ jobs:
       - name: Run Coverage
         run: |
           make -C build/ coverage
-          declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
-          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          EXCLUDE='"\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*"'
+          lcov --rc lcov_branch_coverage=1 --remove build/coverage.info $EXCLUDE -o build/coverage.info
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
 
-      - name: Test coverage cop action
+      - name: Test Coverage Cop Action
+        id: success-coverage-cop
         uses: ./coverage-cop
         with:
-          path: ./build/coverage.info
+          coverage-file: ./build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100
+
+      - name: Test Coverage Cop Failure Action
+        id: failure-coverage-cop-action
+        continue-on-error: false
+        uses: ./coverage-cop
+        with:
+          coverage-file: ./build/coverage.info
+          branch-coverage-min: 70
+          line-coverage-min: 50
+
+      - env:
+          stepName: Check Failure Test Case
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.failure-coverage-cop-action.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Fail on Misspelled Word | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Fail on Misspelled Word | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
 
   test-memory-statistics:
     runs-on: ubuntu-latest
