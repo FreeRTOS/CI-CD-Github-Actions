@@ -73,7 +73,7 @@ runs:
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
             genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=htmlCodecovReport
-            zip $GITHUB_ACTION_PATH/htmlCodecovReport.zip htmlCodecovReport
+            zip -r $GITHUB_ACTION_PATH/htmlCodecovReport.zip htmlCodecovReport
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
