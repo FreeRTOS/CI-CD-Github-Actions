@@ -224,16 +224,7 @@ jobs:
           coverage-file: ./build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100
-
-      - name: Functional | Failure | Coverage Cop Failure Test Case
-        id: failure-coverage-cop-action
-        continue-on-error: true
-        uses: ./coverage-cop
-        with:
-          coverage-file: ./build/coverage.info
-          branch-coverage-min: 100
-          line-coverage-min: 100
-
+          
       - env:
           stepName: Run Coverage Forced Failure
         shell: bash
@@ -251,6 +242,14 @@ jobs:
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
+      - name: Functional | Failure | Coverage Cop Failure Test Case
+        id: failure-coverage-cop-action
+        continue-on-error: true
+        uses: ./coverage-cop
+        with:
+          coverage-file: ./build/coverage.info
+          branch-coverage-min: 100
+          line-coverage-min: 100
 
       - env:
           stepName: Check Failure Test Case
