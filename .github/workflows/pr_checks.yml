@@ -303,4 +303,4 @@ jobs:
         with:
           path: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
           branch-coverage-min: 70
-          line-coverage-min: ${{ matrix.inputs.repository }}
+          line-coverage-min: ${{ matrix.inputs.line-coverage }}
