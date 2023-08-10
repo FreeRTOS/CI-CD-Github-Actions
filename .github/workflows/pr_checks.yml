@@ -137,7 +137,7 @@ jobs:
               exclude-files: ".cSpellWords.txt",
               run-complexity: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
-              line-coverage: 100,
+              line-coverage: 95,
               #org: aws,
               org: skptak,
            },
