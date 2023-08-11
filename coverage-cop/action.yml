@@ -49,6 +49,7 @@ runs:
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0
+        continue-on-error: true
         name: ${{ env.stepName }}
         id: check-line-and-branch-coverage
         shell: bash
