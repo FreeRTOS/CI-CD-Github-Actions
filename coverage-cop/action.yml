@@ -31,19 +31,6 @@ runs:
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
       - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0
-          stepName: Install Dependencies
-        name: Print Coverage Data
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          # Print the lcov report that we received
-          lcov --list --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
-
-      - env:
           stepName: Check Line and Branch Coverage
           bashPass: \033[32;1mPASSED -
           bashInfo: \033[33;1mINFO -
@@ -54,6 +41,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
+          lcov --list --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
           LINE_COVERAGE=$(lcov --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 2 | sed -n "s/\([^%]*\)%.*/\1/p")
           BRANCH_COVERAGE=$(lcov --rc lcov_branch_coverage=1 --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 4 | sed -n "s/\([^%]*\)%.*/\1/p")
           RESULT=0
@@ -72,12 +60,15 @@ runs:
           if [ $RESULT -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
+            echo "::group::Create Codecov HTML Report"
             genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=htmlCodecovReport
             zip -r $GITHUB_ACTION_PATH/htmlCodecovReport.zip htmlCodecovReport
+            echo "::endgroup::"
             echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
             echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
+          exit $RESULT
 
       - env:
           stepName: Run On Failure
