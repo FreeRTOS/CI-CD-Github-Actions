@@ -201,7 +201,7 @@ jobs:
         run: ctest --test-dir build -E system --output-on-failure
 
       - env:
-          stepName: Run Coverage
+          stepName: Passing Coverage Test
         shell: bash
         run: |
           # ${{ env.stepName }}
@@ -224,9 +224,11 @@ jobs:
           coverage-file: ./build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100
-          
+
       - env:
           stepName: Run Coverage Forced Failure
+        id: failure-coverage-action
+        continue-on-error: true
         shell: bash
         run: |
           # ${{ env.stepName }}
@@ -236,11 +238,14 @@ jobs:
 
           echo "::group::${{ env.stepName }}"
           declare -a EXCLUDE=("\*test/\*")
+          set +e
           lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
           echo "::endgroup::"
 
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+          set -e
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+          exit 0
 
       - name: Functional | Failure | Coverage Cop Failure Test Case
         id: failure-coverage-cop-action
