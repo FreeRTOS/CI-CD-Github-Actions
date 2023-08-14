@@ -100,6 +100,7 @@ runs:
           echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} At the bottom of the page will be a CodecovHTMLReport.zip file that you can download ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} Unzip the file and then open the index.html file in your browser for more info missing branch and line coverage ${{ env.bashEnd }}"
+          exit 1
 
 
 
