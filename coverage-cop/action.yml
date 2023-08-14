@@ -80,7 +80,7 @@ runs:
           exit $RESULT
 
       - name: Upload Failed Codecov HTML Report
-        if: failure() && steps.check-line-and-brach-coverage.outcome == 'failure'
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: CodecovHTMLReport.zip
