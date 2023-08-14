@@ -299,6 +299,6 @@ jobs:
         if: matrix.inputs.run-complexity && ( success() || failure() )
         uses: ./coverage-cop
         with:
-          path: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
+          coverage-file: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: ${{ matrix.inputs.line-coverage }}
