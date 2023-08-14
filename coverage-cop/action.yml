@@ -49,7 +49,6 @@ runs:
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0
-        continue-on-error: true
         name: ${{ env.stepName }}
         id: action-check-line-and-branch-coverage
         shell: bash
@@ -109,14 +108,6 @@ runs:
           echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-      - name: Upload Failed Codecov HTML Report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: CodecovHTMLReport.zip
-          path: $GITHUB_ACTION_PATH/htmlCodecovReport.zip
-          retention-days: 5
 
       - name: Upload Failed Codecov HTML Report
         if: failure()
