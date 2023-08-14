@@ -120,18 +120,18 @@ runs:
 
           echo "::group::File Difference"
           set +e
-          # I am intentionally doing this instead of using tee to make sure we don't capture
-          # The exit code of the tee command vs the git diff exit code if there is a diff
-          # Put it in what the 'default' path will be for the upload step
-          git diff > $GITHUB_ACTION_PATH/../formattingChanges.patch
+          git diff
           exitCode=$?
-          cat $GITHUB_ACTION_PATH/../formattingChanges.patch
           set -e
           echo "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
+            # I am intentionally doing this a second time here.
+            # Using tee or piping it to a file above will mask the exit code
+            # Put it in what the 'default' path will be for the upload step
+            git diff > $GITHUB_ACTION_PATH/../formattingChanges.patch
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
