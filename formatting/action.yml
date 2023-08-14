@@ -81,6 +81,7 @@ runs:
           bashEnd:  \033[0m
           stepName: Run Clang Format
         name: ${{ env.stepName }}
+        id: action-formatting-check
         if: ${{ steps.validate-inputs.outcome}} = "success"
         working-directory: ${{ inputs.path }}
         shell: bash
@@ -127,8 +128,37 @@ runs:
           if [ $exitCode -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
+            # Make a git patch with the formatting differences.
+            set +e
+            git diff > $GITHUB_ACTION_PATH/../formattingChanges.patch
+            set -e
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $exitCode
+
+
+      - name: Upload Formatting Git Patch
+        if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
+        id: upload-formatting-patch
+        uses: actions/upload-artifact@v3
+        with:
+          name: formattingChanges
+          path: formattingChanges.patch
+          retention-days: 7
+
+      - env:
+          stepName: Formatting Git Patch Info
+          bashPass: \033[32;1m
+          bashInfo: \033[33;1m
+          bashFail: \033[31;1m
+          bashEnd:  \033[0
+        if: failure() && ( steps.action-formatting-check.outcome == 'success' )
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
