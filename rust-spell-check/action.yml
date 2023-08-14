@@ -1,0 +1,140 @@
+name: 'rust-spell-check'
+description: 'Rust CI spellings check'
+inputs:
+  path:
+    description: 'Path to repository folder to check spellings in.'
+    required: false
+    default: ./
+  lexicon:
+    description: 'Path to lexicon file to check spellings with'
+    required: false
+    default: lexicon.txt
+  exclude-dirs:
+    description: "Comma separated list of directories to not spell check"
+    required: false
+  exclude-files:
+    description: "Comma separated list of files to not spell check"
+    required: false
+  include-extensions:
+    description: "Comma separated list of files to match to regex"
+    required: false
+
+
+runs:
+  using: "composite"
+  steps:
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Set-Up The Spell Checker
+      name: ${{ env.stepName }}
+      id: spell-checker-setup
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo "::group::Install Dependencies"
+
+        # Install the Dependencies we need to run the spell-checker
+        sudo apt-get install util-linux -y
+        sudo apt-get install fd-find -y
+        sudo apt-get install aspell -y
+        sudo apt-get install spell -y
+        echo "::endgroup::"
+
+        # Check if we can use the current spell checker
+        # This is not added to the path by default.
+        # I honestly do not know why
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
+        echo -e " ${{ env.bashInfo }} Try Using the pre-built spell checker ${{ env.bashEnd }}"
+
+        # Wrap the check to use if in a set +e so we don't error out if it fails
+        # Save the exit code to check later, as "set -e" will overwrite it
+        set +e
+        spell-checker
+        exitCode=$?
+        set -e
+        if ! [ $exitCode -eq 0 ]; then
+          echo "::endgroup::"
+          echo -e " ${{ env.bashFail }} Don't have the ability to use the current spell checker, building it ${{ env.bashEnd }}"
+          echo "::group::Compile Spell Checker"
+
+          # If we can't run the current one, install the tools we need to build it
+          # Run one a time for error checking
+          sudo apt-get install libaspell-dev -y
+          sudo apt-get install build-essential -y
+          sudo apt install rustc -y
+
+          echo -e "${{ env.bashInfo }} cargo --version = $(cargo --version) ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} rustc --version = $(rustc --version) ${{ env.bashEnd }}"
+          pushd "$GITHUB_ACTION_PATH"
+          cargo build --release
+          echo -e "find = $(find . -name 'spell-checker') "
+          # It's possible that we have one in the directory, but just can't suse it
+          # set +e so we don't error when overriding it
+          set +e
+          mv $(find . -name "spell-checker") .
+          set -e
+          popd
+          spell-checker --help
+          echo "::endgroup::Compile Spell Checker"
+
+          # Only make it to here if nothing above fails
+          echo -e "${{ env.bashPass }} Compiled the Spell Checker ${{ env.bashEnd }}"
+        fi
+        echo "::endgroup::"
+        # Only get to here if nothing above fails
+
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Spell Checker
+      name: ${{ env.stepName }}
+      id: run-spell-checker
+      working-directory: ${{ inputs.path }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        #echo "::group::${{ env.stepName }}"
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
+
+        # So here's the deal. At time of writing this spell checker can check
+        # every word in every folder in FreeRTOS/FreeRTOS in like 10 seconds.
+        # So I just let it do that. If this changes in the future, feel free to use
+        # The various exclude dir/file options
+        # files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs}}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions }}")
+
+        # The use of exec will return the exit code from the grep command
+        # Grep returns an exit code if a file isn't found
+        # So wrap the search in a set +/- e so github doesn't stop the run on first failure
+        set +e
+        files=$(fdfind -e c -e h --exec grep -liE "copyright (.*) [0-9]{4} amazon.com")
+        set -e
+
+        # If you're onboarding a repo or need better debugging, uncomment this instead
+        # Of the one-line check
+        # for file in ${files[@]}; do
+        #   echo -e "${{ env.bashInfo }} Checking spelling of "$file" ${{ env.bashEnd }}"
+        #   set +e
+        #   spell-checker -c -w .cSpellWords.txt $file
+        #   exitStatus=$?
+        #   set -e
+        # done
+
+        set +e
+        spell-checker -c -w .cSpellWords.txt $files
+        exitStatus=$?
+        set -e
+
+        #echo "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi
