@@ -61,29 +61,14 @@ runs:
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
             echo "::group::Create Codecov HTML Report"
-            genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=htmlCodecovReport
-            zip -r $GITHUB_ACTION_PATH/htmlCodecovReport.zip htmlCodecovReport
+            genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=CodecovHTMLReport
+            zip -r $GITHUB_ACTION_PATH/CodecovHTMLReport.zip CodecovHTMLReport
             echo "::endgroup::"
-            echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
-            echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
+            echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH) ${{ env.bashEnd }}"
+            echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/CodecovHTMLReport.zip) ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
-
-      - env:
-          stepName: Run On Failure
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0
-        if: failure()
-        name: ${{ env.stepName }}
-        id: run-on-failure
-        shell: bash
-        run: |
-          echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
-          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
           stepName: Failure and Exact Step Failure
@@ -96,24 +81,18 @@ runs:
         id: run-on-failure-and-exact-step-fails
         shell: bash
         run: |
-          echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/htmlCodecovReport.zip) ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} pwd= $(pwd) ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} ls= $(ls) ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} ls GITHUB_ACTION_PATH= $(ls $GITHUB_ACTION_PATH) ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/CodecovHTMLReport.zip) ${{ env.bashEnd }}"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-      - name: Upload Failed Codecov HTML Report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: CodecovHTMLReport.zip
-          path: $GITHUB_ACTION_PATH/htmlCodecovReport.zip
-          retention-days: 5
 
       - name: Upload Failed Codecov HTML Report
         if: failure() && ( steps.action-check-line-and-branch-coverage.outcome == 'failure' )
         uses: actions/upload-artifact@v3
         with:
           name: CodecovHTMLReport.zip
-          path: $GITHUB_ACTION_PATH/htmlCodecovReport.zip
+          path: CodecovHTMLReport.zip
           retention-days: 5
 
 
