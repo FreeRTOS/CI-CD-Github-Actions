@@ -62,10 +62,10 @@ runs:
           else
             echo "::group::Create Codecov HTML Report"
             genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=CodecovHTMLReport
-            zip -r $GITHUB_ACTION_PATH/CodecovHTMLReport.zip CodecovHTMLReport
+            zip -r CodecovHTMLReport.zip CodecovHTMLReport
             echo "::endgroup::"
-            echo -e "${{ env.bashInfo }} ls= $(ls $GITHUB_ACTION_PATH) ${{ env.bashEnd }}"
-            echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/CodecovHTMLReport.zip) ${{ env.bashEnd }}"
+            echo -e "${{ env.bashInfo }} ls= $(ls) ${{ env.bashEnd }}"
+            echo -e "${{ env.bashInfo }} ls GITHUB_ACTION_PATH= $(ls $GITHUB_ACTION_PATH) ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
@@ -81,10 +81,10 @@ runs:
         id: run-on-failure-and-exact-step-fails
         shell: bash
         run: |
+          # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} pwd= $(pwd) ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} ls= $(ls) ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} ls GITHUB_ACTION_PATH= $(ls $GITHUB_ACTION_PATH) ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} readlink= $(readlink -f $GITHUB_ACTION_PATH/CodecovHTMLReport.zip) ${{ env.bashEnd }}"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - name: Upload Failed Codecov HTML Report
