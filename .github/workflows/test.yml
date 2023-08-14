@@ -265,7 +265,7 @@ jobs:
         run: |
           # ${{ env.stepName }}
           exitStatus=0
-          if [ "${{ steps.failure-coverage-cop-action.outcome}}" = "failure" ]; then
+          if [ "${{ steps.failure-coverage-cop-action.outcome }}" = "failure" ]; then
             echo -e "${{ env.bashPass }} Functional | Failure | Coverage Cop Failure Test Case | Had Expected "failure" ${{ env.bashEnd }}"
           else
             echo -e "${{ env.bashFail }} Functional | Failure | Coverage Cop Failure Test Case | Had Unexpected "success" ${{ env.bashEnd }}"
