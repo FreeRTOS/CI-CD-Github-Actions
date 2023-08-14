@@ -120,7 +120,7 @@ runs:
 
           echo "::group::File Difference"
           set +e
-          git diff
+          git diff --exit-code --color=always
           exitCode=$?
           set -e
           echo "::endgroup::"
@@ -129,7 +129,8 @@ runs:
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
             # I am intentionally doing this a second time here.
-            # Using tee or piping it to a file above will mask the exit code
+            # Using tee will mask the exit code of the diff
+            # And we don't want the colour to be added to the patch
             # Put it in what the 'default' path will be for the upload step
             git diff > $GITHUB_ACTION_PATH/../formattingChanges.patch
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
