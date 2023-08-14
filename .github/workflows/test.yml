@@ -103,25 +103,30 @@ jobs:
         with:
           path: coreMQTT
 
-  test-rust-spell-checker-needs-to-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/checkout@v3
-        with:
-          repository: skptak/coreMQTT
-          ref: main
-          path: coreMQTT
-
-      - name: Delete the pre-built spell-checker
-        shell: bash
-        run: file=$(find . -name spell-checker); readlink -f "$file" ; rm "$file"
-
-      - name: Test Spell Check Build and Run
-        uses: ./rust-spell-check
-        with:
-          path: coreMQTT
+# This has become more of a TODO
+# Where in the future this should either be put in a S3 Bucket or
+# Or this should be stored using GitHub Caches and then pulled.
+# Due to feedback from @archigup we will not be storing the binary
+# So will build it from scratch each time.
+#  test-rust-spell-checker-needs-to-build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#
+#      - uses: actions/checkout@v3
+#        with:
+#          repository: skptak/coreMQTT
+#          ref: main
+#          path: coreMQTT
+#
+#      - name: Delete the pre-built spell-checker
+#        shell: bash
+#        run: file=$(find . -name spell-checker); readlink -f "$file" ; rm "$file"
+#
+#      - name: Test Spell Check Build and Run
+#        uses: ./rust-spell-check
+#        with:
+#          path: coreMQTT
 
   test-rust-spell-checker-find-mistake:
     runs-on: ubuntu-latest

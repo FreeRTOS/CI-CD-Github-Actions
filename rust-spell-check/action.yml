@@ -43,22 +43,29 @@ runs:
         sudo apt-get install spell -y
         echo "::endgroup::"
 
-        # Check if we can use the current spell checker
-        # This is not added to the path by default.
-        # I honestly do not know why
+        # Add the current directory to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
-        echo -e " ${{ env.bashInfo }} Try Using the pre-built spell checker ${{ env.bashEnd }}"
 
+
+        # Due to feedback from @archigup we will not be storing the binary
+        # So will build it from scratch each time. A future improvement is to use
+        # GitHub Caches or a public S3 bucket to store a pre-built one and download it.
+        # When this is done this logic below needs to be changed to perform the download
+        # And then try to use the spell-checker. Leaving this here for future reference
+        # When this work is being done.
+        # echo -e " ${{ env.bashInfo }} Try Using the pre-built spell checker ${{ env.bashEnd }}"
         # Wrap the check to use if in a set +e so we don't error out if it fails
         # Save the exit code to check later, as "set -e" will overwrite it
-        set +e
-        spell-checker
-        exitCode=$?
-        set -e
+        # set +e
+        # spell-checker
+        # exitCode=$?
+        # set -e
+
+        echo "::group::Compile Spell Checker"
+        exitCode=1
+
         if ! [ $exitCode -eq 0 ]; then
-          echo "::endgroup::"
-          echo -e " ${{ env.bashFail }} Don't have the ability to use the current spell checker, building it ${{ env.bashEnd }}"
-          echo "::group::Compile Spell Checker"
+          #echo -e " ${{ env.bashFail }} Don't have the ability to use the current spell checker, building it ${{ env.bashEnd }}"
 
           # If we can't run the current one, install the tools we need to build it
           # Run one a time for error checking
@@ -68,6 +75,7 @@ runs:
 
           echo -e "${{ env.bashInfo }} cargo --version = $(cargo --version) ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} rustc --version = $(rustc --version) ${{ env.bashEnd }}"
+
           pushd "$GITHUB_ACTION_PATH"
           cargo build --release
           echo -e "find = $(find . -name 'spell-checker') "
@@ -84,8 +92,8 @@ runs:
           echo -e "${{ env.bashPass }} Compiled the Spell Checker ${{ env.bashEnd }}"
         fi
         echo "::endgroup::"
-        # Only get to here if nothing above fails
 
+        # Only get to here if nothing above fails
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
