@@ -132,7 +132,7 @@ runs:
             # Using tee will mask the exit code of the diff
             # And we don't want the colour to be added to the patch
             # Put it in what the 'default' path will be for the upload step
-            git diff > $GITHUB_ACTION_PATH/../formattingChanges.patch
+            git diff > formattingChanges.patch
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -142,6 +142,7 @@ runs:
       - name: Upload Formatting Git Patch
         if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
         id: upload-formatting-patch
+        working-directory: ${{ inputs.path }}
         uses: actions/upload-artifact@v3
         with:
           name: formattingChanges
