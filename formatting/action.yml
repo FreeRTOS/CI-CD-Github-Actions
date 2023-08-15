@@ -2,78 +2,164 @@ name: 'formatting'
 description: 'CI formatting check'
 inputs:
   path:
-    description: 'Path to repository folder to run formatting check for.'
+    description: 'Path to repository folder to run formatting check for. '
     required: false
     default: ./
   exclude-files:
-    description: 'List of comma-separated files to exclude from trailing whitespace check. Eg file1,file2'
+    description: 'List of comma-separated files to exclude from the formatting check. Eg file1,file2'
     required: false
     default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from trailing whitespace formatting check. Eg docs,build'
+    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs,build'
     required: false
     default: ''
+  include-extensions:
+    description: 'List of comma-separated extensions to add to the formatting check . Eg md,dox'
+    required: false
+    default: ''
+
 runs:
   using: "composite"
-  steps: 
-      - name: Install Uncrustify
+  steps:
+      - env:
+          # At time of writing, you can't add a global environment
+          # to an action file so stuck with this. If this gets changed
+          # Please move this
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Install Clang Format
+        name: ${{ env.stepName }}
+        shell: bash
         run: |
-          : # Install Uncrustify
-          echo "::group::Install Uncrustify"
-          sudo apt-get install uncrustify
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          sudo apt-get install clang-format fd-find
+          echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+          export PATH="$PATH:$GITHUB_ACTION_PATH"
+
+          fdfind --version
+          fdInstalled=$?
+
+          clang-format --version
+          clangFormatInstalled=$?
+
+          getFiles --help
+          getFilesAdded=$?
+
           echo "::endgroup::"
+          if [ $getFilesAdded -eq 1 ] || [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          else
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 0
+          fi
+
+      - env:
+          stepName: Validate Inputs
+          bashPass:   \033[32;1mPASSED -
+          bashInfo:   \033[33;1mINFO -
+          bashFail:   \033[31;1mFAILED -
+          bashEnd:    \033[0m
+        name: ${{ env.stepName }}
+        id: validate-inputs
         shell: bash
-      - name: Run Uncrustify
-        working-directory: ${{ inputs.path }}
         run: |
-          : # Uncrustify on C files while ignoring symlinks.
-          : # Make a collapsible section in the log to run uncrustify
-          echo "::group::Uncrustify Check"
-          : # GitHub automtically use "set -e" which causes scripts to fail on the first exit code
-          : # This would mean the first time a file fails the check that we exit without formatting all files.
-          set +e
-          : # Format all the files using the common config file.
-          find . -iname "*.[ch]" | xargs uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          # ${{ env.stepName }}
+          # Check exclude dirs for possible input issues
+          if [[ "${{ inputs.exclude-dirs }}" = *"\n"* ]]; then
+            echo -e "${{ env.bashFail }} YOU HAVE NEWLINE IN YOUR EXCLUDE-DIRS. ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Run Clang Format
+        name: ${{ env.stepName }}
+        id: action-formatting-check
+        if: ${{ steps.validate-inputs.outcome}} = "success"
+        working-directory: ${{ inputs.path }}
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
+          echo "::group::${{ env.stepName }}"
+          exitCode=0
+          export PATH="$PATH:$GITHUB_ACTION_PATH"
+          files=$(getFiles --exclude-files="${{inputs.exclude-files}}" --exclude-dir="${{inputs.exclude-dirs}}" )
+          if ! [ $? -eq 0 ]; then
+              echo -e "${{ env.bashFail }} Error calling getFiles() ${{ env.bashEnd }}"
+              echo -e "$fileOut"
+              exit 1
+          fi
+
+          # Loop over the files that matched the above conditions
+          for file in ${files[@]}; do
+
+            # set +e so we don't exit on the first file with an error
+            # Doing it here instead of over the whole loop incase there
+            # Is an error that gets raised in the loop (somehow)
+            set +e
+
+            # Pipe the output of the command to a variable
+            # This way we can print the command only if it fails
+            fileOut=$(clang-format -i --verbose --style=file $file)
+
+            # Re-enable failing or error
+            set -e
+
+          done
+
           echo "::endgroup::"
-          : # Run a git diff to print the differences if any exist, return an error code if there are any
-          git diff --exit-code
-          if [ "$?" = "0" ]; then
-            echo -e "\033[32;3mUncrustify check passed\033[0m"
-            exit 0
-          else
-            echo -e "\033[32;31mFormatting check (using Uncrustify) failed...\033[0m"
-            : # If there is an error, set this flag high again so the exit 1 fails the run
-            set -e
-            exit 1
-          fi
-        shell: bash
-      - name: Check For Trailing Whitespace
-        working-directory: ${{ inputs.path }}
-        run: |
-          : # Trailing Whitespace Check
+          # Run a git diff to print the differences if any exist, return an error code if there are any
+
+          echo "::group::File Difference"
           set +e
-          grep --exclude={README.md,${{ inputs.exclude-files }}} --exclude-dir={${{ inputs.exclude-dirs }},'.git'} -rnI -e "[[:blank:]]$" .
-          if [ "$?" = "0" ]; then
-            set -e
-            echo -e "\033[32;31mFiles have trailing whitespace.\033[0m"
-            exit 1
+          git diff --exit-code --color=always
+          exitCode=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $exitCode -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo -e "\033[32;3mTrailing whitespace check passed\033[0m"
-            exit 0
+            # I am intentionally doing this a second time here.
+            # Using tee will mask the exit code of the diff
+            # And we don't want the colour to be added to the patch
+            # Put it in what the 'default' path will be for the upload step
+            git diff > formattingChanges.patch
+            echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
+          exit $exitCode
+
+      - name: Upload Formatting Git Patch
+        if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
+        id: upload-formatting-patch
+        uses: actions/upload-artifact@v3
+        with:
+          name: formattingChanges
+          path: ${{ inputs.path }}/formattingChanges.patch
+          retention-days: 7
+
+      - env:
+          stepName: Formatting Git Patch Info
+          bashPass: \033[32;1m
+          bashInfo: \033[33;1m
+          bashFail: \033[31;1m
+          bashEnd:  \033[0
+        if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
         shell: bash
-      - name: Check for CRLF
-        working-directory: ${{ inputs.path }}
         run: |
-          : # Check for CRLF Line Ending
-          set +e
-          find . -path ./.git -prune -o -exec file {} + |  grep "CRLF"
-          if [ "$?" = "0" ]; then
-            set -e
-            echo -e "\033[32;31mFiles have CRLF line endings.\033[0m"
-            exit 1
-          else
-            echo -e "\033[32;3mLine ending check passed\033[0m"
-            exit 0
-          fi
-        shell: bash
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
+          exit 1
