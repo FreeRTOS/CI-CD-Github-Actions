@@ -29,7 +29,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: coreHTTP,
@@ -38,7 +39,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: coreJSON,
@@ -47,7 +49,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: coreMQTT,
@@ -56,7 +59,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: corePKCS11,
@@ -65,7 +69,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DUNIT_TESTS=1 -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 95,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: coreSNTP,
@@ -74,7 +79,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: FreeRTOS-Cellular-Interface,
@@ -83,7 +89,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              org: skptak,
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
@@ -92,7 +99,8 @@ jobs:
               build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: aws,
+              #org: aws,
+              org: skptak,
             },
            {
               repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
@@ -101,7 +109,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: aws,
+              #org: aws,
+              org: skptak,
            },
            {
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
@@ -110,7 +119,8 @@ jobs:
               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: aws,
+              #org: aws,
+              org: skptak,
            },
            {
               repository: Jobs-for-AWS-IoT-embedded-sdk,
@@ -119,8 +129,8 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
-              org: aws,
-
+              #org: aws,
+              org: skptak,
            },
            {
               repository: ota-for-AWS-IoT-embedded-sdk,
@@ -133,7 +143,8 @@ jobs:
               # JUST for this repo, or just wait for the "make all repos the same"
               # Just increase the coverage to 95 for now to pass this one
               line-coverage: 95,
-              org: aws,
+              #org: aws,
+              org: skptak,
            },
            {
               repository: SigV4-for-AWS-IoT-embedded-sdk,
@@ -142,14 +153,15 @@ jobs:
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: aws,
+              #org: aws,
+              org: skptak,
            },
            # TODO: Get these three repos to use this
            #{
-           #repository: FreeRTOS-Kernel,
-           #exclude-files: .cSpellWords.txt,
-           #run-complexity: false,
-           #org: aws,
+              #repository: FreeRTOS-Kernel,
+              #exclude-files: .cSpellWords.txt,
+              #run-complexity: false,
+              #org: aws,
            #},
            #{
            #  repository: FreeRTOS,
