@@ -142,11 +142,10 @@ runs:
       - name: Upload Formatting Git Patch
         if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
         id: upload-formatting-patch
-        working-directory: ${{ inputs.path }}
         uses: actions/upload-artifact@v3
         with:
           name: formattingChanges
-          path: formattingChanges.patch
+          path: ${{ inputs.path }}/formattingChanges.patch
           retention-days: 7
 
       - env:
