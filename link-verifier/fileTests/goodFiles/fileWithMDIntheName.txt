@@ -1,0 +1,8 @@
+# I am a test file to make sure the regex name replacement only replaces files
+# that end in .md, not all files with md in their name.
+# As this would cause the python script to fail
+
+# When using the default input
+# Here are two links that exist
+[verify-links.py](../../verify-links.py)
+[CI-CD-Github-Actions](https://github.com/FreeRTOS/CI-CD-Github-Actions]
