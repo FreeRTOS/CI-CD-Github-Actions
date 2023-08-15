@@ -154,7 +154,7 @@ runs:
           bashInfo: \033[33;1m
           bashFail: \033[31;1m
           bashEnd:  \033[0
-        if: failure() && ( steps.action-formatting-check.outcome == 'success' )
+        if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
         shell: bash
         run: |
           # ${{ env.stepName }}
