@@ -70,7 +70,7 @@ runs:
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
             echo "::group::Create Failed Codecov HTML Report"
-            genhtml --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=CodecovHTMLReport
+            genhtml --rc lcov_branch_coverage=1 --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=CodecovHTMLReport
             zip -r CodecovHTMLReport.zip CodecovHTMLReport
             echo "::endgroup::"
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
