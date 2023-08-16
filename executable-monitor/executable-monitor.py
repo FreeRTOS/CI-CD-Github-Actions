@@ -24,7 +24,7 @@ stdout_logging_handler.setFormatter(stdout_logging_formatter)
 logging.getLogger().addHandler(stdout_logging_handler)
 
 def runAndMonitor(args):
-    # If we're on Windows need to add the child thread's logger to get stdout
+    # On Windows we need to add the child's logging to the global logger
     if os.name == 'nt':
         logging.getLogger().addHandler(stdout_logging_handler)
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
         # If the thread is still alive, the join() call timed out.
         if ( ( thread.exitcode is None ) and ( thread.is_alive() ) ):
             # Print the thread timeout they passed in to the log
-            logging.warning(f"{bashWarn}EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 3} SECONDS: FORCE KILLING THREAD")
+            logging.warning(f"{bashWarn}EXECUTABLE HAS HIT TIMEOUT OF {threadTimeout - 3} SECONDS: FORCE KILLING THREAD{bashEnd}")
             thread.kill()
             exit_status = 1
         else:
@@ -230,10 +230,10 @@ if __name__ == '__main__':
             logging.info(f"THREAD EXITED WITH EXITCODE {exit_status}")
 
         if( ( attempts  < args.retry_attempts ) and exit_status != 0 ):
-            logging.warning(f"{bashWarn}DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {args.retry_attempts}\n")
+            logging.warning(f"{bashWarn}DID NOT RECEIVE SUCCESSFUL EXIT STATUS, TRYING RE-ATTEMPT {attempts+1} OF {args.retry_attempts}{bashEnd}\n")
         else:
             break
 
-    logging.info(f"EXECUTABLE MONITOR EXITING WITH STATUS: {exit_status}")
-    # Report final exit status if no successful run occured
+    logging.warning(f"{bashWarn}EXECUTABLE MONITOR EXITING WITH STATUS: {exit_status}{bashEnd}")
+    # Report Final Exit Status
     sys.exit(exit_status)
