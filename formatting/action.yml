@@ -6,15 +6,15 @@ inputs:
     required: false
     default: ./
   exclude-files:
-    description: 'List of comma-separated files to exclude from the formatting check. Eg file1,file2'
+    description: 'List of comma-separated files to exclude from the formatting check. Eg file1, file2'
     required: false
     default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs,build'
+    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs, build'
     required: false
     default: ''
   include-extensions:
-    description: 'List of comma-separated extensions to add to the formatting check. Eg md,dox'
+    description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
     required: false
     default: ''
 
