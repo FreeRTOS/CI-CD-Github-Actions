@@ -445,44 +445,42 @@ jobs:
       - uses: actions/checkout@v3
 
       - env:
-          stepName: "Functional | Success | Exclude All Error Dirs"
+          stepName: "Functional | Success | Exclude Files and Dirs"
         name: ${{ env.stepName }}
         id: exclude-dirs-with-errors
         uses: ./formatting
         with:
-          path: formatting
-          exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace"
-          exclude-files: "badFile.c"
+          path: formatting/goodFiles
+          exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+          exclude-files: "formatErrorTest.h, formatErrorTest.c"
 
       - env:
-          stepName: "Functional | Success | Exclude Files"
+          stepName: "Functional | Success | Exclude Just Files"
         name: ${{ env.stepName }}
         id: exclude-files-with-errors
         uses: ./formatting
         with:
-          path: formatting
+          path: formatting/goodFiles
           exclude-dirs: ",,,"
-          exclude-files: "badFile.c, cgc_error.h, main-blinky.c, test.c, out.txt, myFile.log"
+          exclude-files: "formatErrorTest.h, formatErrorTest.c, errorFileInDirectory.h, errorFileInDirectory.c"
+
+      - name: Remove Error Files at Top Directory
+        working-directory: formatting/goodFiles
+        shell: bash
+        run: |
+          # Remove Error Files at Top Directory
+          # Do a git remove since we use a git diff to check if formatting fails
+          git rm $(find . -name "formatErrorTest.c")
+          git rm $(find . -name "formatErrorTest.h")
 
       - env:
-          stepName: "Functional | Success | Exclude File and Exclude Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-single-dir-multiple-files
-        uses: ./formatting
-        with:
-          path: formatting
-          exclude-dirs: "goodFiles"
-          exclude-files: "cgc_error.h, main-blinky.c, test.c, out.txt, myFile.log"
-
-      - env:
-          stepName: "Functional | Success | Exclude Files and Exclude Dirs"
+          stepName: "Functional | Success | Exclude Just Error Dirs"
         name: ${{ env.stepName }}
         id: exclude-two-files-two-dirs
         uses: ./formatting
         with:
-          path: formatting
-          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
-          exclude-files: "test.c, cgc_error.h, main-blinky.c, badFile.c, out.txt"
+          path: formatting/goodFiles
+          exclude-dirs: "fileWithErrorInclude,fileWithErrorSource"
 
   clang-formatting-error-cases:
     runs-on: ubuntu-latest
