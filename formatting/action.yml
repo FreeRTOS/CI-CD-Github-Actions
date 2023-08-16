@@ -6,15 +6,15 @@ inputs:
     required: false
     default: ./
   exclude-files:
-    description: 'List of comma-separated files to exclude from the formatting check. Eg file1,file2'
+    description: 'List of comma-separated files to exclude from the formatting check. Eg file1, file2'
     required: false
     default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs,build'
+    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs, build'
     required: false
     default: ''
   include-extensions:
-    description: 'List of comma-separated extensions to add to the formatting check. Eg md,dox'
+    description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
     required: false
     default: ''
 
@@ -35,7 +35,7 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
-          sudo apt-get install clang-format fd-find
+          sudo apt-get install clang-format fd-find dos2unix
           echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
@@ -124,10 +124,10 @@ runs:
           # These checks will be captured in the git diff
 
           # Replace all trailing whitespace
-          fd . --exec sed -Ei 's/[[:blank:]]+$//'
+          fdfind --type=file . --exec sed -Ei 's/[[:blank:]]+$//'
 
           # Replace all line endings with LF ones instead of CRLF
-          fd . --exec dos2unix
+          fdfind --type=file . --exec dos2unix
 
           echo "::endgroup::"
           # Run a git diff to print the differences if any exist, return an error code if there are any
