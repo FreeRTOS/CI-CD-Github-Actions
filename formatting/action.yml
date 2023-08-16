@@ -14,7 +14,7 @@ inputs:
     required: false
     default: ''
   include-extensions:
-    description: 'List of comma-separated extensions to add to the formatting check . Eg md,dox'
+    description: 'List of comma-separated extensions to add to the formatting check. Eg md,dox'
     required: false
     default: ''
 
@@ -35,7 +35,7 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
-          sudo apt-get install clang-format fd-find
+          sudo apt-get install clang-format fd-find dos2unix
           echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
@@ -79,7 +79,7 @@ runs:
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0m
-          stepName: Run Clang Format
+          stepName: Check Format of Files
         name: ${{ env.stepName }}
         id: action-formatting-check
         if: ${{ steps.validate-inputs.outcome}} = "success"
@@ -91,6 +91,11 @@ runs:
           echo "::group::${{ env.stepName }}"
           exitCode=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
+
+          # TODO: These checks should really only run against modified files on PRS
+          # Where when the commit to the actual repo happens, then we should trigger the job
+          # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
+          # But maintain that we don't have a change in the Repo that suddenly causes an issue
           files=$(getFiles --exclude-files="${{inputs.exclude-files}}" --exclude-dir="${{inputs.exclude-dirs}}" )
           if ! [ $? -eq 0 ]; then
               echo -e "${{ env.bashFail }} Error calling getFiles() ${{ env.bashEnd }}"
@@ -114,6 +119,15 @@ runs:
             set -e
 
           done
+
+
+          # These checks will be captured in the git diff
+
+          # Replace all trailing whitespace
+          fdfind --type=file . --exec sed -Ei 's/[[:blank:]]+$//'
+
+          # Replace all line endings with LF ones instead of CRLF
+          fdfind --type=file . --exec dos2unix
 
           echo "::endgroup::"
           # Run a git diff to print the differences if any exist, return an error code if there are any
