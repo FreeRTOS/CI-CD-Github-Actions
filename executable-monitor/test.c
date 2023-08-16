@@ -4,20 +4,20 @@
 #include <stdint.h>
 
 
-typedef struct DateAndTime
+typedef struct TimeStruct
 {
     uint64_t hour;
     uint64_t minutes;
     uint64_t seconds;
     uint64_t msec;
-} DateAndTime;
+} TimeStruct;
 
 
 #if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 )
     #include <Windows.h>
     /* Remove the warning about implicit sleep even with windows.h included */
     extern void sleep( int miliseconds );
-    void getTime( struct DateAndTime * currentTime )
+    void getTime( struct TimeStruct * currentTime )
     {
         SYSTEMTIME st, lt;
 
@@ -30,7 +30,7 @@ typedef struct DateAndTime
 #else /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
     #include <sys/time.h>
     #include <unistd.h>
-    void getTime( struct DateAndTime * currentTime )
+    void getTime( struct TimeStruct * currentTime )
     {
         struct timeval tv;
         struct tm * tm;
@@ -47,7 +47,7 @@ typedef struct DateAndTime
 int main( int argc,
           char ** argv )
 {
-    DateAndTime currentTime = { 0 };
+    TimeStruct currentTime = { 0 };
     int32_t loop = 0;
     int32_t totalLoops = 5U;
     int32_t exitCode = 0;
