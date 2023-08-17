@@ -82,7 +82,7 @@ def parse_make_output(output, values, key):
 
         values[filename][key] = total_size_in_kb
 
-# This outputs an object that maps to the report JSON format, and can be passed to 
+# This outputs an object that maps to the report JSON format, and can be passed to
 # generate_table_from_object() for library HTML format.
 def parse_to_object(o1_output, os_output, name, filename_map):
     sizes = defaultdict(dict)
@@ -199,7 +199,7 @@ def generate_library_estimates(config_path):
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation. ' + 
+    parser.add_argument('-c', '--config', required=True, help='Configuration json file for memory estimation. ' +
                         'This is the library config file, unless --json_report is used, ' +
                         'in which case it is the report paths config.')
     parser.add_argument('-o', '--output', default=None, help='File to save generated size table to.')
@@ -216,13 +216,13 @@ def main():
 
     if not args['json_report']:
         # Generate HTML file for a library. The config parameter is the library config path.
-        # See test/memory_statistics_config.json for an example. 
+        # See test/memory_statistics_config.json for an example.
         lib_data = generate_library_estimates(args['config'])
         doc = generate_table_from_object(lib_data)
 
     else:
         # Generate a JSON report for the given libraries. The config parameter is the path to the report paths config.
-        # See paths.json for a paths config for the FreeRTOS repository. 
+        # See paths.json for a paths config for the FreeRTOS repository.
         with open(args['config']) as paths_file:
             libs = json.load(paths_file)
 

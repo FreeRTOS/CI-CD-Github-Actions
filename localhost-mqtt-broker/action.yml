@@ -14,7 +14,7 @@ inputs:
 
 runs:
   using: "composite"
-  steps: 
+  steps:
       - name: Install dependencies
         run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
         shell: bash

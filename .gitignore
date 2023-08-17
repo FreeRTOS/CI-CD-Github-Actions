@@ -1,3 +1,7 @@
 *.out
 logDir/
 demo_run_logs/
+rust-spell-check/target/
+rust-spell-check/debug/
+# Ignore any helper scripts people are writing while working
+*.sh

@@ -30,7 +30,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(response_body)))
         self.end_headers()
         self.wfile.write(response_body)
-    
+
     def do_PUT(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.
@@ -60,7 +60,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(response_body)))
         self.end_headers()
         self.wfile.write(response_body)
-    
+
     def do_HEAD(self):
         # Receive the body of the request - don't do anything with it,
         # but this needs to be done to clear the receiving buffer.

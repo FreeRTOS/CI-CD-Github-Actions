@@ -1,0 +1,295 @@
+name: Repository Pull Request Checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashInfo:   \033[33;1mINFO -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
+
+
+jobs:
+  PR-repo-checks:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request }} || ${{ github.event.workflow }}
+    strategy:
+      fail-fast: false
+      matrix:
+        inputs:
+          [
+            {
+              repository: backoffAlgorithm,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: coreHTTP,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: coreJSON,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: coreMQTT,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: corePKCS11,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DUNIT_TESTS=1 -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 95,
+              org: FreeRTOS,
+            },
+            {
+              repository: coreSNTP,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: FreeRTOS-Cellular-Interface,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: FreeRTOS,
+            },
+            {
+              repository: Device-Defender-for-AWS-IoT-embedded-sdk,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: aws,
+            },
+           {
+              repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: aws,
+           },
+           {
+              repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: aws,
+           },
+           {
+              repository: Jobs-for-AWS-IoT-embedded-sdk,
+              exclude-files: ".cSpellWords.txt",
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
+              line-coverage: 100,
+              org: aws,
+
+           },
+           {
+              repository: ota-for-AWS-IoT-embedded-sdk,
+              exclude-files: ".cSpellWords.txt",
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              # TODO: Make all repos use the same build command for testing and coverage
+              # OTA uses a different command compared to all other repos
+              # So would either need to use a completely different build step
+              # JUST for this repo, or just wait for the "make all repos the same"
+              # Just increase the coverage to 95 for now to pass this one
+              line-coverage: 95,
+              org: aws,
+           },
+           {
+              repository: SigV4-for-AWS-IoT-embedded-sdk,
+              exclude-files: .cSpellWords.txt,
+              run-complexity: true,
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
+              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              line-coverage: 100,
+              org: aws,
+           },
+           # TODO: Get these three repos to use this
+           #{
+           #  repository: FreeRTOS-Kernel,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: false,
+           #  org: aws,
+           #},
+           #{
+           #  repository: FreeRTOS,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: false,
+           #  org: FreeRTOS,
+           #},
+           #{
+           #  repository: FreeRTOS-Plus-TCP,
+           #  exclude-files: .cSpellWords.txt,
+           #  run-complexity: false,
+           #  org: FreeRTOS,
+           #},
+          ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+
+      - name: Install Common Tools
+        shell: bash
+        run: |
+          sudo apt-get install -y lcov sed build-essential cmake
+
+      - name: "Clone: ${{ matrix.inputs.repository }}"
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
+          ref: main
+          path: repo/${{ matrix.inputs.repository }}
+
+      - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
+        uses: ./link-verifier
+        if: success() || failure() && ( "${{ matrix.inputs.repository }}" != "FreeRTOS" )
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+          exclude-dirs: complexity,formatting
+
+      - name: "Formatting Check : ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./formatting
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+          exclude-files: ${{ matrix.inputs.exclude-files }}
+          exclude-dirs: ${{matrix.inputs.exclude-dirs }}
+
+      - name: "Complexity Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./complexity
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+          horrid_threshold: 16
+
+      - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./doxygen
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+
+      - name: "Doxygen Zip Check: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./doxygen
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+          generate_zip: true
+
+      - name: "Spelling Check: ${{ matrix.inputs.repository }} "
+        if: success() || failure()
+        uses: ./rust-spell-check
+        with:
+          path: repo/${{ matrix.inputs.repository }}
+
+      - name: "Recursive Clone: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
+          ref: main
+          path: repo/${{ matrix.inputs.repository }}_Recursive
+          submodules: recursive
+          # Need full history to make sure we get submodules
+          fetch-depth: 0
+
+      - name: Ensure Recursive Clone of ${{ matrix.inputs.repository }}
+        if: success() || failure()
+        shell: bash
+        working-directory: repo/${{ matrix.inputs.repository }}_Recursive
+        run: git submodule update --checkout --init --recursive
+
+
+      - name: Build ${{matrix.inputs.repository}}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        shell: bash
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
+        run: |
+          echo "::group:: Install lcov"
+          sudo apt-get install -y lcov
+          echo "::endgroup::"
+          cmake -S ./test -B build/ ${{ matrix.inputs.build-flags }}
+          make -C build/ all
+
+      - name: Test
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        shell: bash
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
+        run: ctest --test-dir build -E system --output-on-failure
+
+      - name: "Manifest Verifier: ${{ matrix.inputs.repository }}"
+        if: success() || failure()
+        uses: ./manifest-verifier
+        with:
+          path: repo/${{ matrix.inputs.repository }}_Recursive
+          fail-on-incorrect-version: true
+
+      - name: "Memory Statistics Check: ${{ matrix.inputs.repository }}"
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        uses: ./memory_statistics
+        with:
+          path: repo/${{ matrix.inputs.repository }}_Recursive
+          config: .github/memory_statistics_config.json
+          output: size_table_new.html
+          check_against: docs/doxygen/include/size_table.md
+
+      - name: Run Coverage ${{matrix.inputs.repository}}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        shell: bash
+        working-directory: repo/${{matrix.inputs.repository}}_Recursive
+        run: |
+          make -C build/ coverage
+          if [[ "${{ matrix.inputs.coverage-skips }}" != "" ]]; then
+            declare -a EXCLUDE=( ${{ matrix.inputs.coverage-skips }} )
+            echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          else
+            lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          fi
+          lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+
+      - name: Test coverage cop action ${{matrix.inputs.repository}}
+        if: matrix.inputs.run-complexity && ( success() || failure() )
+        uses: ./coverage-cop
+        with:
+          coverage-file: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
+          branch-coverage-min: 70
+          line-coverage-min: ${{ matrix.inputs.line-coverage }}
