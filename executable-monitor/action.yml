@@ -58,6 +58,7 @@ runs:
           # Run Executable with Monitoring
           echo "::group::Argument Parsing"
           optArgs=" "
+          echo "pwd = $(pwd)"
           # Make sure we have an exit condition to look for
           if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
             echo "::endgroup::"
