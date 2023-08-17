@@ -6,13 +6,13 @@ Currently, this repository contains actions for the following code quality check
 FreeRTOS libraries.
 
 * **Complexity** - Uses [GNU Complexity](https://www.gnu.org/software/complexity/manual/complexity.html)
-  to verify that the complexity score of library functions is less than 9.
+  to verify that the complexity score of library functions is less than 16.
 * **Formatting** - Validates all C files of a FreeRTOS library repository comply to the formatting
   standard defined in [clang-format](formatting/.clang-format).
 * **Doxygen** - Validates that the doxygen manual of the FreeRTOS library can be built without
   warnings.
 * **Spellings** - Checks spellings across all files of the FreeRTOS library repository. Each
-  FreeRTOS library repository should have a **lexicon.txt** file.
+  FreeRTOS library repository should have a **.cSpellWords.txt** file.
 * **Coverage Cop** - Enforces that the unit tests of a FreeRTOS library meet the minimum thresholds
   branch and line coverages. The **lcov** coverage output from running unit tests should be
   available before using this action.
