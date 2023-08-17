@@ -124,7 +124,7 @@ runs:
           echo "::group::Check for Trailing Whitespace"
           # These checks will be captured in the git diff
           # Replace all trailing whitespace, exclude photo files
-          fdfind --type=file -E '*.png' -E '*.jpg' . --exec sed -Ei 's/[[:blank:]]+$//'
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' . --exec sed -Ei 's/[[:blank:]]+$//'
           echo "::endgroup::"
 
           echo "::group::Check for CRLF Line Endings"
