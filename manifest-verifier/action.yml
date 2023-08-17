@@ -46,9 +46,9 @@ runs:
           echo "::group::${{ env.stepName }}"
           if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
             echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
-            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
+            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
           else
-            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }}
+            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }}
           fi
           exitStatus=$?
           echo "::endgroup::"
