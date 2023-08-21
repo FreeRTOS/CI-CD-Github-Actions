@@ -160,6 +160,7 @@ jobs:
            {
              repository: FreeRTOS-Kernel,
              exclude-files: .cSpellWords.txt,
+             exclude-dirs: portable,
              run-complexity: false,
              run-doxygen: false,
              # org: skptak,
@@ -219,7 +220,7 @@ jobs:
           horrid_threshold: 16
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
-        if: matrix.inputs.run-doxgyen && success() || failure()
+        if: matrix.inputs.run-doxgyen && ( success() || failure() )
         uses: ./doxygen
         with:
           path: repo/${{ matrix.inputs.repository }}
