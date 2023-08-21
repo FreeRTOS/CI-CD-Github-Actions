@@ -1,0 +1,20 @@
+[package]
+name = "spell-checker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tree-sitter = "0.20.4"
+tree-sitter-c = "0.20.1"
+tree-sitter-cpp = "0.20.0"
+tree-sitter-python = "0.19.1"
+libaspell-sys = { path = "crates/libaspell-sys" }
+cstr = "0.2.10"
+clap = { version = "3.1.2", features = ["derive"] }
+
+[workspace]
+members = ["crates/libaspell-sys"]
+
+[profile.release]
+lto = "thin"
+panic = "abort"
