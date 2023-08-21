@@ -26,6 +26,7 @@ jobs:
               repository: backoffAlgorithm,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
@@ -35,6 +36,7 @@ jobs:
               repository: coreHTTP,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
@@ -44,6 +46,7 @@ jobs:
               repository: coreJSON,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
@@ -53,6 +56,7 @@ jobs:
               repository: coreMQTT,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -62,6 +66,7 @@ jobs:
               repository: corePKCS11,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DUNIT_TESTS=1 -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 95,
@@ -71,6 +76,7 @@ jobs:
               repository: coreSNTP,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -80,6 +86,7 @@ jobs:
               repository: FreeRTOS-Cellular-Interface,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -89,6 +96,7 @@ jobs:
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -107,6 +115,7 @@ jobs:
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -116,6 +125,7 @@ jobs:
               repository: Jobs-for-AWS-IoT-embedded-sdk,
               exclude-files: ".cSpellWords.txt",
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
@@ -126,6 +136,7 @@ jobs:
               repository: ota-for-AWS-IoT-embedded-sdk,
               exclude-files: ".cSpellWords.txt",
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               # TODO: Make all repos use the same build command for testing and coverage
               # OTA uses a different command compared to all other repos
@@ -139,6 +150,7 @@ jobs:
               repository: SigV4-for-AWS-IoT-embedded-sdk,
               exclude-files: .cSpellWords.txt,
               run-complexity: true,
+              run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
@@ -149,6 +161,7 @@ jobs:
              repository: FreeRTOS-Kernel,
              exclude-files: .cSpellWords.txt,
              run-complexity: false,
+             run-doxygen: true,
              # org: skptak,
              org: skptak,
            },
@@ -156,6 +169,7 @@ jobs:
              repository: FreeRTOS-Plus-TCP,
              exclude-files: .cSpellWords.txt,
              run-complexity: false,
+             run-doxygen: false,
              # org: skptak,
              org: skptak,
            },
@@ -205,7 +219,7 @@ jobs:
           horrid_threshold: 16
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
-        if: success() || failure()
+        if: matrix.inputs.run-doxgyen && success() || failure()
         uses: ./doxygen
         with:
           path: repo/${{ matrix.inputs.repository }}
