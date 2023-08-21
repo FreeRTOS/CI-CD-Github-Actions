@@ -161,7 +161,7 @@ jobs:
              repository: FreeRTOS-Kernel,
              exclude-files: .cSpellWords.txt,
              run-complexity: false,
-             run-doxygen: true,
+             run-doxygen: false,
              # org: skptak,
              org: skptak,
            },
