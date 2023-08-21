@@ -135,7 +135,7 @@ runs:
         # done
 
         set +e
-        spell-checker -c -w .cSpellWords.txt $files
+        spell-checker -c -w .github/.cSpellWords.txt $files
         exitStatus=$?
         set -e
 
