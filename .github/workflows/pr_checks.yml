@@ -2,7 +2,7 @@ name: Repository Pull Request Checks
 
 on:
   pull_request:
-    branches: [main, CI-CD-Overhaul]
+    branches: [main, v2]
   workflow_dispatch:
 
 env:
