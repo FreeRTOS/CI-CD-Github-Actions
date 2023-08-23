@@ -148,9 +148,7 @@ runs:
             # Using tee will mask the exit code of the diff
             # And we don't want the colour to be added to the patch
             # Put it in what the 'default' path will be for the upload step
-            formatFile="formatting-$(basename $(pwd)).patch"
-            git diff > $formatFile
-            echo "::set-output name=artifact::$formatFile"
+            git diff > formattingChanges.patch
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -162,7 +160,7 @@ runs:
         id: upload-formatting-patch
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.action-formatting-check.artifact }}
+          name: formattingChanges
           path: ${{ inputs.path }}/formattingChanges.patch
           retention-days: 7
 
