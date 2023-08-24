@@ -15,209 +15,6 @@ env:
   bashEnd:    \033[0m
 
 jobs:
-
-  get-files-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - env:
-          stepName: "Install Dependencies"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          echo "$(pwd)" >> $GITHUB_PATH
-
-          sudo apt install fd-find
-          fdfind --version
-
-          exitStatus=$?
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() No Arguments"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          allFiles=$(grep -sril "copyright.*amazon" --include="*.c" --include="*.h")
-          files=$(getFiles)
-          echo -e "${{ env.bashInfo }} allFiles:\n$allFiles ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
-          exitStatus=0
-
-          # Loop through all the files we found using grep
-          for file in ${allFiles[@]} ; do
-            echo -e "${{ env.bashInfo }} Checking File: $file ${{ env.bashEnd }}"
-            # Check if they're in the flattened version of getFiles() search
-            if ! [[ $files == *"$file"* ]]; then
-              echo -e "${{ env.bashFail }} Get Files did not find file: $file ${{ env.bashEnd }}"
-              exitStatus=1
-            fi
-          done
-
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() Exclude Single File"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          files=$(getFiles --exclude-files="test.c")
-          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
-          exitStatus=0
-
-          if [[ "$files" == *"test.c"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a file it should have skipped: test.c ${{ env.bashEnd }}"
-            exitStatus=1
-          elif [[ "$files" != *"tasks.c"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Did not find a file it should have: tasks.c ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() Exclude Single Directory"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          files=$(getFiles --exclude-dirs="goodFiles")
-          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
-          exitStatus=0
-
-          if [[ "$files" == *"goodFiles"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() Exclude Single Directory and File"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          files=$(getFiles --exclude-dirs="goodFiles" --exclude-files="test.c")
-          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashInfo }}"
-          exitStatus=0
-          if [[ "$files" == *"test.c"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() Include Extra Type"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-
-          files=$(getFiles --include-extensions="md")
-          echo -e "${{ env.bashInfo }} files:\n$files ${{ env.bashEnd }}"
-
-          exitStatus=0
-          if [[ "$files" != *"README.md"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: goodFiles ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-      - env:
-          stepName: "Functional | Success | getFiles() Exclude Two Directories and Two Files"
-        name: ${{ env.stepName }}
-        shell: bash
-        working-directory: formatting
-        run: |
-          # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
-          files=""
-          files=$(getFiles --exclude-dirs="filesWithCRLFEndings,include" --exclude-files="fileFormattedWithClangFormatV16.c,badFile.c")
-
-          echo -e "${{ env.bashInfo }} files:\n"$files" ${{ env.bashEnd }}"
-          exitStatus=0
-          if [[ "$files" == *"fileFormattedWithClangFormatV16.c"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a File it should have skipped: fileFormattedWithClangFormatV16.c ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          if [[ "$files" == *"badFile.c"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a File it should have skipped: badFile.c ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          if [[ "$files" == *"filesWithCRLFEndings"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: filesWithCRLFEndings ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          if [[ "$files" == *"include"* ]]; then
-            echo -e "${{ env.bashFail }} Get Files Found a directory it should have skipped: include ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          echo "::endgroup::"
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
-
   uncrustify-formatting-success-cases:
       runs-on: ubuntu-20.04
       steps:
@@ -227,9 +24,9 @@ jobs:
           stepName: "Functional | Success | Exclude All Error Dirs"
         name: ${{ env.stepName }}
         id: exclude-dirs-with-errors
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace"
           exclude-files: "badFile.c"
 
@@ -237,9 +34,9 @@ jobs:
           stepName: "Functional | Success | Exclude Files"
         name: ${{ env.stepName }}
         id: exclude-files-with-errors
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: ",,,"
           exclude-files: "badFile.c,cgc_error.h,main-blinky.c,test.c"
 
@@ -247,9 +44,9 @@ jobs:
           stepName: "Functional | Success | Exclude File and Exclude Dirs"
         name: ${{ env.stepName }}
         id: exclude-single-dir-multiple-files
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "goodFiles"
           exclude-files: "cgc_error.h,main-blinky.c,test.c"
 
@@ -257,9 +54,9 @@ jobs:
           stepName: "Functional | Success | Exclude Files and Exclude Dirs"
         name: ${{ env.stepName }}
         id: exclude-two-files-two-dirs
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
           exclude-files: "test.c,cgc_error.h,main-blinky.c,badFile.c"
 
@@ -272,18 +69,18 @@ jobs:
         name: ${{ env.stepName }}
         id: all-format-errors
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
 
       - env:
           stepName: "Functional | Failure | CRLF and Formatting Error"
         name: ${{ env.stepName }}
         id: crlf-and-format-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithTrailingWhitespace"
 
       - env:
@@ -291,9 +88,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-and-whitespace-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors"
 
       - env:
@@ -301,9 +98,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
           exclude-files: "badFile.c"
 
@@ -312,9 +109,9 @@ jobs:
         name: ${{ env.stepName }}
         id: formatting-and-whitespace-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithCRLFEndings"
 
       - env:
@@ -322,9 +119,9 @@ jobs:
         name: ${{ env.stepName }}
         id: formatting-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
 
       - env:
@@ -332,9 +129,9 @@ jobs:
         name: ${{ env.stepName }}
         id: whitespace-error
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings"
 
       - env:
@@ -342,9 +139,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-exclude-dirs
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-dirs: "filesWithFormattingErrors,    filesWithCRLFEndings"
 
       - env:
@@ -352,9 +149,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-exclude-files
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
 
       - env:
@@ -362,9 +159,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-both
         continue-on-error: true
-        uses: ./uncrustify-formatting
+        uses: ./formatting
         with:
-          path: uncrustify-formatting
+          path: formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
           exclude-dirs: "filesWithFormattingErrors,
                           filesWithCRLFEndings"
@@ -448,9 +245,9 @@ jobs:
           stepName: "Functional | Success | Exclude Files and Dirs"
         name: ${{ env.stepName }}
         id: exclude-dirs-with-errors
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting/goodFiles
+          path: clang-formatting/goodFiles
           exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
           exclude-files: "formatErrorTest.h, formatErrorTest.c"
 
@@ -458,9 +255,9 @@ jobs:
           stepName: "Functional | Success | Exclude Just Files"
         name: ${{ env.stepName }}
         id: exclude-files-with-errors
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting/goodFiles
+          path: clang-formatting/goodFiles
           exclude-dirs: ",,,"
           exclude-files: "formatErrorTest.h, formatErrorTest.c, errorFileInDirectory.h, errorFileInDirectory.c"
 
@@ -477,9 +274,9 @@ jobs:
           stepName: "Functional | Success | Exclude Just Error Dirs"
         name: ${{ env.stepName }}
         id: exclude-two-files-two-dirs
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting/goodFiles
+          path: clang-formatting/goodFiles
           exclude-dirs: "fileWithErrorInclude,fileWithErrorSource"
 
   clang-formatting-error-cases:
@@ -491,9 +288,9 @@ jobs:
         name: ${{ env.stepName }}
         id: all-format-errors
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
 
       - name:  Reset Files
         shell: bash
@@ -504,9 +301,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-and-format-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithTrailingWhitespace"
 
       - name:  Reset Files
@@ -518,9 +315,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-and-whitespace-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors"
 
       - name:  Reset Files
@@ -532,9 +329,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-and-whitespace-non-c-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors"
           exclude-files: "test.c, main-blinky.c, cgc_error.h"
 
@@ -547,9 +344,9 @@ jobs:
         name: ${{ env.stepName }}
         id: crlf-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
           exclude-files: "badFile.c"
 
@@ -562,9 +359,9 @@ jobs:
         name: ${{ env.stepName }}
         id: formatting-and-whitespace-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithCRLFEndings"
 
       - name:  Reset Files
@@ -576,9 +373,9 @@ jobs:
         name: ${{ env.stepName }}
         id: formatting-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
 
       - name:  Reset Files
@@ -590,9 +387,9 @@ jobs:
         name: ${{ env.stepName }}
         id: whitespace-error
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings"
 
       - name:  Reset Files
@@ -604,9 +401,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-exclude-dirs
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors,    filesWithCRLFEndings"
 
       - name:  Reset Files
@@ -618,9 +415,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-exclude-files
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
 
       - name:  Reset Files
@@ -632,9 +429,9 @@ jobs:
         name: ${{ env.stepName }}
         id: error-in-both
         continue-on-error: true
-        uses: ./formatting
+        uses: ./clang-formatting
         with:
-          path: formatting
+          path: clang-formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
           exclude-dirs: "filesWithFormattingErrors,
                           filesWithCRLFEndings"
