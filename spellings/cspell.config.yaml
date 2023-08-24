@@ -9,7 +9,7 @@ useGitignore: true
 # That having just one single dictionary might be nicer?
 dictionaryDefinitions:
   - name: freertos-words
-    path: '.cSpellWords.txt'
+    path: '.github/.cSpellWords.txt'
     addWords: true
 dictionaries:
   - freertos-words

@@ -1,7 +1,8 @@
-#include <stdint.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <stdint.h>
+
 
 typedef struct DateAndTime
 {
@@ -11,41 +12,40 @@ typedef struct DateAndTime
     uint64_t msec;
 } DateAndTime;
 
-#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || \
-    defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 )
-    #include <Windows.h>
-/* Remove the warning about implicit sleep even with windows.h included */
-extern void sleep( int miliseconds );
-void getTime( struct DateAndTime * currentTime )
-{
-    SYSTEMTIME st, lt;
 
-    GetLocalTime( &lt );
-    currentTime->hour = lt.wHour;
-    currentTime->minutes = lt.wMinute;
-    currentTime->seconds = lt.wSecond;
-    currentTime->msec = lt.wMilliseconds;
-}
-#else /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || \
-         defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 )
+    #include <Windows.h>
+    /* Remove the warning about implicit sleep even with windows.h included */
+    extern void sleep( int miliseconds );
+    void getTime( struct DateAndTime * currentTime )
+    {
+        SYSTEMTIME st, lt;
+
+        GetLocalTime( &lt );
+        currentTime->hour = lt.wHour;
+        currentTime->minutes = lt.wMinute;
+        currentTime->seconds = lt.wSecond;
+        currentTime->msec = lt.wMilliseconds;
+    }
+#else /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
     #include <sys/time.h>
     #include <unistd.h>
-void getTime( struct DateAndTime * currentTime )
-{
-    struct timeval tv;
-    struct tm * tm;
+    void getTime( struct DateAndTime * currentTime )
+    {
+        struct timeval tv;
+        struct tm * tm;
 
-    gettimeofday( &tv, NULL );
-    tm = localtime( &tv.tv_sec );
-    currentTime->hour = tm->tm_hour;
-    currentTime->minutes = tm->tm_min;
-    currentTime->seconds = tm->tm_sec;
-    currentTime->msec = ( int ) ( tv.tv_usec / 1000 );
-}
-#endif /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || \
-          defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
+        gettimeofday( &tv, NULL );
+        tm = localtime( &tv.tv_sec );
+        currentTime->hour = tm->tm_hour;
+        currentTime->minutes = tm->tm_min;
+        currentTime->seconds = tm->tm_sec;
+        currentTime->msec = ( int ) ( tv.tv_usec / 1000 );
+    }
+#endif /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
 
-int main( int argc, char ** argv )
+int main( int argc,
+          char ** argv )
 {
     DateAndTime currentTime = { 0 };
     int32_t loop = 0;
@@ -55,14 +55,9 @@ int main( int argc, char ** argv )
     if( argc == 1 )
     {
         printf( "This is a basic test application.\n" );
-        printf(
-            "It prints the date and time and then sleeps for loopCount * 3\n" );
-        printf( "This program takes in two inputs, a loop count and an exit "
-                "code\n" );
-        printf( "By default it will run %d loops and exit with exit status "
-                "%d\n",
-                totalLoops,
-                exitCode );
+        printf( "It prints the date and time and then sleeps for loopCount * 3\n" );
+        printf( "This program takes in two inputs, a loop count and an exit code\n" );
+        printf( "By default it will run %d loops and exit with exit status %d\n", totalLoops, exitCode );
     }
 
     if( argc == 2 )
@@ -82,8 +77,7 @@ int main( int argc, char ** argv )
     for( int i = 1U; i < totalLoops; i++ )
     {
         getTime( &currentTime );
-        printf( "%02llu:%02llu:%02llu.%03llu TEST APPLICATION SLEEPING FOR %d "
-                "SECONDS\n",
+        printf( "%02llu:%02llu:%02llu.%03llu TEST APPLICATION SLEEPING FOR %d SECONDS\n",
                 currentTime.hour,
                 currentTime.minutes,
                 currentTime.seconds,
@@ -92,9 +86,9 @@ int main( int argc, char ** argv )
         sleep( i * 3U );
     }
 
-#ifdef EXIT_WITH_MINUTES
-    exitCode = currentTime.minutes;
-#endif
+    #ifdef EXIT_WITH_MINUTES
+        exitCode = currentTime.minutes;
+    #endif
     printf( "EXITING TEST APPLICATION WITH EXIT CODE = %d\n", exitCode );
     return exitCode;
 }

@@ -1,0 +1,181 @@
+name: 'formatting'
+description: 'CI formatting check'
+inputs:
+  path:
+    description: 'Path to repository folder to run formatting check for. '
+    required: false
+    default: ./
+  exclude-files:
+    description: 'List of comma-separated files to exclude from the formatting check. Eg file1, file2'
+    required: false
+    default: ''
+  exclude-dirs:
+    description: 'List of comma-separated directories to exclude from the formatting check. Eg docs, build'
+    required: false
+    default: ''
+  include-extensions:
+    description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+      - env:
+          # At time of writing, you can't add a global environment
+          # to an action file so stuck with this. If this gets changed
+          # Please move this
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Install Clang Format
+        name: ${{ env.stepName }}
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo "::group::${{ env.stepName }}"
+          sudo apt-get install clang-format fd-find dos2unix
+          echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+          export PATH="$PATH:$GITHUB_ACTION_PATH"
+
+          fdfind --version
+          fdInstalled=$?
+
+          clang-format --version
+          clangFormatInstalled=$?
+
+          getFiles --help
+          getFilesAdded=$?
+
+          echo "::endgroup::"
+          if [ $getFilesAdded -eq 1 ] || [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 1
+          else
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+            exit 0
+          fi
+
+      - env:
+          stepName: Validate Inputs
+          bashPass:   \033[32;1mPASSED -
+          bashInfo:   \033[33;1mINFO -
+          bashFail:   \033[31;1mFAILED -
+          bashEnd:    \033[0m
+        name: ${{ env.stepName }}
+        id: validate-inputs
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          # Check exclude dirs for possible input issues
+          if [[ "${{ inputs.exclude-dirs }}" = *"\n"* ]]; then
+            echo -e "${{ env.bashFail }} YOU HAVE NEWLINE IN YOUR EXCLUDE-DIRS. ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Check Format of Files
+        name: ${{ env.stepName }}
+        id: action-formatting-check
+        if: ${{ steps.validate-inputs.outcome}} = "success"
+        working-directory: ${{ inputs.path }}
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
+          echo "::group::Clang Format Code Files"
+          exitCode=0
+          export PATH="$PATH:$GITHUB_ACTION_PATH"
+
+          # TODO: These checks should really only run against modified files on PRS
+          # Where when the commit to the actual repo happens, then we should trigger the job
+          # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
+          # But maintain that we don't have a change in the Repo that suddenly causes an issue
+          files=$(getFiles --exclude-files="${{inputs.exclude-files}}" --exclude-dir="${{inputs.exclude-dirs}}" )
+          if ! [ $? -eq 0 ]; then
+              echo -e "${{ env.bashFail }} Error calling getFiles() ${{ env.bashEnd }}"
+              echo -e "$fileOut"
+              exit 1
+          fi
+
+          # Loop over the files that matched the above conditions
+          for file in ${files[@]}; do
+
+            # set +e so we don't exit on the first file with an error
+            # Doing it here instead of over the whole loop incase there
+            # Is an error that gets raised in the loop (somehow)
+            set +e
+
+            # Pipe the output of the command to a variable
+            # This way we can print the command only if it fails
+            fileOut=$(clang-format -i --verbose --style=file $file)
+
+            # Re-enable failing or error
+            set -e
+
+          done
+          echo "::endgroup::"
+
+          echo "::group::Check for Trailing Whitespace"
+          # These checks will be captured in the git diff
+          # Replace all trailing whitespace, exclude photo files
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' . --exec sed -Ei 's/[[:blank:]]+$//'
+          echo "::endgroup::"
+
+          echo "::group::Check for CRLF Line Endings"
+          # Replace all line endings with LF ones instead of CRLF
+          fdfind --type=file . --exec dos2unix
+          echo "::endgroup::"
+
+          # Run a git diff to print the differences if any exist, return an error code if there are any
+          # Wrap in a set+e and set -e so we can keep running after the error
+          echo "::group::File Difference"
+          set +e
+          git diff --exit-code --color=always
+          exitCode=$?
+          set -e
+          echo "::endgroup::"
+
+          if [ $exitCode -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          else
+            # I am intentionally doing this a second time here.
+            # Using tee will mask the exit code of the diff
+            # And we don't want the colour to be added to the patch
+            # Put it in what the 'default' path will be for the upload step
+            git diff > formattingChanges.patch
+            echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          fi
+          exit $exitCode
+
+      - name: Upload Formatting Git Patch
+        if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
+        id: upload-formatting-patch
+        uses: actions/upload-artifact@v3
+        with:
+          name: formattingChanges
+          path: ${{ inputs.path }}/formattingChanges.patch
+          retention-days: 7
+
+      - env:
+          stepName: Formatting Git Patch Info
+          bashPass: \033[32;1m
+          bashInfo: \033[33;1m
+          bashFail: \033[31;1m
+          bashEnd:  \033[0
+        if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
+          exit 1

@@ -1,14 +1,10 @@
 name: 'rust-spell-check'
-description: 'Rust CI spellings check'
+description: 'Rust CI spelling check'
 inputs:
   path:
     description: 'Path to repository folder to check spellings in.'
     required: false
     default: ./
-  lexicon:
-    description: 'Path to lexicon file to check spellings with'
-    required: false
-    default: lexicon.txt
   exclude-dirs:
     description: "Comma separated list of directories to not spell check"
     required: false
@@ -45,7 +41,6 @@ runs:
 
         # Add the current directory to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
-
 
         # Due to feedback from @archigup we will not be storing the binary
         # So will build it from scratch each time. A future improvement is to use
@@ -134,12 +129,13 @@ runs:
         #   set -e
         # done
 
+        # Wrap in set +e so the first mis-spelled word doesn't end the run
         set +e
-        spell-checker -c -w .cSpellWords.txt $files
+        spell-checker -c -w .github/.cSpellWords.txt $files
         exitStatus=$?
         set -e
 
-        #echo "::endgroup::"
+        echo "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
