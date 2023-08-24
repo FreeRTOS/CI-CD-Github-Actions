@@ -40,7 +40,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.stepName }}"
 
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
         sudo dpkg -i pandoc.deb
@@ -61,7 +61,7 @@ runs:
 
         python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
 
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd}}"
 
     - env:
@@ -75,7 +75,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.stepName }}"
         args="--verbose --test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           dirs="${{ inputs.exclude-dirs }}"
@@ -98,7 +98,7 @@ runs:
         python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}";
         exitStatus=$?
         set -e
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         # We check the backwards condition for this one
         if [ $exitStatus -eq 1 ]; then
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"

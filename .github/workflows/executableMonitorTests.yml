@@ -39,10 +39,10 @@ jobs:
         id: install-ubuntu-build--tools
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           sudo apt install build-essential
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           if [ $exitStatus -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
@@ -57,13 +57,13 @@ jobs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           gcc executable-monitor/test.c -o executable-monitor/test.out
           gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
           readlink -f executable-monitor/test.out
           readlink -f executable-monitor/test_exit_current_minutes.out
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           if [ $exitStatus -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
@@ -200,10 +200,10 @@ jobs:
       id: install-ubuntu-build--tools
       run: |
         # Install Ubuntu Build Tools
-        echo "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.stepName }}"
         sudo apt install build-essential
         exitStatus=$?
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
@@ -218,13 +218,13 @@ jobs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.stepName }}"
         gcc executable-monitor/test.c -o executable-monitor/test.out
         gcc -DEXIT_WITH_MINUTES executable-monitor/test.c -o executable-monitor/test_exit_current_minutes.out
         readlink -f executable-monitor/test.out
         readlink -f executable-monitor/test_exit_current_minutes.out
         exitStatus=$?
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else

@@ -30,14 +30,14 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::Install Dependencies"
+        echo -e "::group::Install Dependencies"
 
         # Install the Dependencies we need to run the spell-checker
         sudo apt-get install util-linux -y
         sudo apt-get install fd-find -y
         sudo apt-get install npm -y
         sudo npm install -g cspell
-        echo "::endgroup::"
+        echo -e "::endgroup::"
 
         # Add the current directory to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
@@ -68,7 +68,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        #echo "::group::${{ env.stepName }}"
+        #echo -e "::group::${{ env.stepName }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
 
 
@@ -105,7 +105,7 @@ runs:
         exitStatus=$?
         set -e
 
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else

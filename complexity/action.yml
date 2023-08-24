@@ -28,9 +28,9 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           sudo apt-get install complexity -y
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
       - env:
@@ -43,7 +43,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           echo -e "${{ env.bashInfo }} Have complexity limit of ${{ inputs.horrid_threshold }} ${{ env.bashEnd }}"
           exitStatus=0
 
@@ -52,6 +52,6 @@ runs:
           find ${{ inputs.source_path }}/ -iname '*.c' |\
             xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
 
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
           exit 0

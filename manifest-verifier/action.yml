@@ -26,10 +26,10 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           pip install -r $GITHUB_ACTION_PATH/requirements.txt
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
@@ -43,7 +43,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
             echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
             python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
@@ -51,7 +51,7 @@ runs:
             python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }}
           fi
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           if [ "$exitStatus" = "0" ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else

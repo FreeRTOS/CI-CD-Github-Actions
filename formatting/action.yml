@@ -27,9 +27,9 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           sudo apt-get install uncrustify fd-find dos2unix
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
       - env:
           bashPass: \033[32;1mPASSED -
@@ -75,29 +75,29 @@ runs:
           # Get all .c and .h files, as well as any other requested file types.
           # Then run uncrustify with the common config file.
           echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C ${{ env.bashEnd }}"
-          echo "::group::${{ env.bashInfo }} Check Formatting with Uncrustify ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Check Formatting with Uncrustify ${{ env.bashEnd }}"
           fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
           # These checks will be captured in the git diff
           # Replace all trailing whitespace, exclude photo files and args
           fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
           # Replace all line endings with LF ones instead of CRLF
           fdfind --type=file ${args} . --exec dos2unix
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           # Run a git diff to print the differences if any exist, return an error code if there are any
           # Wrap in a set+e and set -e so we can keep running after the error
-          echo "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
           set +e
           git diff --exit-code --color=always
           exitCode=$?
           set -e
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"

@@ -34,7 +34,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           sudo apt-get install clang-format fd-find dos2unix
           echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
           export PATH="$PATH:$GITHUB_ACTION_PATH"
@@ -45,7 +45,7 @@ runs:
           clang-format --version
           clangFormatInstalled=$?
 
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           if [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
@@ -68,7 +68,7 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
-          echo "::group::Clang Format Code Files"
+          echo -e "::group::Clang Format Code Files"
           exitCode=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
@@ -107,29 +107,29 @@ runs:
           # Get all .c and .h files, as well as any other requested file types.
           # Then run clang-format with the common config file.
           echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
-          echo "::group::${{ env.bashInfo }} Check Formatting with Clang-Format ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Check Formatting with Clang-Format ${{ env.bashEnd }}"
           fdfind -e c -e h ${args} --exec fdfind -e c -e h ${args} --exec clang-format -i
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::Check for Trailing Whitespace"
+          echo -e "::group::Check for Trailing Whitespace"
           # These checks will be captured in the git diff
           # Replace all trailing whitespace, exclude photo files
           fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::Check for CRLF Line Endings"
+          echo -e "::group::Check for CRLF Line Endings"
           # Replace all line endings with LF ones instead of CRLF
           fdfind --type=file ${args} . --exec dos2unix
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           # Run a git diff to print the differences if any exist, return an error code if there are any
           # Wrap in a set+e and set -e so we can keep running after the error
-          echo "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
           set +e
           git diff --exit-code --color=always
           exitCode=$?
           set -e
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"

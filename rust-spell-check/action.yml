@@ -30,14 +30,14 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::Install Dependencies"
+        echo -e "::group::Install Dependencies"
 
         # Install the Dependencies we need to run the spell-checker
         sudo apt-get install util-linux -y
         sudo apt-get install fd-find -y
         sudo apt-get install aspell -y
         sudo apt-get install spell -y
-        echo "::endgroup::"
+        echo -e "::endgroup::"
 
         # Add the current directory to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
@@ -56,7 +56,7 @@ runs:
         # exitCode=$?
         # set -e
 
-        echo "::group::Compile Spell Checker"
+        echo -e "::group::Compile Spell Checker"
         exitCode=1
 
         if ! [ $exitCode -eq 0 ]; then
@@ -81,12 +81,12 @@ runs:
           set -e
           popd
           spell-checker --help
-          echo "::endgroup::Compile Spell Checker"
+          echo -e "::endgroup::Compile Spell Checker"
 
           # Only make it to here if nothing above fails
           echo -e "${{ env.bashPass }} Compiled the Spell Checker ${{ env.bashEnd }}"
         fi
-        echo "::endgroup::"
+        echo -e "::endgroup::"
 
         # Only get to here if nothing above fails
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -103,7 +103,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        #echo "::group::${{ env.stepName }}"
+        #echo -e "::group::${{ env.stepName }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
 
         # So here's the deal. At time of writing this spell checker can check
@@ -135,7 +135,7 @@ runs:
         exitStatus=$?
         set -e
 
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else

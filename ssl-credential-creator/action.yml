@@ -33,9 +33,9 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           pip install -r $GITHUB_ACTION_PATH/requirements.txt
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName}} ${{ env.bashEnd }}"
 
       - env:
@@ -56,6 +56,6 @@ runs:
           echo "server-cert-path=$(pwd)/server_cert.crt" >> $GITHUB_OUTPUT
           echo "device-priv-key-path=$(pwd)/device_priv_key.key" >> $GITHUB_OUTPUT
           echo "device-cert-path=$(pwd)/device_cert.crt" >> $GITHUB_OUTPUT
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName}} ${{ env.bashEnd }}"
 

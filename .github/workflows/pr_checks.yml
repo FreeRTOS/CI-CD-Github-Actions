@@ -246,9 +246,9 @@ jobs:
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
-          echo "::group:: Install lcov"
+          echo -e "::group:: Install lcov"
           sudo apt-get install -y lcov
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           cmake -S ./test -B build/ ${{ matrix.inputs.build-flags }}
           make -C build/ all
 

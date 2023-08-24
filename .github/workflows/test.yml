@@ -184,11 +184,11 @@ jobs:
           # ${{ env.stepName }}
           exitStatus=0
 
-          echo "::group::Install Lcov"
+          echo -e "::group::Install Lcov"
           sudo apt-get install -y lcov
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           cmake -S ./coreMQTT/test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
@@ -196,7 +196,7 @@ jobs:
           -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
           make -C build/ all
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           # Only get to here if we passed the build
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -210,14 +210,14 @@ jobs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::Build Coverage for coreMQTT"
+          echo -e "::group::Build Coverage for coreMQTT"
           make -C build/ coverage
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
           echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
@@ -237,16 +237,16 @@ jobs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::Build Coverage for coreMQTT"
+          echo -e "::group::Build Coverage for coreMQTT"
           make -C build/ clean
           make -C build/ coverage
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           declare -a EXCLUDE=("\*test/\*")
           set +e
           lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
-          echo "::endgroup::"
+          echo -e "::endgroup::"
 
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
           set -e
