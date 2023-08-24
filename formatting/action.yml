@@ -6,13 +6,15 @@ inputs:
     required: false
     default: ./
   exclude-files:
-    description: 'List of comma-separated files to exclude from trailing whitespace check. Eg file1,file2'
+    description: 'List of comma-separated files to exclude from formatting check. Eg file1, file2'
     required: false
-    default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from trailing whitespace formatting check. Eg docs,build'
+    description: 'List of comma-separated directories to exclude from formatting check. Eg docs, build'
     required: false
-    default: ''
+  include-extensions:
+    description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
+    required: false
+
 runs:
   using: "composite"
   steps:
@@ -26,37 +28,8 @@ runs:
         run: |
           # ${{ env.stepName }}
           echo "::group::${{ env.stepName }}"
-          sudo apt-get install uncrustify
+          sudo apt-get install uncrustify fd-find dos2unix
           echo "::endgroup::"
-
-      - env:
-          stepName: Validate Inputs
-          # The bash escape character is \033
-          # At time of writing, you can't add a global environment
-          # to an action file so stuck with this. If this gets changed
-          # Please move this
-          bashPass:   \033[32;1mPASSED -
-          bashInfo:   \033[33;1mINFO -
-          bashFail:   \033[31;1mFAILED -
-          bashEnd:    \033[0m
-        name: ${{ env.stepName }}
-        id: validate-inputs
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          exitStatus=0
-          # Check exclude dirs for possible input issues
-          if [[ "${{ inputs.exclude-dirs }}" = *" "* ]]; then
-            echo -e "${{ env.bashFail }} YOU HAVE WHITESPACE IN YOUR EXCLUDE-DIRS. ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-
-          # Check exclude-files  for possible input issues
-          if [[ "${{ inputs.exclude-files }}" = *" "* ]]; then
-            echo -e "${{ env.bashFail }} YOU HAVE WHITESPACE IN YOUR EXCLUDE-FILES. ${{ env.bashEnd }}"
-            exitStatus=1
-          fi
-          exit $exitStatus
 
       - env:
           bashPass: \033[32;1mPASSED -
@@ -65,105 +38,99 @@ runs:
           bashEnd:  \033[0m
           stepName: Run Uncrustify
         name: ${{ env.stepName }}
-        if: ${{ steps.validate-inputs.outcome}} = "success"
+        id: action-formatting-check
         working-directory: ${{ inputs.path }}
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} Using Uncrustify version "$(uncrustify --version)" ${{ env.bashEnd }}"
-          echo "::group::${{ env.stepName }}"
+          echo -e "${{ env.bashInfo }} Using Uncrustify Version "$(uncrustify --version)" ${{ env.bashEnd }}"
 
-          # GitHub automatically use "set -e" which causes scripts to fail on the first exit code
-          # This would mean the first time a file fails the check that we exit without formatting all files.
-          set +e
 
-          # Get all files that end in .c or .h.
-          # Exclude any files or directories that we were asked to.
-          # Then limit the search to files that have the amazon copyright on them.
-          # -l Provides a list of the files
-          # -r Means do a recursive search
-          # -i tells it to ignore the case
-          files=$(grep --include={*.[ch],} --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},} -lriE "copyright (.*) [0-9]{4} amazon.com" )
+          # Parse the optional inputs
+          args=""
 
-          # Loop over the files that matched the above conditions
-          for file in ${files[@]}; do
-            # Print them out for future debugging
-            echo -e "${{ env.bashInfo }} Parsing File: "$file" ${{ env.bashEnd }}"
+          /* fd-find uses -E to exclude a file or directory */
+          if [ -n "${{ inputs.exclude-dirs }}" ]; then
+            dirs=" -E "
+            dirs+="${{ inputs.exclude-dirs }}"
+            dirs="${dirs//,/ -E }"
+            args+="{${dirs}}"
+          fi
 
-            # Pipe the output of the command to a variable
-            # This way we can print the command only if it fails
-            fileOut=$(uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C $file 2>&1)
+          /* fd-find uses -E to exclude a file or directory */
+          if [ -n "${{ inputs.exclude-files }}" ]; then
+            files=" -E "
+            files+="${{ inputs.exclude-files }}"
+            files="${files//,/ -E }"
+            args+="{${files}}"
+          fi
 
-            # If the previous command failed then print out an error message as well as the output
-            if [ "$?" != "0" ]; then
-              echo -e "${{ env.bashFail }} Error parsing "$file" ${{ env.bashEnd }}"
-              echo -e "$fileOut"
-            fi
-          done
+          /* fd-find uses -e to exclude a file extension */
+          if [ -n "${{ inputs.include-file-types }}" ]; then
+            file_types=" -e "
+            file_types+="${{ inputs.include-file-types }}"
+            file_types="${file_types//,/ -e }"
+            args+="${file_types}"
+          fi
+
+          # Get all .c and .h files, as well as any other requested file types.
+          # Then run uncrustify with the common config file.
+          echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C ${{ env.bashEnd }}"
+          echo "::group::${{ env.bashInfo }} Check Formatting with Uncrustify ${{ env.bashEnd }}"
+          fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          echo "::endgroup::"
+
+          echo "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+          # These checks will be captured in the git diff
+          # Replace all trailing whitespace, exclude photo files and args
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
+          echo "::endgroup::"
+
+          echo "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+          # Replace all line endings with LF ones instead of CRLF
+          fdfind --type=file ${args} --exec dos2unix
           echo "::endgroup::"
 
           # Run a git diff to print the differences if any exist, return an error code if there are any
-          echo "::group::File Difference"
+          echo "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
           git diff --exit-code
           exitCode=$?
           echo "::endgroup::"
-          if [ "$exitCode" = "0" ]; then
-            echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
+          if [ $exitCode -eq 0 ]; then
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            filesWithErrors=$(git diff --name-only)
+            # I am intentionally doing this a second time here.
+            # Using tee will mask the exit code of the diff
+            # And we don't want the colour to be added to the patch
+            # Put it in what the 'default' path will be for the upload step
+            git diff > formattingChanges.patch
             echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
-            echo -e "${{ env.bashFail }} "$filesWithErrors" ${{ env.bashEnd }} "
-            echo -e "${{ env.bashFail }} ${{env.stepName }} ${{ env.bashEnd }}"
-            # If there is an error, set this flag high again so the exit 1 fails the run instantly
-            set -e
-            exit 1
-          fi
-
-      - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Check For Trailing Whitespace
-        name: ${{ env.stepName }}
-        shell: bash
-        # Use this so that even if we fail formatting these checks run
-        # Solves the issue of "Make commit to fix formatting, to then learn
-        # You need to fix whitespace
-        if: success() || failure() && ${{ steps.validate-inputs.outcome}} = "success"
-        working-directory: ${{ inputs.path }}
-        run: |
-          # ${{ env.stepName }}
-          set +e
-          grep --exclude={README.md,${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnIe "[[:blank:]]$" .
-          if [ "$?" = "0" ]; then
+            echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            set -e
-            exit 1
-          else
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 0
           fi
+          exit $exitCode
+
+      - name: Upload Formatting Git Patch
+        if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
+        id: upload-formatting-patch
+        uses: actions/upload-artifact@v3
+        with:
+          name: formattingChanges
+          path: ${{ inputs.path }}/formattingChanges.patch
+          retention-days: 7
 
       - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Check for CRLF
-        name: ${{ env.stepName }}
-        if: success() || failure() && ${{ steps.validate-inputs.outcome}} = "success"
-        working-directory: ${{ inputs.path }}
+          stepName: Formatting Git Patch Info
+          bashPass: \033[32;1m
+          bashInfo: \033[33;1m
+          bashFail: \033[31;1m
+          bashEnd:  \033[0
+        if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
         shell: bash
         run: |
           # ${{ env.stepName }}
-          set +e
-          grep --exclude={${{inputs.exclude-files}},} --exclude-dir={${{inputs.exclude-dirs}},.git} -rnl $'\r'
-          if [ "$?" = "0" ]; then
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            set -e
-            exit 1
-          else
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 0
-          fi
+          echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
