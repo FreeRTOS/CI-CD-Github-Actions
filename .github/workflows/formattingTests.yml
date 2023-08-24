@@ -262,7 +262,7 @@ jobs:
           exclude-files: "formatErrorTest.h, formatErrorTest.c, errorFileInDirectory.h, errorFileInDirectory.c"
 
       - name: Remove Error Files at Top Directory
-        working-directory: formatting/goodFiles
+        working-directory: clang-formatting/goodFiles
         shell: bash
         run: |
           # Remove Error Files at Top Directory

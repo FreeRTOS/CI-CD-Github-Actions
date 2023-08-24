@@ -49,7 +49,7 @@ runs:
           # Parse the optional inputs
           args=""
 
-          /* fd-find uses -E to exclude a file or directory */
+          # fd-find uses -E to exclude a file or directory
           if [ -n "${{ inputs.exclude-dirs }}" ]; then
             dirs=" -E "
             dirs+="${{ inputs.exclude-dirs }}"
@@ -57,7 +57,7 @@ runs:
             args+="{${dirs}}"
           fi
 
-          /* fd-find uses -E to exclude a file or directory */
+          # fd-find uses -E to exclude a file or directory
           if [ -n "${{ inputs.exclude-files }}" ]; then
             files=" -E "
             files+="${{ inputs.exclude-files }}"
@@ -65,7 +65,7 @@ runs:
             args+="{${files}}"
           fi
 
-          /* fd-find uses -e to exclude a file extension */
+          # fd-find uses -e to exclude a file extension
           if [ -n "${{ inputs.include-file-types }}" ]; then
             file_types=" -e "
             file_types+="${{ inputs.include-file-types }}"
