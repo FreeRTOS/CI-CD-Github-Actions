@@ -64,7 +64,7 @@ runs:
             args+=" ${files}"
           fi
 
-          # fd-find uses -e to exclude a file extension
+          # fd-find uses -e to include a file extension
           if [ -n "${{ inputs.include-file-types }}" ]; then
             file_types=" -e "
             file_types+="${{ inputs.include-file-types }}"
@@ -87,13 +87,16 @@ runs:
 
           echo "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
           # Replace all line endings with LF ones instead of CRLF
-          fdfind --type=file ${args} --exec dos2unix
+          fdfind --type=file ${args} . --exec dos2unix
           echo "::endgroup::"
 
           # Run a git diff to print the differences if any exist, return an error code if there are any
+          # Wrap in a set+e and set -e so we can keep running after the error
           echo "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
-          git diff --exit-code
+          set +e
+          git diff --exit-code --color=always
           exitCode=$?
+          set -e
           echo "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then

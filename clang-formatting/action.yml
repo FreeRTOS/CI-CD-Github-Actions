@@ -45,33 +45,13 @@ runs:
           clang-format --version
           clangFormatInstalled=$?
 
-          getFiles --help
-          getFilesAdded=$?
-
           echo "::endgroup::"
-          if [ $getFilesAdded -eq 1 ] || [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
+          if [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 1
           else
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
             exit 0
-          fi
-
-      - env:
-          stepName: Validate Inputs
-          bashPass:   \033[32;1mPASSED -
-          bashInfo:   \033[33;1mINFO -
-          bashFail:   \033[31;1mFAILED -
-          bashEnd:    \033[0m
-        name: ${{ env.stepName }}
-        id: validate-inputs
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          # Check exclude dirs for possible input issues
-          if [[ "${{ inputs.exclude-dirs }}" = *"\n"* ]]; then
-            echo -e "${{ env.bashFail }} YOU HAVE NEWLINE IN YOUR EXCLUDE-DIRS. ${{ env.bashEnd }}"
-            exitStatus=1
           fi
 
       - env:
@@ -96,45 +76,55 @@ runs:
           # Where when the commit to the actual repo happens, then we should trigger the job
           # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
           # But maintain that we don't have a change in the Repo that suddenly causes an issue
-          files=$(getFiles --exclude-files="${{inputs.exclude-files}}" --exclude-dir="${{inputs.exclude-dirs}}" )
-          if ! [ $? -eq 0 ]; then
-              echo -e "${{ env.bashFail }} Error calling getFiles() ${{ env.bashEnd }}"
-              echo -e "$fileOut"
-              exit 1
+
+          # Parse the optional inputs
+          args=""
+
+          # fd-find uses -E to exclude a file or directory
+          if [ -n "${{ inputs.exclude-dirs }}" ]; then
+            dirs=" -E "
+            dirs+="${{ inputs.exclude-dirs }}"
+            dirs="${dirs//,/ -E }"
+            args+=" ${dirs}"
           fi
 
-          # Loop over the files that matched the above conditions
-          for file in ${files[@]}; do
+          # fd-find uses -E to exclude a file or directory
+          if [ -n "${{ inputs.exclude-files }}" ]; then
+            files=" -E "
+            files+="${{ inputs.exclude-files }}"
+            files="${files//,/ -E }"
+            args+=" ${files}"
+          fi
 
-            # set +e so we don't exit on the first file with an error
-            # Doing it here instead of over the whole loop incase there
-            # Is an error that gets raised in the loop (somehow)
-            set +e
+          # fd-find uses -e to include a file extension
+          if [ -n "${{ inputs.include-file-types }}" ]; then
+            file_types=" -e "
+            file_types+="${{ inputs.include-file-types }}"
+            file_types="${file_types//,/ -e }"
+            args+=" ${file_types}"
+          fi
 
-            # Pipe the output of the command to a variable
-            # This way we can print the command only if it fails
-            fileOut=$(clang-format -i --verbose --style=file $file)
-
-            # Re-enable failing or error
-            set -e
-
-          done
+          # Get all .c and .h files, as well as any other requested file types.
+          # Then run clang-format with the common config file.
+          echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
+          echo "::group::${{ env.bashInfo }} Check Formatting with Clang-Format ${{ env.bashEnd }}"
+          fdfind -e c -e h ${args} --exec fdfind -e c -e h ${args} --exec clang-format -i
           echo "::endgroup::"
 
           echo "::group::Check for Trailing Whitespace"
           # These checks will be captured in the git diff
           # Replace all trailing whitespace, exclude photo files
-          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' . --exec sed -Ei 's/[[:blank:]]+$//'
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
           echo "::endgroup::"
 
           echo "::group::Check for CRLF Line Endings"
           # Replace all line endings with LF ones instead of CRLF
-          fdfind --type=file . --exec dos2unix
+          fdfind --type=file ${args} . --exec dos2unix
           echo "::endgroup::"
 
           # Run a git diff to print the differences if any exist, return an error code if there are any
           # Wrap in a set+e and set -e so we can keep running after the error
-          echo "::group::File Difference"
+          echo "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
           set +e
           git diff --exit-code --color=always
           exitCode=$?
