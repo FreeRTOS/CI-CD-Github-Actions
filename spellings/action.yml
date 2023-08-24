@@ -71,21 +71,37 @@ runs:
         #echo "::group::${{ env.stepName }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
 
-        # Add helper script to path
-        export PATH="$PATH:$GITHUB_ACTION_PATH"
 
-        # Get all files
-        files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs }}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions}}")
+        # Parse the optional inputs
+        args=""
 
-        # Wrap the check in set +e so it runs against all files
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          dirs=" -E "
+          dirs+="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ -E }"
+          args+=" ${dirs}"
+        fi
+
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-files }}" ]; then
+          files=" -E "
+          files+="${{ inputs.exclude-files }}"
+          files="${files//,/ -E }"
+          args+=" ${files}"
+        fi
+
+        # fd-find uses -e to exclude a file extension
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          file_types=" -e "
+          file_types+="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ -e }"
+          args+=" ${file_types}"
+        fi
+
         set +e
-        exitStatus=0
-        for file in ${files[@]}; do
-          cspell --language-id C --color -c cspell.config.yaml --show-suggestions --show-context "$file"
-          if ! [ $? -eq 0 ]; then
-            exitStatus=1
-          fi
-        done
+        fdfind -e c -e h ${args} --exec cspell --language-id C --color -c cspell.config.yaml --show-suggestions --show-context
+        exitStatus=$?
         set -e
 
         echo "::endgroup::"

@@ -45,7 +45,6 @@ runs:
           # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} Using Uncrustify Version "$(uncrustify --version)" ${{ env.bashEnd }}"
 
-
           # Parse the optional inputs
           args=""
 
