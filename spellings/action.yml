@@ -99,6 +99,7 @@ runs:
           args+=" ${file_types}"
         fi
 
+        # Wrap in a set +e so Github doesn't stop the spell check from running
         set +e
         fdfind -e c -e h ${args} --exec cspell --language-id C --color -c cspell.config.yaml --show-suggestions --show-context
         exitStatus=$?
