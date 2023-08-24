@@ -54,7 +54,7 @@ runs:
             dirs=" -E "
             dirs+="${{ inputs.exclude-dirs }}"
             dirs="${dirs//,/ -E }"
-            args+="{${dirs}}"
+            args+=" ${dirs}"
           fi
 
           # fd-find uses -E to exclude a file or directory
@@ -62,7 +62,7 @@ runs:
             files=" -E "
             files+="${{ inputs.exclude-files }}"
             files="${files//,/ -E }"
-            args+="{${files}}"
+            args+=" ${files}"
           fi
 
           # fd-find uses -e to exclude a file extension
@@ -70,7 +70,7 @@ runs:
             file_types=" -e "
             file_types+="${{ inputs.include-file-types }}"
             file_types="${file_types//,/ -e }"
-            args+="${file_types}"
+            args+=" ${file_types}"
           fi
 
           # Get all .c and .h files, as well as any other requested file types.
