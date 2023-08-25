@@ -103,7 +103,7 @@ runs:
         set +e
         echo -e echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
 
-        fdfind -e c -e h -e md -e txt -e readme ${args} --exec \
+        fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch \
           cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
         exitStatus=$?
         set -e
