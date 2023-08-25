@@ -50,8 +50,8 @@ runs:
 
 
         # Make sure we have all the commands we need.
-        echo -e "${{ env.bashInfo }} fdfind --version ${{ env.bashEnd }}"
-        echo -e "${{ env.bashInfo }} cspell --version ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} fdfind --version $(fdfind --version) ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} cspell --version $(cspell --version) ${{ env.bashEnd }}"
 
         # Only reach this line if no errors were hit above
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -70,7 +70,7 @@ runs:
         # ${{ env.stepName }}
         #echo -e "::group::${{ env.stepName }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
-
+        exitStatus=0
 
         # Parse the optional inputs
         args=""
@@ -101,7 +101,10 @@ runs:
 
         # Wrap in a set +e so Github doesn't stop the spell check from running
         set +e
-        fdfind -e c -e h -e md ${args} --exec cspell --language-id C --color -c cspell.config.yaml --show-suggestions --show-context
+        echo -e echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
+
+        fdfind -e c -e h -e md -e txt -e readme ${args} --exec \
+          cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
         exitStatus=$?
         set -e
 
@@ -110,5 +113,5 @@ runs:
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          exit 1
         fi
+        exit $exitStatus

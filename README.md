@@ -41,7 +41,10 @@ to verify that the complexity score of library functions is less than 16.
 uncrustify formatting standard defined in [formatting](formatting/uncrustify.cfg).
 
 * **Clang-Formatting** - Validates all C files of a FreeRTOS library repository comply to the formatting
-  standard defined in [clang-format](formatting/.clang-format).
+  standard defined in [clang-format](clang-formatting/.clang-format).
+
+* **Uncrustify-formatting** - Validates all C files of a FreeRTOS library repository comply to the formatting
+  standard defined in [uncrustify.cfg](formatting/uncrustify.cfg).
 
 * **Doxygen** - Validates that the doxygen manual of the FreeRTOS library can be built without
   warnings.
