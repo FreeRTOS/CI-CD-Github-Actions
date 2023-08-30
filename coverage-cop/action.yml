@@ -25,9 +25,9 @@ runs:
         name: ${{ env.stepName }}
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.stepName }}"
           sudo apt-get install lcov fd-find
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
 
       - env:
@@ -69,10 +69,10 @@ runs:
           if [ $RESULT -eq 0 ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            echo "::group::Create Failed Codecov HTML Report"
+            echo -e "::group::Create Failed Codecov HTML Report"
             genhtml --rc lcov_branch_coverage=1 --ignore-errors source ${{ inputs.coverage-file }} --legend --title "$(basename `git rev-parse --show-toplevel`) $(git rev-parse HEAD)" --output-directory=CodecovHTMLReport
             zip -r CodecovHTMLReport.zip CodecovHTMLReport
-            echo "::endgroup::"
+            echo -e "::endgroup::"
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $RESULT
