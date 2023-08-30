@@ -17,6 +17,9 @@ inputs:
     description: 'Path to file containing allowlist of URLs.'
     required: false
     default: ''
+  exclude-urls:
+    description: 'Comma separated list of URLS not to check'
+    required: false
   user-agent:
     description: 'User agent string to use when making http requests.'
     required: false
@@ -40,22 +43,28 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.stepName }}"
+
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
         sudo dpkg -i pandoc.deb
+
         rm pandoc.deb
         sudo apt install debsums
+
         sudo debsums pandoc
         sudo type -p curl >/dev/null || sudo apt install curl -y
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
         sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
         sudo apt update
         sudo apt install -y gh
         sudo apt install pandoc -y
         sudo apt-get install -y python3-setuptools python3-pip
+
         python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
-        echo "::endgroup::"
+
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd}}"
 
     - env:
@@ -69,8 +78,8 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
-        args="--verbose --test-markdown"
+        echo -e "::group::${{ env.stepName }}"
+        args="--test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           dirs="${{ inputs.exclude-dirs }}"
           dirs="${dirs//,/ }"
@@ -82,9 +91,18 @@ runs:
           args+=" --include-file-types ${file_types}"
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          allowlist_file="${{ inputs.allowlist-file }}"
-          allowlist_file="${allowlist_file//,/ }"
-          args+=" --allowlist-file ${allowlist_file}"
+          touch allowList.txt
+          cat ${{ inputs.allowlist-file }} >> allowList.txt
+        fi
+        if [[ "${{ inputs.exclude-urls }}" != "" ]]; then
+          touch allowList.txt
+          exclude_urls="${{ inputs.exclude-urls }}"
+          exclude_urls="${exclude_urls//,/ }"
+          for url in ${exclude_urls[@]}; do echo -e "$url" >> allowList.txt; done
+        fi
+
+        if [ -n "${{ inputs.allowlist-file }}" ] || [ -n "${{ inputs.exclude-urls }}" ]; then
+          args+=" --allowlist-file allowList.txt"
         fi
 
         echo -e "${{ env.bashInfo }} Running verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\" ${{ env.bashEnd }}"
@@ -92,7 +110,7 @@ runs:
         python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}";
         exitStatus=$?
         set -e
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         # We check the backwards condition for this one
         if [ $exitStatus -eq 1 ]; then
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
