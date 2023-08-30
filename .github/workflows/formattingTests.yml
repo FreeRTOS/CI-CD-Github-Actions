@@ -38,7 +38,7 @@ jobs:
         with:
           path: formatting
           exclude-dirs: ",,,"
-          exclude-files: "badFile.c,cgc_error.h,main-blinky.c,test.c"
+          exclude-files: "badFile.c,cgc_error.h,crlf-file.c,test.c"
 
       - env:
           stepName: "Functional | Success | Exclude File and Exclude Dirs"
@@ -48,7 +48,7 @@ jobs:
         with:
           path: formatting
           exclude-dirs: "goodFiles"
-          exclude-files: "cgc_error.h,main-blinky.c,test.c"
+          exclude-files: "cgc_error.h,crlf-file.c,test.c"
 
       - env:
           stepName: "Functional | Success | Exclude Files and Exclude Dirs"
@@ -58,7 +58,7 @@ jobs:
         with:
           path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
-          exclude-files: "test.c,cgc_error.h,main-blinky.c,badFile.c"
+          exclude-files: "test.c,cgc_error.h,crlf-file.c,badFile.c"
 
   uncrustify-formatting-error-cases:
     runs-on: ubuntu-20.04
@@ -333,7 +333,7 @@ jobs:
         with:
           path: clang-formatting
           exclude-dirs: "filesWithFormattingErrors"
-          exclude-files: "test.c, main-blinky.c, cgc_error.h"
+          exclude-files: "test.c, crlf-file.c, cgc_error.h"
 
       - name:  Reset Files
         shell: bash

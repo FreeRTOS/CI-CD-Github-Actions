@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: skptak/coreMQTT
-          ref: main
+          ref: CI-CD-Updates
           path: coreMQTT
 
       - name: Test spell check action
@@ -325,14 +325,14 @@ jobs:
           allowlist-file: link-verifier/badUrls.md
 
       - env:
-          stepName: "Functional | Success | Link being Excluded"
+          stepName: "Functional | Success | Links being Excluded"
         name: ${{ env.stepName }}
         id: link-verifier-exclude-url-success-case
         uses: ./link-verifier
         with:
           path: ./
           exclude-dirs: complexity, formatting
-          exclude-urls: https://dummy-url.com/ota.bin, https://dummy-url.com/ota.com, https://dummy-url-three.com/ota.bin
+          exclude-urls: https://dummy-url.com/ota.bin, https://dummy-url.com/ota.com, https://dummy-url-three.com/ota.bin, https://github.com/FreeRTOS/A-Repo-That-Wins-You-The-Lottery
 
       - env:
           stepName: "Functional | Failure | Link Does Not Exist"
