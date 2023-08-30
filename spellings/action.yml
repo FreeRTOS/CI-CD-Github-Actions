@@ -1,65 +1,59 @@
 name: 'spellings'
-description: 'CI spellings check'
+description: 'cSpell CI spelling check'
 inputs:
   path:
-    description: 'Path to repository folder to run formatting check for.'
+    description: 'Path to repository folder to check spellings in.'
     required: false
     default: ./
-  exclude-files:
-    description: 'List of comma-separated files to exclude from trailing whitespace check. Eg file1,file2'
-    required: false
-    default: ''
   exclude-dirs:
-    description: 'List of comma-separated directories to exclude from trailing whitespace formatting check. Eg docs,build'
+    description: "Comma separated list of directories to not spell check"
     required: false
-    default: ''
+  exclude-files:
+    description: "Comma separated list of files to not spell check"
+    required: false
   include-extensions:
-    description: 'List of comma-separated file endings to include into the spell check. Eg md, dox, build'
+    description: "Comma separated list of files to match to regex"
     required: false
-    default: ''
+
 
 runs:
   using: "composite"
   steps:
     - env:
-        stepName: Install Spell
         bashPass: \033[32;1mPASSED -
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
+        stepName: Set-Up The Spell Checker
       name: ${{ env.stepName }}
       id: spell-checker-setup
       shell: bash
       run: |
-        #  ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
-        sudo apt-get install spell -y
+        # ${{ env.stepName }}
+        echo -e "::group::Install Dependencies"
+
+        # Install the Dependencies we need to run the spell-checker
         sudo apt-get install util-linux -y
         sudo apt-get install fd-find -y
-
-        # This is a 1000+ line log for the install
-        # Wrap it in an echo group
-        echo "::group::NPM Install"
         sudo apt-get install npm -y
         sudo npm install -g cspell
-        echo "::endgroup::"
+        echo -e "::endgroup::"
 
-        echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-        export PATH="$PATH:$GITHUB_ACTION_PATH"
+        # Add the current directory to PATH
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
 
         # cp has an error code if it's asked to copy to the same file
         # Wrap it in a set +e in case the input path is the working directory
         set +e
         cp $GITHUB_ACTION_PATH/cspell.config.yaml ${{ inputs.path }}
         set -e
-        echo "::endgroup::"
+
 
         # Make sure we have all the commands we need.
-        echo -e "${{ env.bashInfo }} which getFiles ${{ env.bashEnd }}"
-        echo -e "${{ env.bashInfo }} fdfind --version ${{ env.bashEnd }}"
-        echo -e "${{ env.bashInfo }} cspell --version ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} fdfind --version $(fdfind --version) ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} cspell --version $(cspell --version) ${{ env.bashEnd }}"
 
-        # Only get to here if everything above passes
+        # Only reach this line if no errors were hit above
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -67,37 +61,57 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
-        stepName: Check Spelling
-      name: ${{ env.stepName}}
+        stepName: Spell Checker
+      name: ${{ env.stepName }}
       id: run-spell-checker
       working-directory: ${{ inputs.path }}
       shell: bash
       run: |
-        #  ${{ env.stepName }}
-        echo "::group::${{ env.stepName }}"
-
-        # Add helper script to path
-        export PATH="$PATH:$GITHUB_ACTION_PATH"
-
-        # Get all files
-        files=$(getFiles --exclude-dirs="${{ inputs.exclude-dirs }}" --exclude-files="${{ inputs.exclude-files }}" --include-extensions="${{ inputs.include-extensions}}")
-
-        # Wrap the check in set +e so it runs against all files
-        set +e
+        # ${{ env.stepName }}
+        #echo -e "::group::${{ env.stepName }}"
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
         exitStatus=0
-        for file in ${files[@]}; do
-          cspell --language-id C --color -c cspell.config.yaml --show-suggestions --show-context "$file"
-          if ! [ $? -eq 0 ]; then
-            exitStatus=1
-          fi
-        done
+
+        # Parse the optional inputs
+        args=""
+
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          dirs=" -E "
+          dirs+="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ -E }"
+          args+=" ${dirs}"
+        fi
+
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-files }}" ]; then
+          files=" -E "
+          files+="${{ inputs.exclude-files }}"
+          files="${files//,/ -E }"
+          args+=" ${files}"
+        fi
+
+        # fd-find uses -e to exclude a file extension
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          file_types=" -e "
+          file_types+="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ -e }"
+          args+=" ${file_types}"
+        fi
+
+        # Wrap in a set +e so Github doesn't stop the spell check from running
+        set +e
+        echo -e echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
+
+        fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch \
+          cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
+        exitStatus=$?
         set -e
 
-        echo "::endgroup::"
+        echo -e "::endgroup::"
         if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          exit 1
         fi
-
+        exit $exitStatus
