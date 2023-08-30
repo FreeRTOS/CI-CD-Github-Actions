@@ -12,11 +12,14 @@ inputs:
   include-file-types:
     description: 'Comma-separated list of file type patters in repository to test. (Eg .c, .h)'
     required: false
-    default: '.c .h .dox'
+    default: '.c, .h, .dox, .md, .html'
   allowlist-file:
     description: 'Path to file containing allowlist of URLs.'
     required: false
     default: ''
+  exclude-urls:
+    description: 'Comma separated list of URLS not to check'
+    required: false
   user-agent:
     description: 'User agent string to use when making http requests.'
     required: false
@@ -24,34 +27,59 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install pandoc
+    - name: Setup Python for link verifier action
+      uses: actions/setup-python@v3
+
+    - env:
+        # The bash escape character is \033
+        # At time of writing, you can't add a global environment
+        # to an action file. If this gets changed please move this
+        bashPass:   \033[32;1mPASSED -
+        bashInfo:   \033[33;1mINFO -
+        bashFail:   \033[31;1mFAILED -
+        bashEnd:    \033[0m
+        stepName: Install Dependencies
+      name: ${{ env.stepName }}
+      shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.stepName }}"
+
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
         sudo dpkg -i pandoc.deb
+
         rm pandoc.deb
         sudo apt install debsums
+
         sudo debsums pandoc
-      shell: bash
-    - name: Install ghcurl
-      run: |
         sudo type -p curl >/dev/null || sudo apt install curl -y
-      shell: bash
-    - name: Install gh
-      run: |
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
         sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
         sudo apt update
         sudo apt install -y gh
-      shell: bash
-    - name: Install python dependencies
-      run: |
+        sudo apt install pandoc -y
         sudo apt-get install -y python3-setuptools python3-pip
+
         python3 -m pip install -r  $GITHUB_ACTION_PATH/requirements.txt
+
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd}}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Run link verifier script
+      name: ${{ env.stepName }}
+      working-directory: ${{ inputs.path }}
       shell: bash
-    - name: Run link verifier script
       run: |
-        args="--verbose --test-markdown"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.stepName }}"
+        args="--test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           dirs="${{ inputs.exclude-dirs }}"
           dirs="${dirs//,/ }"
@@ -63,14 +91,30 @@ runs:
           args+=" --include-file-types ${file_types}"
         fi
         if [ -n "${{ inputs.allowlist-file }}" ]; then
-          allowlist_file="${{ inputs.allowlist-file }}"
-          allowlist_file="${allowlist_file//,/ }"
-          args+=" --allowlist-file ${allowlist_file}"
+          touch allowList.txt
+          cat ${{ inputs.allowlist-file }} >> allowList.txt
         fi
-        echo "Running verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\""
-        if python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}"; then
-          exit 0
+        if [[ "${{ inputs.exclude-urls }}" != "" ]]; then
+          touch allowList.txt
+          exclude_urls="${{ inputs.exclude-urls }}"
+          exclude_urls="${exclude_urls//,/ }"
+          for url in ${exclude_urls[@]}; do echo -e "$url" >> allowList.txt; done
+        fi
+
+        if [ -n "${{ inputs.allowlist-file }}" ] || [ -n "${{ inputs.exclude-urls }}" ]; then
+          args+=" --allowlist-file allowList.txt"
+        fi
+
+        echo -e "${{ env.bashInfo }} Running verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\" ${{ env.bashEnd }}"
+        set +e
+        python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}";
+        exitStatus=$?
+        set -e
+        echo -e "::endgroup::"
+        # We check the backwards condition for this one
+        if [ $exitStatus -eq 1 ]; then
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
-          exit 1
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         fi
-      shell: bash
+        exit $exitStatus
