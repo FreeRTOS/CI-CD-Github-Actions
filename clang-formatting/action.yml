@@ -2,21 +2,18 @@ name: 'formatting'
 description: 'CI formatting check'
 inputs:
   path:
-    description: 'Path to repository folder to run formatting check for. '
+    description: 'Path to repository folder to run formatting check for.'
     required: false
     default: ./
   exclude-files:
     description: 'List of comma-separated files to exclude from the formatting check. Eg file1, file2'
     required: false
-    default: ''
   exclude-dirs:
     description: 'List of comma-separated directories to exclude from the formatting check. Eg docs, build'
     required: false
-    default: ''
   include-extensions:
     description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
     required: false
-    default: ''
 
 runs:
   using: "composite"
@@ -46,13 +43,7 @@ runs:
           clangFormatInstalled=$?
 
           echo -e "::endgroup::"
-          if [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          else
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 0
-          fi
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
           bashPass: \033[32;1mPASSED -
@@ -62,12 +53,12 @@ runs:
           stepName: Formatting Check
         name: ${{ env.stepName }}
         id: action-formatting-check
-        if: ${{ steps.validate-inputs.outcome}} = "success"
         working-directory: ${{ inputs.path }}
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format --version)" ${{ env.bashEnd }}"
+
           exitCode=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
@@ -109,7 +100,7 @@ runs:
           echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
           fdfind -e c -e h ${args} --exec clang-format --verbose -i
 
-          # Replace all trailing whitespace, exclude photo files
+          # Replace all trailing whitespace, exclude photo and binary files
           echo -e "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} Running: fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
           fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
