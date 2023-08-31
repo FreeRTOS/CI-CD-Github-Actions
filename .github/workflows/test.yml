@@ -11,11 +11,11 @@ jobs:
   test-format-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
-          ref: main
+          repository: Skptak/coreMQTT
+          ref: CI-CD-Updates
           path: coreMQTT
       - name: Test formatting check action
         uses: ./formatting
@@ -109,7 +109,7 @@ jobs:
           exe-path: executable-monitor/test.out
           success-line: "SLEEPING FOR 6 SECONDS"
           timeout-seconds: 20
-      
+
       - name: Functional Test | Success Case | No Retries, No Success Line, Exit Code
         id: test-executable-monitor-action-no-retry-attempts-exit-code
         uses: ./executable-monitor
@@ -125,7 +125,7 @@ jobs:
           exe-path: executable-monitor/test.out
           success-line: "SLEEPING FOR 6 SECONDS"
           retry-attempts: 2
-          
+
       - name: API Test | Success Case | Retries, No Success Line, Exit Code, Use Default Timeout
         id: test-executable-monitor-action-no-success-line-no-timeout
         uses: ./executable-monitor
@@ -353,7 +353,7 @@ jobs:
           repository: FreeRTOS/FreeRTOS
           ref: '202107.00'
           path: FreeRTOS
-          submodules: recursive      
+          submodules: recursive
       - name: Test manifest verifier
         uses: ./manifest-verifier
         with:
