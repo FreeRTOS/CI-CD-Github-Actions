@@ -12,16 +12,46 @@ inputs:
   horrid_threshold:
     description: 'The horrid threshold parameter passed to the invocation of complexity'
     required: false
-    default: 8
+    default: 10
+
 runs:
   using: "composite"
-  steps: 
-      - name: Setup
-        run: sudo apt-get install complexity
+  steps:
+
+      - env:
+          stepName: Install Dependencies
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0
+        name: ${{ env.stepName }}
         shell: bash
-      - name: Complexity
-        working-directory: ${{ inputs.path }}
         run: |
-          find ${{ inputs.source_path }}/ -iname '*.c' |\
-          xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.stepName }}"
+          sudo apt-get install complexity -y
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
+      - env:
+          stepName: Complexity
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+        working-directory: ${{ inputs.path }}
         shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.stepName }}"
+          echo -e "${{ env.bashInfo }} Have complexity limit of ${{ inputs.horrid_threshold }} ${{ env.bashEnd }}"
+          exitStatus=0
+
+          # Use find to find all files ending with a .c inside of the input directory
+          # From there run the complexity check against them
+          find ${{ inputs.source_path }}/ -iname '*.c' |\
+            xargs complexity --scores --threshold=0 --horrid-threshold=${{ inputs.horrid_threshold }}
+
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+          exit 0
