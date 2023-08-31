@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashInfo:   \033[33;1mINFO -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
+
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
