@@ -31,16 +31,14 @@ jobs:
         uses: ./complexity
         with:
           path: coreMQTT
-          # The default threshold for all repos is 16
-          horrid_threshold: 16
+          # The default threshold for all repos is 10
+          horrid_threshold: 10
 
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - uses: actions/setup-python@v3
-
       - uses: actions/checkout@v3
         with:
           repository: aws/aws-iot-device-sdk-embedded-C
@@ -75,7 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - uses: actions/checkout@v3
         with:
           repository: skptak/coreMQTT
@@ -383,3 +380,4 @@ jobs:
           path: ./FreeRTOS
           exclude-submodules: FreeRTOS-Plus/Test/CMock,FreeRTOS/Test/CMock/CMock,FreeRTOS/Test/litani
           fail-on-incorrect-version: true
+
