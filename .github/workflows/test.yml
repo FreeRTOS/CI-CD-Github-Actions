@@ -7,6 +7,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # The bash escape character is \033
+  bashPass:   \033[32;1mPASSED -
+  bashInfo:   \033[33;1mINFO -
+  bashFail:   \033[31;1mFAILED -
+  bashEnd:    \033[0m
+
 jobs:
   test-format-check:
     runs-on: ubuntu-20.04
@@ -281,41 +288,118 @@ jobs:
         uses: ./spellings
         with:
           path: coreMQTT
+
   test-coverage-cop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
+          repository: skptak/coreMQTT
           ref: main
           path: coreMQTT
-      - name: Build
+
+      - env:
+          stepName: Build Core MQTT
+        name: ${{ env.stepName }}
         run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+
+          echo -e "::group::Install Lcov"
           sudo apt-get install -y lcov
+          echo -e "::endgroup::"
+
+          echo -e "::group::${{ env.stepName }}"
           cmake -S ./coreMQTT/test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
           -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
           make -C build/ all
-      - name: Test
+          exitStatus=$?
+          echo -e "::endgroup::"
+
+          # Only get to here if we passed the build
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+
+      - name: Run CTest for CoreMQTT
+        run: ctest --test-dir build -E system --output-on-failure
+
+      - env:
+          stepName: Passing Coverage Test
+        shell: bash
         run: |
-          cd build/
-          ctest -E system --output-on-failure
-          cd ..
-      - name: Run Coverage
-        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::Build Coverage for coreMQTT"
           make -C build/ coverage
+          echo -e "::endgroup::"
+
+          echo -e "::group::${{ env.stepName }}"
           declare -a EXCLUDE=("\*test/\*" "\*CMakeCCompilerId\*" "\*mocks\*")
-          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
+          echo -e "::endgroup::"
+
           lcov --rc lcov_branch_coverage=1 --list build/coverage.info
-      - name: Test coverage cop action
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
+      - name: Test Coverage Cop Action
+        id: success-coverage-cop
         uses: ./coverage-cop
         with:
-          path: ./build/coverage.info
+          coverage-file: ./build/coverage.info
           branch-coverage-min: 70
           line-coverage-min: 100
+
+      - env:
+          stepName: Create Lower Branch and Line Coverage Report
+        id: failure-coverage-action
+        continue-on-error: true
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::Build Coverage for coreMQTT"
+          make -C build/ clean
+          make -C build/ coverage
+          echo -e "::endgroup::"
+
+          echo -e "::group::${{ env.stepName }}"
+          declare -a EXCLUDE=("\*test/\*")
+          set +e
+          lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
+          echo -e "::endgroup::"
+
+          lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+          set -e
+          echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"
+
+      - name: Functional | Failure | Coverage Cop Failure Test Case
+        id: failure-coverage-cop-action
+        continue-on-error: true
+        uses: ./coverage-cop
+        with:
+          coverage-file: ./build/coverage.info
+          branch-coverage-min: 100
+          line-coverage-min: 100
+
+      - env:
+          stepName: Check Failure Test Case
+        name: ${{ env.stepName }}
+        if: success() || failure()
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.failure-coverage-cop-action.outcome }}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Coverage Cop Failure Test Case | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Coverage Cop Failure Test Case | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
   test-memory-statistics:
     runs-on: ubuntu-latest
     steps:
