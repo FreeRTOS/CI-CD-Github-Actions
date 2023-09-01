@@ -97,18 +97,18 @@ runs:
           # Get all .c and .h files, as well as any other requested file types.
           # Then run uncrustify with the common config file.
           echo -e "::group::${{ env.bashInfo }} Check Formatting ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C ${{ env.bashEnd }}"
-          fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+          echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c https://github.com/FreeRTOS/CI-CD-Github-Actions/blob/main/formatting/uncrustify.cfg -l C ${{ env.bashEnd }}"
+          fdfind -e c -e h ${args} --exec uncrustify -q --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
 
           # Replace all trailing whitespace, exclude photo and binary files
-          echo -e "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
-          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
+          echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
 
           # Replace all line endings with LF ones instead of CRLF
-          echo -e "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
-          fdfind --type=file ${args} . --exec dos2unix
+          echo -e "${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
+          fdfind --type=file ${args} . --exec dos2unix -q
 
           # Determine if there was a formatting diff.
           # If there was, create a patch of it.

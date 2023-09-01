@@ -16,47 +16,47 @@ env:
 
 jobs:
   uncrustify-formatting-success-cases:
-      runs-on: ubuntu-20.04
-      steps:
-      - uses: actions/checkout@v3
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
 
-      - env:
-          stepName: "Functional | Success | Exclude Files and Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-dirs-with-errors
-        uses: ./formatting
-        with:
-          path: formatting/goodFiles
-          exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
-          exclude-files: "formatErrorTest.h, formatErrorTest.c"
+    - env:
+        stepName: "Functional | Success | Exclude Files and Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-dirs-with-errors
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+        exclude-files: "formatErrorTest.h, formatErrorTest.c"
 
-      - env:
-          stepName: "Functional | Success | Exclude Just Files"
-        name: ${{ env.stepName }}
-        id: exclude-files-with-errors
-        uses: ./formatting
-        with:
-          path: formatting/goodFiles
-          exclude-dirs: ",,,"
-          exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
+    - env:
+        stepName: "Functional | Success | Exclude Just Files"
+      name: ${{ env.stepName }}
+      id: exclude-files-with-errors
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: ",,,"
+        exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
 
-      - name: Remove Error Files at Top Directory
-        working-directory: formatting/goodFiles
-        shell: bash
-        run: |
-          # Remove Error Files at Top Directory
-          # Do a git remove since we use a git diff to check if formatting fails
-          git rm $(find . -name "formatErrorTest.c")
-          git rm $(find . -name "formatErrorTest.h")
+    - name: Remove Error Files at Top Directory
+      working-directory: formatting/goodFiles
+      shell: bash
+      run: |
+        # Remove Error Files at Top Directory
+        # Do a git remove since we use a git diff to check if formatting fails
+        git rm $(find . -name "formatErrorTest.c")
+        git rm $(find . -name "formatErrorTest.h")
 
-      - env:
-          stepName: "Functional | Success | Exclude Just Error Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-two-files-two-dirs
-        uses: ./formatting
-        with:
-          path: formatting/goodFiles
-          exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+    - env:
+        stepName: "Functional | Success | Exclude Just Error Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-two-files-two-dirs
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
 
   formatting-error-cases:
     runs-on: ubuntu-20.04
