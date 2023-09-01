@@ -2,21 +2,18 @@ name: 'formatting'
 description: 'CI formatting check'
 inputs:
   path:
-    description: 'Path to repository folder to run formatting check for. '
+    description: 'Path to repository folder to run formatting check for.'
     required: false
     default: ./
   exclude-files:
     description: 'List of comma-separated files to exclude from the formatting check. Eg file1, file2'
     required: false
-    default: ''
   exclude-dirs:
     description: 'List of comma-separated directories to exclude from the formatting check. Eg docs, build'
     required: false
-    default: ''
   include-extensions:
     description: 'List of comma-separated extensions to add to the formatting check. Eg md, dox'
     required: false
-    default: ''
 
 runs:
   using: "composite"
@@ -46,36 +43,31 @@ runs:
           clangFormatInstalled=$?
 
           echo -e "::endgroup::"
-          if [ $clangFormatInstalled -eq 1 ] || [ $fdInstalled -eq 1 ]; then
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          else
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 0
-          fi
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
           bashPass: \033[32;1mPASSED -
           bashInfo: \033[33;1mINFO -
           bashFail: \033[31;1mFAILED -
           bashEnd:  \033[0m
-          stepName: Check Format of Files
+          stepName: Formatting Check
         name: ${{ env.stepName }}
         id: action-formatting-check
-        if: ${{ steps.validate-inputs.outcome}} = "success"
         working-directory: ${{ inputs.path }}
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} Using clang-format version "$(clang-format --version)" ${{ env.bashEnd }}"
-          echo -e "::group::Clang Format Code Files"
+          echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format --version)" ${{ env.bashEnd }}"
+
           exitCode=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
           # TODO: These checks should really only run against modified files on PRS
           # Where when the commit to the actual repo happens, then we should trigger the job
-          # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
-          # But maintain that we don't have a change in the Repo that suddenly causes an issue
+          # Against all of the files in the repo. That way we can keep checks fast for PRs,
+          # and maintain that we don't have a change in the Repo.
+          # Think this can be done with git clang-format:
+          # https://ortogonal.github.io/cpp/git-clang-format/
 
           # Parse the optional inputs
           args=""
@@ -106,42 +98,37 @@ runs:
 
           # Get all .c and .h files, as well as any other requested file types.
           # Then run clang-format with the common config file.
-          echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
-          echo -e "::group::${{ env.bashInfo }} Check Formatting with Clang-Format ${{ env.bashEnd }}"
-          fdfind -e c -e h ${args} --exec fdfind -e c -e h ${args} --exec clang-format -i
-          echo -e "::endgroup::"
+          echo -e "::group::${{ env.bashInfo }} Check Formatting ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
+          fdfind -e c -e h ${args} --exec clang-format --verbose -i
 
-          echo -e "::group::Check for Trailing Whitespace"
-          # These checks will be captured in the git diff
-          # Replace all trailing whitespace, exclude photo files
-          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
-          echo -e "::endgroup::"
+          # Replace all trailing whitespace, exclude photo and binary files
+          echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
 
-          echo -e "::group::Check for CRLF Line Endings"
           # Replace all line endings with LF ones instead of CRLF
-          fdfind --type=file ${args} . --exec dos2unix
-          echo -e "::endgroup::"
+          echo -e "${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
+          fdfind --type=file ${args} . --exec dos2unix -q
 
-          # Run a git diff to print the differences if any exist, return an error code if there are any
-          # Wrap in a set+e and set -e so we can keep running after the error
-          echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
+          # Determine if there was a formatting diff.
+          # If there was, create a patch of it.
           set +e
-          git diff --exit-code --color=always
+          git diff --exit-code >> formattingChanges.patch
           exitCode=$?
           set -e
-          echo -e "::endgroup::"
 
           if [ $exitCode -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+              echo -e "::endgroup::"
+              echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else
-            # I am intentionally doing this a second time here.
-            # Using tee will mask the exit code of the diff
-            # And we don't want the colour to be added to the patch
-            # Put it in what the 'default' path will be for the upload step
-            git diff > formattingChanges.patch
-            echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
-            echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+              # Run a git diff to print the formatting differences
+              echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
+              git diff --color=always
+              echo -e "::endgroup::${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
+              echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
+              echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           fi
           exit $exitCode
 

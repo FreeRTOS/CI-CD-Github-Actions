@@ -16,51 +16,49 @@ env:
 
 jobs:
   uncrustify-formatting-success-cases:
-      runs-on: ubuntu-20.04
-      steps:
-      - uses: actions/checkout@v3
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
 
-      - env:
-          stepName: "Functional | Success | Exclude All Error Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-dirs-with-errors
-        uses: ./formatting
-        with:
-          path: formatting
-          exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings,filesWithTrailingWhitespace"
-          exclude-files: "badFile.c"
+    - env:
+        stepName: "Functional | Success | Exclude Files and Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-dirs-with-errors
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+        exclude-files: "formatErrorTest.h, formatErrorTest.c"
 
-      - env:
-          stepName: "Functional | Success | Exclude Files"
-        name: ${{ env.stepName }}
-        id: exclude-files-with-errors
-        uses: ./formatting
-        with:
-          path: formatting
-          exclude-dirs: ",,,"
-          exclude-files: "badFile.c,cgc_error.h,crlf-file.c,test.c"
+    - env:
+        stepName: "Functional | Success | Exclude Just Files"
+      name: ${{ env.stepName }}
+      id: exclude-files-with-errors
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: ",,,"
+        exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
 
-      - env:
-          stepName: "Functional | Success | Exclude File and Exclude Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-single-dir-multiple-files
-        uses: ./formatting
-        with:
-          path: formatting
-          exclude-dirs: "goodFiles"
-          exclude-files: "cgc_error.h,crlf-file.c,test.c"
+    - name: Remove Error Files at Top Directory
+      working-directory: formatting/goodFiles
+      shell: bash
+      run: |
+        # Remove Error Files at Top Directory
+        # Do a git remove since we use a git diff to check if formatting fails
+        git rm $(find . -name "formatErrorTest.c")
+        git rm $(find . -name "formatErrorTest.h")
 
-      - env:
-          stepName: "Functional | Success | Exclude Files and Exclude Dirs"
-        name: ${{ env.stepName }}
-        id: exclude-two-files-two-dirs
-        uses: ./formatting
-        with:
-          path: formatting
-          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
-          exclude-files: "test.c,cgc_error.h,crlf-file.c,badFile.c"
+    - env:
+        stepName: "Functional | Success | Exclude Just Error Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-two-files-two-dirs
+      uses: ./formatting
+      with:
+        path: formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
 
-  uncrustify-formatting-error-cases:
+  formatting-error-cases:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -73,6 +71,10 @@ jobs:
         with:
           path: formatting
 
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
       - env:
           stepName: "Functional | Failure | CRLF and Formatting Error"
         name: ${{ env.stepName }}
@@ -83,6 +85,10 @@ jobs:
           path: formatting
           exclude-dirs: "filesWithTrailingWhitespace"
 
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
       - env:
           stepName: "Functional | Failure | CRLF and Whitespace Error"
         name: ${{ env.stepName }}
@@ -92,6 +98,24 @@ jobs:
         with:
           path: formatting
           exclude-dirs: "filesWithFormattingErrors"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Whitespace Error Not C Files"
+        name: ${{ env.stepName }}
+        id: crlf-and-whitespace-non-c-error
+        continue-on-error: true
+        uses: ./formatting
+        with:
+          path: formatting
+          exclude-dirs: "filesWithFormattingErrors, fileWithErrorInclude, fileWithErrorSource"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
 
       - env:
           stepName: "Functional | Failure | CRLF Error"
@@ -104,6 +128,10 @@ jobs:
           exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
           exclude-files: "badFile.c"
 
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
       - env:
           stepName: "Functional | Failure | Formatting and Whitespace Error"
         name: ${{ env.stepName }}
@@ -113,6 +141,10 @@ jobs:
         with:
           path: formatting
           exclude-dirs: "filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
 
       - env:
           stepName: "Functional | Failure | Formatting Error"
@@ -124,6 +156,10 @@ jobs:
           path: formatting
           exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
 
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
       - env:
           stepName: "Functional | Failure | Whitespace Error"
         name: ${{ env.stepName }}
@@ -133,6 +169,10 @@ jobs:
         with:
           path: formatting
           exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
 
       - env:
           stepName: "API | Failure | Exclude Dirs Error"
@@ -144,6 +184,10 @@ jobs:
           path: formatting
           exclude-dirs: "filesWithFormattingErrors,    filesWithCRLFEndings"
 
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
       - env:
           stepName: "API | Failure | Exclude Files Error"
         name: ${{ env.stepName }}
@@ -153,6 +197,10 @@ jobs:
         with:
           path: formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
 
       - env:
           stepName: "API | Failure | Exclude Option Errors"
@@ -165,6 +213,10 @@ jobs:
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
           exclude-dirs: "filesWithFormattingErrors,
                           filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
 
       - env:
           stepName: Check Failure Test Cases
@@ -190,6 +242,12 @@ jobs:
             echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
           else
             echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-whitespace-non-c-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error Not C Files | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error Not C Files | Had Unexpected "success" ${{ env.bashEnd }}"
             exitStatus=1
           fi
           if [ "${{ steps.crlf-error.outcome}}" = "failure" ]; then
@@ -259,7 +317,7 @@ jobs:
         with:
           path: clang-formatting/goodFiles
           exclude-dirs: ",,,"
-          exclude-files: "formatErrorTest.h, formatErrorTest.c, errorFileInDirectory.h, errorFileInDirectory.c"
+          exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
 
       - name: Remove Error Files at Top Directory
         working-directory: clang-formatting/goodFiles
@@ -277,7 +335,7 @@ jobs:
         uses: ./clang-formatting
         with:
           path: clang-formatting/goodFiles
-          exclude-dirs: "fileWithErrorInclude,fileWithErrorSource"
+          exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
 
   clang-formatting-error-cases:
     runs-on: ubuntu-latest
@@ -332,8 +390,7 @@ jobs:
         uses: ./clang-formatting
         with:
           path: clang-formatting
-          exclude-dirs: "filesWithFormattingErrors"
-          exclude-files: "test.c, crlf-file.c, cgc_error.h"
+          exclude-dirs: "filesWithFormattingErrors, fileWithErrorInclude, fileWithErrorSource"
 
       - name:  Reset Files
         shell: bash

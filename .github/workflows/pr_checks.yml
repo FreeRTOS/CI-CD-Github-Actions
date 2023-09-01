@@ -12,7 +12,6 @@ env:
   bashFail:   \033[31;1mFAILED -
   bashEnd:    \033[0m
 
-
 jobs:
   PR-repo-checks:
     runs-on: ubuntu-latest
@@ -23,155 +22,201 @@ jobs:
         inputs:
           [
             {
+              repository: FreeRTOS-Kernel,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
+              run-complexity: false,
+              run-doxygen: false,
+            },
+            {
+              repository: FreeRTOS-Plus-TCP,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
+              run-complexity: false,
+              run-doxygen: false,
+            },
+            {
+              repository: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: false,
+              run-complexity: false,
+              run-doxygen: false,
+            },
+            {
               repository: backoffAlgorithm,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: coreHTTP,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: coreJSON,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: coreMQTT,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: corePKCS11,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DUNIT_TESTS=1 -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 95,
-              org: FreeRTOS,
             },
             {
               repository: coreSNTP,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: FreeRTOS-Cellular-Interface,
-              exclude-files: .cSpellWords.txt,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: FreeRTOS,
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: AWS,
             },
            {
               repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: AWS,
            },
            {
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: AWS,
            },
            {
               repository: Jobs-for-AWS-IoT-embedded-sdk,
-              exclude-files: ".cSpellWords.txt",
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
               line-coverage: 100,
-              org: AWS,
 
            },
            {
               repository: ota-for-AWS-IoT-embedded-sdk,
-              exclude-files: ".cSpellWords.txt",
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
+              run-link-verifier: true,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               line-coverage: 95,
-              org: AWS,
            },
            {
               repository: SigV4-for-AWS-IoT-embedded-sdk,
-              exclude-files: .cSpellWords.txt,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_UNIT_TESTS=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               line-coverage: 100,
-              org: AWS,
-           },
-           {
-             repository: FreeRTOS-Kernel,
-             exclude-files: .cSpellWords.txt,
-             exclude-dirs: portable,
-             run-complexity: false,
-             run-doxygen: false,
-             org: FreeRTOS,
-           },
-           {
-             repository: FreeRTOS-Plus-TCP,
-             exclude-files: .cSpellWords.txt,
-             run-complexity: false,
-             run-doxygen: false,
-             org: FreeRTOS,
-           },
-           {
-             repository: FreeRTOS,
-             exclude-files: .cSpellWords.txt,
-             run-complexity: false,
-             run-doxygen: false,
-             org: FreeRTOS,
            },
           ]
     steps:
@@ -187,15 +232,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
-          ref: main
+          ref: ${{ matrix.inputs.branch }}
           path: repo/${{ matrix.inputs.repository }}
 
       - name: "Link Verifier Check: ${{ matrix.inputs.repository }}"
         uses: ./link-verifier
-        if: success() || failure() && ( "${{ matrix.inputs.repository }}" != "FreeRTOS" )
+        if: matrix.inputs.run-link-verifier && ( success() || failure() )
         with:
           path: repo/${{ matrix.inputs.repository }}
-          exclude-dirs: complexity,formatting
+          exclude-dirs: complexity, formatting
+          exclude-urls: https://dummy-url.com/ota.bin
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-complexity && ( success() || failure() )
@@ -219,7 +265,7 @@ jobs:
 
       - name: "Spelling Check: ${{ matrix.inputs.repository }} "
         if: success() || failure()
-        uses: ./rust-spell-check
+        uses: ./spellings
         with:
           path: repo/${{ matrix.inputs.repository }}
 
@@ -228,7 +274,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
-          ref: main
+          ref: ${{ matrix.inputs.branch }}
           path: repo/${{ matrix.inputs.repository }}_Recursive
           submodules: recursive
           # Need full history to make sure we get submodules
@@ -296,8 +342,6 @@ jobs:
           branch-coverage-min: 70
           line-coverage-min: ${{ matrix.inputs.line-coverage }}
 
-
-
   PR-uncrustify-checks:
     runs-on: ubuntu-20.04
     if: ${{ github.event.pull_request }} || ${{ github.event.workflow }}
@@ -308,70 +352,115 @@ jobs:
           [
             {
               repository: FreeRTOS-Kernel,
-              exclude-dirs: portable,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: FreeRTOS-Plus-TCP,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: FreeRTOS,
-              exclude-files: .cSpellWords.txt,
-              exclude-dirs: Demo,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: FreeRTOS-Cellular-Interface,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: backoffAlgorithm,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: coreHTTP,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: coreJSON,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: coreMQTT,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: corePKCS11,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: coreSNTP,
-              org: FreeRTOS,
+              #org: FreeRTOS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: Jobs-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: ota-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
             {
               repository: SigV4-for-AWS-IoT-embedded-sdk,
-              org: AWS,
+              #org: AWS,
+              #branch: main,
+              org: skptak,
+              branch: CI-CD-Updates,
             },
           ]
     steps:
@@ -382,7 +471,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ matrix.inputs.org }}/${{ matrix.inputs.repository }}
-          ref: main
+          ref: ${{ matrix.inputs.branch }}
           path: repo/${{ matrix.inputs.repository }}
 
       - name: "Formatting Check : ${{ matrix.inputs.repository }}"

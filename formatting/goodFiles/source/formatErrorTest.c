@@ -14,9 +14,17 @@ typedef struct DateAndTime
 #if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || \
     defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 )
     #include <Windows.h>
+
+
+
+
+
+
 /* Remove the warning about implicit sleep even with windows.h included */
 extern void sleep( int miliseconds );
-void getTime( struct DateAndTime * currentTime )
+
+
+            void getTime( struct DateAndTime * currentTime )
 {
     SYSTEMTIME st, lt;
 
@@ -42,8 +50,8 @@ void getTime( struct DateAndTime * currentTime )
     currentTime->seconds = tm->tm_sec;
     currentTime->msec = ( int ) ( tv.tv_usec / 1000 );
 }
-#endif /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || \
-          defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
+#endif /* if defined( WIN32 )                   || defined( _WIN32 ) || defined( __WIN32__ ) || \
+          defined( __NT__ ) || defined( WIN64 )          || defined( __WIN64 ) */
 
 int main( int argc, char ** argv )
 {
