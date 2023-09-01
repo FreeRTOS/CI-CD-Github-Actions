@@ -64,8 +64,10 @@ runs:
 
           # TODO: These checks should really only run against modified files on PRS
           # Where when the commit to the actual repo happens, then we should trigger the job
-          # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
-          # But maintain that we don't have a change in the Repo that suddenly causes an issue
+          # Against all of the files in the repo. That way we can keep checks fast for PRs,
+          # and maintain that we don't have a change in the Repo.
+          # Think this can be done with git clang-format:
+          # https://ortogonal.github.io/cpp/git-clang-format/
 
           # Parse the optional inputs
           args=""
@@ -97,18 +99,18 @@ runs:
           # Get all .c and .h files, as well as any other requested file types.
           # Then run clang-format with the common config file.
           echo -e "::group::${{ env.bashInfo }} Check Formatting ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
           fdfind -e c -e h ${args} --exec clang-format --verbose -i
 
           # Replace all trailing whitespace, exclude photo and binary files
-          echo -e "::group::${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
-          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '.a' -E '.lib' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
+          echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
+          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
 
           # Replace all line endings with LF ones instead of CRLF
-          echo -e "::group::${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Running: fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
-          fdfind --type=file ${args} . --exec dos2unix
+          echo -e "${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
+          fdfind --type=file ${args} . --exec dos2unix -q
 
           # Determine if there was a formatting diff.
           # If there was, create a patch of it.
