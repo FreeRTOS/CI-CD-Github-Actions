@@ -1,2 +1,3 @@
 formatting/filesWithCRLFEndings/* eol=crlf
-formatting/goodFiles/source/badFile.c eol=crlf
+clang-formatting/filesWithFormattingErrors/* eol=crlf
+
