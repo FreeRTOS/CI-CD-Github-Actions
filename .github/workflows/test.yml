@@ -18,11 +18,11 @@ jobs:
   test-format-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          repository: FreeRTOS/coreMQTT
-          ref: main
+          repository: Skptak/coreMQTT
+          ref: CI-CD-Updates
           path: coreMQTT
       - name: Test formatting check action
         uses: ./formatting
