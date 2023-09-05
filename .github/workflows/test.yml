@@ -216,6 +216,7 @@ jobs:
           config: ./memory_statistics_config.json
           output: ./size_table_new.html
           check_against: ./size_table_expected.html
+
   test-link-verifier:
     runs-on: ubuntu-latest
     steps:
@@ -253,7 +254,6 @@ jobs:
         with:
           path: ./
           exclude-dirs: complexity, formatting
-          allowlist-file: badUrls.md
 
       - env:
           stepName: Check Failure Test Case

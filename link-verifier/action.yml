@@ -43,7 +43,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo -e "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
         wget https://github.com/jgm/pandoc/releases/download/2.11/pandoc-2.11-1-amd64.deb -O pandoc.deb
         sudo dpkg -i pandoc.deb
@@ -72,28 +72,31 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
-        stepName: Run link verifier script
+        stepName: Check Links in Files
       name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo -e "::group::${{ env.stepName }}"
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         args="--test-markdown"
         if [ -n "${{ inputs.exclude-dirs }}" ]; then
           dirs="${{ inputs.exclude-dirs }}"
           dirs="${dirs//,/ }"
           args+=" --exclude-dirs ${dirs}"
         fi
+
         if [ -n "${{ inputs.include-file-types }}" ]; then
           file_types="${{ inputs.include-file-types }}"
           file_types="${file_types//,/ }"
           args+=" --include-file-types ${file_types}"
         fi
+
         if [ -n "${{ inputs.allowlist-file }}" ]; then
           touch allowList.txt
           cat ${{ inputs.allowlist-file }} >> allowList.txt
         fi
+
         if [[ "${{ inputs.exclude-urls }}" != "" ]]; then
           touch allowList.txt
           exclude_urls="${{ inputs.exclude-urls }}"
@@ -105,13 +108,13 @@ runs:
           args+=" --allowlist-file allowList.txt"
         fi
 
-        echo -e "${{ env.bashInfo }} Running verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\" ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} Running: verify-links.py ${args} --user-agent \"${{ inputs.user-agent }}\" ${{ env.bashEnd }}"
         set +e
         python3 ${GITHUB_ACTION_PATH}/verify-links.py ${args} --user-agent "${{ inputs.user-agent }}";
         exitStatus=$?
         set -e
+
         echo -e "::endgroup::"
-        # We check the backwards condition for this one
         if [ $exitStatus -eq 1 ]; then
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
