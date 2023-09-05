@@ -1,5 +1,4 @@
 /*
-/*
  * FreeRTOS V202212.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
@@ -78,4 +77,3 @@ unsigned long ulReceivedValue;
 	}
 }
 /*-----------------------------------------------------------*/
-
