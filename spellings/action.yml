@@ -1,29 +1,123 @@
 name: 'spellings'
-description: 'CI spellings check'
+description: 'cSpell CI spelling check'
 inputs:
   path:
     description: 'Path to repository folder to check spellings in.'
     required: false
     default: ./
+  exclude-dirs:
+    description: "Comma separated list of directories to not spell check"
+    required: false
+  exclude-files:
+    description: "Comma separated list of files to not spell check"
+    required: false
+  include-extensions:
+    description: "Comma separated list of files to match to regex"
+    required: false
+
+
 runs:
   using: "composite"
   steps:
-      - name: Install spell
-        run: |
-          sudo apt-get install spell
-          sudo apt-get install util-linux
-        shell: bash
-      - name: Check spelling
-        working-directory: ${{ inputs.path }}
-        run: |
-          PATH=$PATH:$GITHUB_ACTION_PATH/tools
-          for lexfile in `find ./ -name lexicon.txt`
-          do dir=${lexfile%/lexicon.txt}
-            echo $dir
-            find-unknown-comment-words --directory $dir
-            if [ $? -ne "0" ]
-            then
-              exit 1
-            fi
-          done
-        shell: bash
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Set-Up The Spell Checker
+      name: ${{ env.stepName }}
+      id: spell-checker-setup
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+        # Install the Dependencies we need to run the spell-checker
+        sudo apt-get install util-linux -y
+        sudo apt-get install fd-find -y
+        sudo apt-get install npm -y
+        sudo npm install -g cspell
+        echo -e "::endgroup::"
+
+        # Add the Github Action Path to PATH
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
+
+        # Account for starting with an alternate path in a repository
+        # Do this by copying the cspell config and wordlist to the desired path
+        # Wrap in a set +e so Github doesn't throw an error if the file or
+        # directory already exists.
+        set +e
+        cp cspell.config.yaml ${{ inputs.path }}
+        mkdir ${{ inputs.path }}/.github
+        cp .github/.cSpellWords.txt ${{ inputs.path }}/.github
+        cd ${{ inputs.path }}
+        set -e
+
+        # Make sure we have all the commands we need.
+        echo -e "${{ env.bashInfo }} fdfind --version $(fdfind --version) ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} cspell --version $(cspell --version) ${{ env.bashEnd }}"
+
+        # Only reach this line if no errors were hit above
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Spell Checker
+      name: ${{ env.stepName }}
+      id: run-spell-checker
+      working-directory: ${{ inputs.path }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        #echo -e "::group::${{ env.stepName }}"
+        export PATH="$GITHUB_ACTION_PATH:$PATH"
+        exitStatus=0
+
+        # Parse the optional inputs
+        args=""
+
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          dirs=" -E "
+          dirs+="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ -E }"
+          args+=" ${dirs}"
+        fi
+
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-files }}" ]; then
+          files=" -E "
+          files+="${{ inputs.exclude-files }}"
+          files="${files//,/ -E }"
+          args+=" ${files}"
+        fi
+
+        # fd-find uses -e to exclude a file extension
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          file_types=" -e "
+          file_types+="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ -e }"
+          args+=" ${file_types}"
+        fi
+
+        echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
+
+        # Wrap in a set +e so Github doesn't stop the spell check from running
+        set +e
+
+        # Find all relevant files, then check them for spelling mistakes
+        fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch \
+          cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
+        exitStatus=$?
+        set -e
+
+        echo -e "::endgroup::"
+        if [ $exitStatus -eq 0 ]; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        fi
+        exit $exitStatus
