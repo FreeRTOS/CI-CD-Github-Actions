@@ -1,3 +1,4 @@
 formatting/filesWithCRLFEndings/* eol=crlf
+clang-formatting/filesWithCRLFEndings/* eol=crlf
+clang-formatting/filesWithFormattingErrors/testWithFormattingError.c eol=crlf
 clang-formatting/filesWithFormattingErrors/* eol=crlf
-

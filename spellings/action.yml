@@ -30,7 +30,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        echo -e "::group::Install Dependencies"
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
         # Install the Dependencies we need to run the spell-checker
         sudo apt-get install util-linux -y
@@ -39,15 +39,19 @@ runs:
         sudo npm install -g cspell
         echo -e "::endgroup::"
 
-        # Add the current directory to PATH
+        # Add the Github Action Path to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
 
-        # cp has an error code if it's asked to copy to the same file
-        # Wrap it in a set +e in case the input path is the working directory
+        # Account for starting with an alternate path in a repository
+        # Do this by copying the cspell config and wordlist to the desired path
+        # Wrap in a set +e so Github doesn't throw an error if the file or
+        # directory already exists.
         set +e
-        cp $GITHUB_ACTION_PATH/cspell.config.yaml ${{ inputs.path }}
+        cp cspell.config.yaml ${{ inputs.path }}
+        mkdir ${{ inputs.path }}/.github
+        cp .github/.cSpellWords.txt ${{ inputs.path }}/.github
+        cd ${{ inputs.path }}
         set -e
-
 
         # Make sure we have all the commands we need.
         echo -e "${{ env.bashInfo }} fdfind --version $(fdfind --version) ${{ env.bashEnd }}"
@@ -99,10 +103,12 @@ runs:
           args+=" ${file_types}"
         fi
 
+        echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
+
         # Wrap in a set +e so Github doesn't stop the spell check from running
         set +e
-        echo -e echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
 
+        # Find all relevant files, then check them for spelling mistakes
         fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch \
           cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
         exitStatus=$?

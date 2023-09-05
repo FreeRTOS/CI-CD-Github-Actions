@@ -22,14 +22,14 @@ typedef struct DateAndTime
         SYSTEMTIME st, lt;
 
         GetLocalTime( &lt );
-        currentTime->hour = lt.wHour;
+        currentTime->hour = lt.wHour;  
         currentTime->minutes = lt.wMinute;
-        currentTime->seconds = lt.wSecond;
+        currentTime->seconds = lt.wSecond;  
         currentTime->msec = lt.wMilliseconds;
     }
 #else /* if defined( WIN32 ) || defined( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
-    #include <sys/time.h>
-    #include <unistd.h>
+    #include <sys/time.h>  
+    #include <unistd.h>  
     void getTime( struct DateAndTime * currentTime )
     {
         struct timeval tv;
@@ -88,7 +88,7 @@ int main( int argc,
 
     #ifdef EXIT_WITH_MINUTES
         exitCode = currentTime.minutes;
-    #endif
-    printf( "EXITING TEST APPLICATION WITH EXIT CODE = %d\n", exitCode );
+    #endif   
+    printf( "EXITING TEST APPLICATION WITH EXIT CODE = %d\n", exitCode );  
     return exitCode;
 }
