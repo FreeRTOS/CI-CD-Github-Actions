@@ -151,5 +151,7 @@ runs:
           # ${{ env.stepName }}
           echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.zip file that you can download. ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Extract the 'formattingChanges.patch' file inside of it, and copy it to your repository. ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} From here you can apply it using 'git apply formattingChanges.patch', fixing your formatting issues. ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo }} Or you can add the comment '/bot run formatting' on your Pull Request to have formatting changes automatically applied to your PR! ${{ env.bashEnd }}"
