@@ -58,7 +58,7 @@ jobs:
         path: formatting/goodFiles
         exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
 
-  formatting-error-cases:
+  uncrustify-formatting-error-cases:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -210,6 +210,285 @@ jobs:
         uses: ./formatting
         with:
           path: formatting
+          exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
+          exclude-dirs: "filesWithFormattingErrors,
+                          filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: Check Failure Test Cases
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.all-format-errors.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace, CRLF, and Format Failure |  Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace, CRLF, and Format Failure | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-format-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Formatting Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Formatting Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-and-whitespace-non-c-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF and Whitespace Error Not C Files | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF and Whitespace Error Not C Files | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.crlf-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | CRLF Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | CRLF Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-and-whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting and Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting and Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.formatting-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Formatting Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Formatting Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.whitespace-error.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Whitespace Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Whitespace Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-dirs.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Dirs Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Dirs Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-exclude-files.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Files Error | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Files Error | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          if [ "${{ steps.error-in-both.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} API | Failure | Exclude Option Errors | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} API | Failure | Exclude Option Errors | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
+  clang-formatting-success-cases:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - env:
+        stepName: "Functional | Success | Exclude Files and Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-dirs-with-errors
+      uses: ./clang-formatting
+      with:
+        path: clang-formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+        exclude-files: "formatErrorTest.h, formatErrorTest.c"
+
+    - env:
+        stepName: "Functional | Success | Exclude Just Files"
+      name: ${{ env.stepName }}
+      id: exclude-files-with-errors
+      uses: ./clang-formatting
+      with:
+        path: clang-formatting/goodFiles
+        exclude-dirs: ",,,"
+        exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
+
+    - name: Remove Error Files at Top Directory
+      working-directory: clang-formatting/goodFiles
+      shell: bash
+      run: |
+        # Remove Error Files at Top Directory
+        # Do a git remove since we use a git diff to check if formatting fails
+        git rm $(find . -name "formatErrorTest.c")
+        git rm $(find . -name "formatErrorTest.h")
+
+    - env:
+        stepName: "Functional | Success | Exclude Just Error Dirs"
+      name: ${{ env.stepName }}
+      id: exclude-two-files-two-dirs
+      uses: ./clang-formatting
+      with:
+        path: clang-formatting/goodFiles
+        exclude-dirs: "fileWithErrorInclude, fileWithErrorSource"
+
+  clang-formatting-error-cases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - env:
+          stepName: "Functional | Failure | Whitespace, CRLF, and Format Failure"
+        name: ${{ env.stepName }}
+        id: all-format-errors
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Formatting Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-format-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithTrailingWhitespace"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Whitespace Error"
+        name: ${{ env.stepName }}
+        id: crlf-and-whitespace-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithFormattingErrors"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF and Whitespace Error Not C Files"
+        name: ${{ env.stepName }}
+        id: crlf-and-whitespace-non-c-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithFormattingErrors, fileWithErrorInclude, fileWithErrorSource"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | CRLF Error"
+        name: ${{ env.stepName }}
+        id: crlf-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithTrailingWhitespace"
+          exclude-files: "badFile.c"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Formatting and Whitespace Error"
+        name: ${{ env.stepName }}
+        id: formatting-and-whitespace-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Formatting Error"
+        name: ${{ env.stepName }}
+        id: formatting-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithTrailingWhitespace,filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "Functional | Failure | Whitespace Error"
+        name: ${{ env.stepName }}
+        id: whitespace-error
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithFormattingErrors,filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Dirs Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-dirs
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-dirs: "filesWithFormattingErrors,    filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Files Error"
+        name: ${{ env.stepName }}
+        id: error-in-exclude-files
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
+          exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
+
+      - name:  Reset Files
+        shell: bash
+        run: git reset --hard
+
+      - env:
+          stepName: "API | Failure | Exclude Option Errors"
+        name: ${{ env.stepName }}
+        id: error-in-both
+        continue-on-error: true
+        uses: ./clang-formatting
+        with:
+          path: clang-formatting
           exclude-files: "filesWithFormattingErrors,    filesWithCRLFEndings"
           exclude-dirs: "filesWithFormattingErrors,
                           filesWithCRLFEndings"
