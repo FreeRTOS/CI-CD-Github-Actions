@@ -1,0 +1,2 @@
+formatting/filesWithCRLFEndings/* eol=crlf
+clang-formatting/filesWithFormattingErrors/* eol=crlf
