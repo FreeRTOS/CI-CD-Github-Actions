@@ -59,3 +59,8 @@ The `--user-agent` option allows specifying a specific user agent string to be u
 | `-k`, `--keep` | *None* | Option to keep temporary HTML files instead of deleting them. Only useful for debugging. |
 | `-v`, `--verbose` | *None* | Increase verbosity to print all files and links tested, instead of only errors. |
 | `-u`, `--user-agent`| A User-Agent string | User agent string to use for HTTP requests. |
+
+## Tests
+The various files that live inside of this directory are used in the PR checks
+for this repository. The relevant tests for this action can be found inside of
+[test.yml](../.github/workflows/test.yml)

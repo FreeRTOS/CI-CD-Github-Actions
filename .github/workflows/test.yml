@@ -216,20 +216,61 @@ jobs:
           config: ./memory_statistics_config.json
           output: ./size_table_new.html
           check_against: ./size_table_expected.html
+
   test-link-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Setup python environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11.0'
-      - name: Test link verifier action
+        uses: actions/setup-python@v3
+
+      - env:
+          stepName: "Functional | Success | Link Verifier Works & Excludes Directory"
+        name: ${{ env.stepName }}
+        id: link-verifier-success-case
         uses: ./link-verifier
         with:
           path: ./
-          exclude-dirs: complexity,formatting
-          include-file-types: .c,.html
+          exclude-dirs: complexity, formatting, badFiles
+          allowlist-file: link-verifier/badUrls.md
+
+      - env:
+          stepName: "Functional | Success | Link being Excluded"
+        name: ${{ env.stepName }}
+        id: link-verifier-exclude-url-success-case
+        uses: ./link-verifier
+        with:
+          path: ./
+          exclude-dirs: complexity, formatting
+          exclude-urls: https://dummy-url.com/ota.bin, https://dummy-url.com/ota.com, https://dummy-url-three.com/ota.bin, https://github.com/FreeRTOS/A-Repo-That-Wins-You-The-Lottery
+
+      - env:
+          stepName: "Functional | Failure | Link Does Not Exist"
+        name: ${{ env.stepName }}
+        id: link-verifier-fail-case
+        continue-on-error: true
+        uses: ./link-verifier
+        with:
+          path: ./
+          exclude-dirs: complexity, formatting
+
+      - env:
+          stepName: Check Failure Test Case
+        name: ${{ env.stepName }}
+        id: check-failure-test-cases
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          exitStatus=0
+          if [ "${{ steps.link-verifier-fail-case.outcome}}" = "failure" ]; then
+            echo -e "${{ env.bashPass }} Functional | Failure | Link Does Not Exist | Had Expected "failure" ${{ env.bashEnd }}"
+          else
+            echo -e "${{ env.bashFail }} Functional | Failure | Link Does Not Exist | Had Unexpected "success" ${{ env.bashEnd }}"
+            exitStatus=1
+          fi
+          exit $exitStatus
+
   test-manifest-verifier:
     runs-on: ubuntu-latest
     steps:
