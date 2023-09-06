@@ -28,8 +28,8 @@ def file_writer(output, filepath: str, sha1: str, license: str, copyright='NOASS
     output.write('FileCopyrightText: '+ copyright + '\n')
     output.write('FileComment: '+ comment + '\n')
     output.write('\n')
-    
-def pacakge_writer(output, packageName: str, version: str, url: str, license: str, ver_code: str, file_analyzed=True, 
+
+def package_writer(output, packageName: str, version: str, url: str, license: str, ver_code: str, file_analyzed=True,
                    copyright='NOASSERTION', summary='NOASSERTION', description='NOASSERTION'):
     output.write('PackageName: '+ packageName + '\n')
     output.write('SPDXID: SPDXRef-Package-'+ packageName + '\n')
@@ -43,7 +43,7 @@ def pacakge_writer(output, packageName: str, version: str, url: str, license: st
     output.write('PackageDescription: '+ description + '\n')
     output.write('\n')
 
-def doc_writer(output, version: str, name: str, creator_comment='NOASSERTION', 
+def doc_writer(output, version: str, name: str, creator_comment='NOASSERTION',
                doc_comment='NOASSERTION'):
     today = datetime.now()
     namespace = 'https://github.com/FreeRTOS/'+name+'/blob/'+version+'/sbom.spdx'

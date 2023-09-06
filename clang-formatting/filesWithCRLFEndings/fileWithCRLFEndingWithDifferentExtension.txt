@@ -43,5 +43,3 @@
 #if ( PCLKB_FREQUENCY > 50000000L )  
     #error "PCLKB_FREQUENCY Error: Please enter a valid divider value"
 #endif
-    
-#endif

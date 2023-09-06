@@ -23,13 +23,32 @@ outputs:
 
 runs:
   using: "composite"
-  steps: 
-      - name: Install dependencies
-        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+  steps:
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Install Dependencies
         shell: bash
-      - name: Generate credentials
-        id: generate-credentials
         run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          pip install -r $GITHUB_ACTION_PATH/requirements.txt
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName}} ${{ env.bashEnd }}"
+
+      - env:
+          bashPass: \033[32;1mPASSED -
+          bashInfo: \033[33;1mINFO -
+          bashFail: \033[31;1mFAILED -
+          bashEnd:  \033[0m
+          stepName: Generate credentials
+        id: generate-credentials
+        shell: bash
+        run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           python3 $GITHUB_ACTION_PATH/ssl_credential_creator.py
           echo "root-ca-priv-key-path=$(pwd)/root_ca_priv_key.key" >> $GITHUB_OUTPUT
           echo "root-ca-cert-path=$(pwd)/root_ca_cert.crt" >> $GITHUB_OUTPUT
@@ -37,4 +56,6 @@ runs:
           echo "server-cert-path=$(pwd)/server_cert.crt" >> $GITHUB_OUTPUT
           echo "device-priv-key-path=$(pwd)/device_priv_key.key" >> $GITHUB_OUTPUT
           echo "device-cert-path=$(pwd)/device_cert.crt" >> $GITHUB_OUTPUT
-        shell: bash
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{env.stepName}} ${{ env.bashEnd }}"
+

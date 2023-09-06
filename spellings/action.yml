@@ -37,7 +37,6 @@ runs:
         sudo apt-get install fd-find -y
         sudo apt-get install npm -y
         sudo npm install -g cspell
-        echo -e "::endgroup::"
 
         # Add the Github Action Path to PATH
         export PATH="$GITHUB_ACTION_PATH:$PATH"
@@ -53,6 +52,7 @@ runs:
         cd ${{ inputs.path }}
         set -e
 
+        echo -e "::endgroup::"
         # Make sure we have all the commands we need.
         echo -e "${{ env.bashInfo }} fdfind --version $(fdfind --version) ${{ env.bashEnd }}"
         echo -e "${{ env.bashInfo }} cspell --version $(cspell --version) ${{ env.bashEnd }}"
@@ -72,7 +72,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        #echo -e "::group::${{ env.stepName }}"
+        echo -e "::group:${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
         exitStatus=0
 

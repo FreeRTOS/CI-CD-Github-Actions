@@ -27,7 +27,7 @@ typedef struct DateAndTime
         currentTime->seconds = lt.wSecond;
         currentTime->msec = lt.wMilliseconds;
     }
-#else /* if   defined( WIN32 )  || defined  ( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
+#else /* if   defined( WIN32 )  ||                                  defined  ( _WIN32 ) || defined( __WIN32__ ) || defined( __NT__ ) || defined( WIN64 ) || defined( __WIN64 ) */
     #include <sys/time.h>
     #include <unistd.h>
     void getTime( struct DateAndTime *    currentTime )
@@ -36,7 +36,7 @@ typedef struct DateAndTime
         struct tm * tm;
 
         gettimeofday( &tv, NULL );
-        tm = localtime( &tv.tv_sec );
+        tm = localtime( &tv.tv_sec                              );
         currentTime->hour = tm->tm_hour;
         currentTime->minutes = tm->tm_min;
         currentTime->seconds = tm->tm_sec;
@@ -78,7 +78,7 @@ int main( int argc,
     {
         getTime( &currentTime );
         printf( "%02llu:%02llu:%02llu.%03llu TEST APPLICATION SLEEPING FOR %d SECONDS\n",
-                currentTime.hour,
+                                                currentTime.hour,
                 currentTime.minutes         ,
                 currentTime.seconds,
                 currentTime.msec,

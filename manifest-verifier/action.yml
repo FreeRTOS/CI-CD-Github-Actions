@@ -26,10 +26,10 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           pip install -r $GITHUB_ACTION_PATH/requirements.txt
           exitStatus=$?
-          echo "::endgroup::"
+          echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
@@ -43,15 +43,19 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
           if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
             echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
-            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
+            echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
+            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
           else
-            python3 $GITHUB_ACTION_PATH/verify_manifest.py --ignore-submodule-path=${{ inputs.exclude-submodules }}
+            echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} ${{ env.bashEnd }}"
+            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }}
           fi
           exitStatus=$?
-          echo "::endgroup::"
+
+          echo -e "::endgroup::"
           if [ "$exitStatus" = "0" ]; then
             echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
           else

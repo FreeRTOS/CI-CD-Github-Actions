@@ -20,7 +20,7 @@ IGNORE_SUBMODULES_LIST = []
 
 # Obtain submodule path of all entries in manifest.yml file.
 def read_manifest(git_modules, path_manifest):
-    dict = {}
+    list = []
 
     with open(git_modules, 'r') as fp:
         module_lines = fp.read()
@@ -49,9 +49,10 @@ def read_manifest(git_modules, path_manifest):
         assert 'repository' in dep, f"Failed to parse 'repository' for {dep}"
         assert 'path' in dep['repository'], f"Failed to parse 'path' for {dep}"
         assert 'url' in dep['repository'], f"Failed to parse 'repository' object for {dep}"
-        dict[dep['name']] = (dep['repository']['path'], dep['version'])
-
-    return dict
+        
+        list.append( ( dep['repository']['path'], dep['version'] ) )
+        print("{0} Submodule {1}:{2} from manifest.yml {3}".format(bashInfo, dep['repository']['path'],dep['version'], bashEnd))
+    return list
 
 # Generate list of submodules path in repository, excluding the
 # path in IGNORES_SUBMODULES_LIST.
@@ -95,37 +96,45 @@ if __name__ == '__main__':
     git_modules = os.path.join(REPO_PATH, '.gitmodules')
     assert os.path.exists(path_manifest), f"{bashFail} NO FILE {REPO_PATH}/.gitmodules {bashEnd}"
 
+    print("{0} PARSING manifest.yml FILE: {1}{2}".format(bashInfo, REPO_PATH, bashEnd))
+    # Get a list of all the submodules from the manifest file
     submodules_info_from_manifest = read_manifest(git_modules, path_manifest)
-    submodule_path_from_manifest = [pair[0] for pair in submodules_info_from_manifest.values()]
-    submodule_path_from_manifest = sorted(submodule_path_from_manifest)
+    
+    # Pull just the path from the tuple
+    submodule_paths_from_manifest = [submodule[0] for submodule in submodules_info_from_manifest]
 
+    # Get a dictionary of all the submodules from the .gitmodule file
     submodules_info_from_git = get_all_submodules()
-    submodule_path_from_git = sorted(submodules_info_from_git.keys())
+
+    # Get just the paths from the dictionary
+    submodule_path_from_git = submodules_info_from_git.keys()
 
     print("{0} CHECKING PATH: {1}{2}".format(bashInfo, REPO_PATH, bashEnd))
-    print("{0} List of submodules being verified: {1}{2}".format(bashInfo, submodule_path_from_git, bashEnd))
+    
+    print("{0} List of Submodules From Git being verified: {1}".format(bashInfo, bashEnd))
+    for submodule_path in submodule_path_from_git:
+        print("{0} {1} {2}".format(bashInfo, submodule_path, bashEnd))
 
-    # Check that manifest.yml contains entries for all submodules
-    # present in repository.
-    if submodule_path_from_manifest != submodule_path_from_git:
-        # Find list of library submodules missing in manifest.yml
-        for git_path in submodule_path_from_git:
-            if git_path not in submodule_path_from_manifest:
-                print(f"{bashFail} {git_path} not in {submodule_path_from_manifest} {bashEnd}")
-        sys.exit(1)
+    # Check that manifest.yml contains entries for all submodules present in repository.
+    # Find list of library submodules missing in manifest.yml
+    for git_path in submodule_path_from_git:
+        if git_path not in submodule_paths_from_manifest:
+            print(f"{bashFail} Submodule {git_path} not in manifest.yml paths: {submodule_paths_from_manifest} {bashEnd}")
+            sys.exit(1)
 
     # Verify that manifest contains correct versions of submodules pointers.
     mismatch_flag = False
     print(f"{bashInfo} Verifying that manifest.yml versions are up-to-date..... {bashEnd}")
-    for submodule_name, submodule_info in submodules_info_from_manifest.items():
-        relative_path = submodule_info[0]
-        manifest_commit =  submodule_info[1]
-        submodule = Repo(REPO_PATH+'/'+relative_path)
+    # Loop over all the submodules we read from the manifest
+    for submodule_name, manifest_commit in submodules_info_from_manifest:
+        # Get the path to the submodule, then checkout the commit
+        submodule = Repo(REPO_PATH+'/'+submodule_name)
         submodule.remote('origin').fetch()
+        # Checkout the submodule from the commit in the manifest, there's an error
         submodule.git.checkout(manifest_commit)
-        if (submodules_info_from_git[relative_path] != submodule.head.commit):
-            print("{0} manifest.yml does not have correct commit ID for {1} manifest Commit=({2},{3}) Actual Commit={4} {5}"
-                .format(bashFail, submodule_name, manifest_commit, submodule.head.commit, submodules_info_from_git[relative_path], bashEnd))
+        if (submodules_info_from_git[submodule_name] != submodule.head.commit):
+            print("{0} manifest.yml does not have correct commit ID for {1}:\nManifest Commit=({2},{3}) Actual Commit={4} {5}"
+                .format(bashFail, submodule_name, manifest_commit, submodule.head.commit, submodules_info_from_git[submodule_name], bashEnd))
             mismatch_flag = True
 
     if ( True == mismatch_flag ) and args.fail_on_incorrect_version:

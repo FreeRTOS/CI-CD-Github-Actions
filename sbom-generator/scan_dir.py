@@ -26,7 +26,7 @@ def scan_dir():
     root_name = manifest['name']
     url += '/tree/' + manifest['version']
     output_buffer[root_name] = io.StringIO()
-    
+  
     try:
         for dependency in manifest['dependencies']:
             dependency_info[dependency['name']] = dependency
@@ -63,7 +63,7 @@ def scan_dir():
                 library_lic = root_license
                 buffer = output_buffer[root_name]
                 temp_list = []
-            
+           
             for subdir, dirs, files in os.walk(os.path.join(dependency_path, library)):
                 for file in files:
                     filepath = os.path.join(subdir, file)
@@ -81,7 +81,7 @@ def scan_dir():
 
             #cross check with manifest file
             if library in dependency_info.keys():
-                output_buffer[library] = io.StringIO() 
+                output_buffer[library] = io.StringIO()
                 buffer = output_buffer[library]
                 library_lic = dependency_info[library]['license']
                 dependency_file_list[library] = []
@@ -90,7 +90,7 @@ def scan_dir():
                 library_lic = root_license
                 buffer = output_buffer[root_name]
                 temp_list = []
-            
+           
             for subdir, dirs, files in os.walk(os.path.join(path_3rdparty, library)):
                 for file in files:
                     filepath = os.path.join(subdir, file)
@@ -113,7 +113,7 @@ def scan_dir():
         info = dependency_info[library_name]
         pacakge_writer(output, library_name, info['version'], info['repository']['url'], info['license'], package_hash(dependency_file_list[library_name]))
         output.write(output_buffer[library_name].getvalue())
-    
+   
     #print relationships
     for library_name in output_buffer.keys():
         if library_name == root_name:
@@ -135,5 +135,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     REPO_PATH = os.path.abspath(args.repo_root_path)
     SOURCE_PATH = os.path.abspath(args.source_path)
-    
+   
     scan_dir()

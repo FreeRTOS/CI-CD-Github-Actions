@@ -25,7 +25,7 @@ runs:
         name: ${{ env.stepName }}
         run: |
           # ${{ env.stepName }}
-          echo -e "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           sudo apt-get install lcov fd-find
           echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName }} ${{ env.bashEnd }}"

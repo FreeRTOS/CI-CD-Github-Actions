@@ -32,7 +32,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout the repo for generating doxygen
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: doxygen_source
         ref: ${{ inputs.ref }}
@@ -40,7 +40,7 @@ runs:
     - name: Install Doxygen
       shell: bash
       run: |
-        wget -O doxygen.tgz "${{ inputs.doxygen_link }}" 
+        wget -O doxygen.tgz "${{ inputs.doxygen_link }}"
         if [ $? -ne 0 ]; then exit 1; fi
         sudo tar --strip-components=1 -xzf doxygen.tgz -C /usr/local
         sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
@@ -51,7 +51,7 @@ runs:
       run: ${{ inputs.generate_command }}
 
     - name: Checkout the repo for storing doxygen
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: doxygen_store
 
