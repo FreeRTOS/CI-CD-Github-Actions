@@ -29,7 +29,7 @@ def file_writer(output, filepath: str, sha1: str, license: str, copyright='NOASS
     output.write('FileComment: '+ comment + '\n')
     output.write('\n')
 
-def pacakge_writer(output, packageName: str, version: str, url: str, license: str, ver_code: str, file_analyzed=True,
+def package_writer(output, packageName: str, version: str, url: str, license: str, ver_code: str, file_analyzed=True,
                    copyright='NOASSERTION', summary='NOASSERTION', description='NOASSERTION'):
     output.write('PackageName: '+ packageName + '\n')
     output.write('SPDXID: SPDXRef-Package-'+ packageName + '\n')

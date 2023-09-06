@@ -31,18 +31,16 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
           sudo apt-get install uncrustify fd-find dos2unix
           echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
           export PATH="$PATH:$GITHUB_ACTION_PATH"
 
+          # Check that the commands installed correctly
           fdfind --version
-          fdInstalled=$?
-
-          uncrustify --version
-          uncrustifyInstalled=$?
-
           echo -e "::endgroup::"
+          echo -e "${{ env.bashInfo }} Using Uncrustify Version: "$(uncrustify --version)" ${{ env.bashEnd }}"
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - env:
@@ -57,15 +55,10 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} Using Uncrustify Version "$(uncrustify --version)" ${{ env.bashEnd }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
           exitCode=0
           export PATH="$PATH:$GITHUB_ACTION_PATH"
-
-          # TODO: These checks should really only run against modified files on PRS
-          # Where when the commit to the actual repo happens, then we should trigger the job
-          # Against all of the files in the repo. Nice inbetween to keep checks fast for PRs,
-          # But maintain that we don't have a change in the Repo that suddenly causes an issue
 
           # Parse the optional inputs
           args=""
@@ -96,7 +89,7 @@ runs:
 
           # Get all .c and .h files, as well as any other requested file types.
           # Then run uncrustify with the common config file.
-          echo -e "::group::${{ env.bashInfo }} Check Formatting ${{ env.bashEnd }}"
+
           echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec uncrustify --no-backup --replace --if-changed -c https://github.com/FreeRTOS/CI-CD-Github-Actions/blob/main/formatting/uncrustify.cfg -l C ${{ env.bashEnd }}"
           fdfind -e c -e h ${args} --exec uncrustify -q --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
 

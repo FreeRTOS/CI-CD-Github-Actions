@@ -44,6 +44,7 @@ jobs:
               run-link-verifier: false,
               run-complexity: false,
               run-doxygen: false,
+              exclude-dirs: ethernet, drivers, FreeRTOS/Demo,
             },
             {
               repository: backoffAlgorithm,
@@ -236,6 +237,7 @@ jobs:
         uses: ./spellings
         with:
           path: repo/${{ matrix.inputs.repository }}
+          exclude-dirs: ${{ matrix.inputs.repository }}
 
       - name: "Recursive Clone: ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -253,7 +255,6 @@ jobs:
         shell: bash
         working-directory: repo/${{ matrix.inputs.repository }}_Recursive
         run: git submodule update --checkout --init --recursive
-
 
       - name: Build ${{matrix.inputs.repository}}
         if: matrix.inputs.run-complexity && ( success() || failure() )
@@ -332,7 +333,6 @@ jobs:
               repository: FreeRTOS,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: ethernet, drivers, FreeRTOS/Demo
             },
             {
               repository: FreeRTOS-Cellular-Interface,
@@ -418,4 +418,4 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-files: ${{ matrix.inputs.exclude-files }}
-          exclude-dirs: ${{matrix.inputs.exclude-dirs }}
+          exclude-dirs: ethernet, drivers, FreeRTOS/Demo

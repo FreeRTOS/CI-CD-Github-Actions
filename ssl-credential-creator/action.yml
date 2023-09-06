@@ -33,7 +33,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           pip install -r $GITHUB_ACTION_PATH/requirements.txt
           echo -e "::endgroup::"
           echo -e "${{ env.bashPass }} ${{env.stepName}} ${{ env.bashEnd }}"
@@ -48,7 +48,7 @@ runs:
         shell: bash
         run: |
           # ${{ env.stepName }}
-          echo -e "::group::${{ env.stepName }}"
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           python3 $GITHUB_ACTION_PATH/ssl_credential_creator.py
           echo "root-ca-priv-key-path=$(pwd)/root_ca_priv_key.key" >> $GITHUB_OUTPUT
           echo "root-ca-cert-path=$(pwd)/root_ca_cert.crt" >> $GITHUB_OUTPUT

@@ -103,7 +103,7 @@ runs:
       shell: bash
       run: |
         # ${{ env.stepName }}
-        #echo -e "::group::${{ env.stepName }}"
+        #echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         export PATH="$GITHUB_ACTION_PATH:$PATH"
 
         # So here's the deal. At time of writing this spell checker can check
