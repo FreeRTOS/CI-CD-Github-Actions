@@ -46,7 +46,7 @@ runs:
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
         if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
-          echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo}} This action will cause a PR Failure if a submodule is not equal to the manifest.yml version ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
           echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
           python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
         else
