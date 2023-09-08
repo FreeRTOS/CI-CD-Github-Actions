@@ -32,12 +32,14 @@ runs:
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
         stepName: Install ARM GCC
+      name: ${{ env.stepName }}
       shell: bash
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         wget -qO- "${{ inputs.toolchain_link }}" | sudo tar --strip-components=1 -xj -C /usr/local
-        echo -e "::endgroup::${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        echo -e "::endgroup::"
+        echo -e "::group::${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
         bashPass: \033[32;1mPASSED -
@@ -45,6 +47,7 @@ runs:
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
         stepName: Compute File Sizes
+      name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
       shell: bash
       run: |
@@ -59,6 +62,7 @@ runs:
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
         stepName: Check File Size
+      name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
       shell: bash
       if: inputs.check_against
@@ -67,10 +71,11 @@ runs:
         echo -e "${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 0
+          exit 0
         else
-            echo -e "::endgroup::${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            echo -e "${{ env.bashFail }} Sizes of files from provided ${{ inputs.check_against }} are not equal to current file size! ${{ env.bashEnd }}"
-            diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
-            exit 1
+          echo -e "::endgroup::"
+          echo -e "::group::${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }} Sizes of files from provided ${{ inputs.check_against }} are not equal to current file size! ${{ env.bashEnd }}"
+          diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
+          exit 1
         fi

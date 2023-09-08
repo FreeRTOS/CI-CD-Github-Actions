@@ -118,7 +118,8 @@ runs:
             # Run a git diff to print the formatting differences
             echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
             git diff --color=always
-            echo -e "::endgroup::${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
+            echo -e "::endgroup::"
+            echo -e "${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
             echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
             echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
         fi
@@ -134,11 +135,12 @@ runs:
         retention-days: 7
 
     - env:
-        stepName: Formatting Git Patch Info
         bashPass: \033[32;1m
         bashInfo: \033[33;1m
         bashFail: \033[31;1m
         bashEnd:  \033[0
+        stepName: Formatting Git Patch Info
+      name: ${{ env.stepName }}
       if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
       shell: bash
       run: |

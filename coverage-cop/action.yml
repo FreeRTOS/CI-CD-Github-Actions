@@ -21,8 +21,8 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0
-      shell: bash
       name: ${{ env.stepName }}
+      shell: bash
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -45,7 +45,7 @@ runs:
         # Print the received code cov report.
         # TODO: The way it grabs the line/branch coverage is a little complicated
         # I'd like to see if this can be done simpler.
-        echo -e " ${{ env.bashInfo }} Received LCov Report: ${{ inputs.line-coverage-min }} ${{ env.bashEnd}}"
+        echo -e " ${{ env.bashInfo }} Received LCov Report: ${{ inputs.coverage-file }} ${{ env.bashEnd}}"
         lcov --list --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
         LINE_COVERAGE=$(lcov --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 2 | sed -n "s/\([^%]*\)%.*/\1/p")
         BRANCH_COVERAGE=$(lcov --rc lcov_branch_coverage=1 --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 4 | sed -n "s/\([^%]*\)%.*/\1/p")
@@ -53,14 +53,14 @@ runs:
 
         # Check Line Coverage
         echo -e " ${{ env.bashInfo }} Required Line Coverage: ${{ inputs.line-coverage-min }} ${{ env.bashEnd}}"
-        echo -e " ${{ env.bashInfo }} Received Line Coverage: $LINE_COVERAGE ${{ env.bashEnd}}"
+        echo -e " ${{ env.bashInfo }} Line Coverage of PR: $LINE_COVERAGE ${{ env.bashEnd}}\n"
         if [[ $(echo "$LINE_COVERAGE < ${{ inputs.line-coverage-min }}" | bc) -ne 0 ]]; then
           echo -e "${{ env.bashFail }} Line Coverage is too low. ${{ env.bashEnd }}"
           RESULT=1
         fi
 
         echo -e " ${{ env.bashInfo }} Required Branch Coverage: ${{ inputs.branch-coverage-min }} ${{ env.bashEnd}}"
-        echo -e " ${{ env.bashInfo }} Received Branch Coverage: $BRANCH_COVERAGE ${{ env.bashEnd}}"
+        echo -e " ${{ env.bashInfo }} Line Coverage of PR: $BRANCH_COVERAGE ${{ env.bashEnd}}"
         if [[ $(echo "$BRANCH_COVERAGE < ${{ inputs.branch-coverage-min }}" | bc) -ne 0 ]]; then
           echo -e "${{ env.bashFail }} Branch Coverage is too low. ${{ env.bashEnd }}"
           RESULT=1
@@ -92,6 +92,7 @@ runs:
         bashInfo: \033[33;1m
         bashFail: \033[31;1m
         bashEnd:  \033[0
+      name: ${{ env.stepName }}
       if: failure() && ( steps.upload-codecov-report.outcome == 'success' )
       shell: bash
       run: |

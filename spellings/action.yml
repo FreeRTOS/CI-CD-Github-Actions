@@ -72,7 +72,7 @@ runs:
     shell: bash
     run: |
       # ${{ env.stepName }}
-      echo -e "::group:${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
       export PATH="$GITHUB_ACTION_PATH:$PATH"
       exitStatus=0
 

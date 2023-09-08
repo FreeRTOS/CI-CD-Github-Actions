@@ -38,6 +38,7 @@ runs:
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
+      name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
       shell: bash
       run: |

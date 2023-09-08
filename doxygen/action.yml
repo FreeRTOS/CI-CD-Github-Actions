@@ -31,6 +31,7 @@ runs:
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
         stepName: Install Doxygen
+        name: ${{ env.stepName }}
       shell: bash
       run: |
         # ${{ env.stepName }}
@@ -45,6 +46,7 @@ runs:
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
         stepName: Verify Doxygen build and Generate ZIP (if specified)
+      name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
       shell: bash
       run: |
