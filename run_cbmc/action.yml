@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT-0
 # CBMC starter kit 2.9
 name: Run CBMC
+description: 'Action that runs the CBMC proofs inside of a FreeRTOS Repository'
 inputs:
   proofs_dir:
     required: true
@@ -22,17 +23,20 @@ runs:
       shell: bash
       working-directory: ${{ inputs.proofs_dir }}
       run: ${{ inputs.run_cbmc_proofs_command }}
+
     - name: Check repository visibility
       shell: bash
       run: |
         VIZ="${{ fromJson(toJson(github.event.repository)).visibility }}";
         echo "REPO_VISIBILITY=${VIZ}" | tee -a "${GITHUB_ENV}";
+
     - name: Set name for zip artifact with CBMC proof results
       shell: bash
       id: artifact
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       run: |
         echo "name=cbmc_proof_results_${{ fromJson(toJson(github.event.repository)).name }}_$(date +%Y_%m_%d_%H_%M_%S)" >> $GITHUB_OUTPUT
+
     - name: Create zip artifact with CBMC proof results
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       shell: bash
@@ -42,12 +46,14 @@ runs:
           && zip -r ${{ steps.artifact.outputs.name }}.zip . \
           && popd \
           && mv $FINAL_REPORT_DIR/${{ steps.artifact.outputs.name }}.zip .
+
     - name: Upload zip artifact of CBMC proof results to GitHub Actions
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.artifact.outputs.name }}
         path: ${{ steps.artifact.outputs.name }}.zip
+
     - name: CBMC proof results
       shell: bash
       run: |

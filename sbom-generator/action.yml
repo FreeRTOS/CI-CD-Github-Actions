@@ -12,11 +12,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Install dependencies
-        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
-        shell: bash
-      - name: Run generator script
-        working-directory: ${{ inputs.repo_path }}
-        run: |
-          python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
-        shell: bash
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+
+    - name: Run generator script
+      working-directory: ${{ inputs.repo_path }}
+      shell: bash
+      run: |
+        python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}

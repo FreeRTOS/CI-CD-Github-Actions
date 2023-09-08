@@ -22,30 +22,33 @@ inputs:
     description: 'Link to ARM GCC tar.bz2 to use for compiling files (default version 9-2020-q2).'
     required: false
     default: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A"
+
 runs:
   using: "composite"
   steps:
     - name: Install ARM GCC
-      run: |
-          wget -qO- "${{ inputs.toolchain_link }}" | sudo tar --strip-components=1 -xj -C /usr/local
       shell: bash
+      run: |
+        wget -qO- "${{ inputs.toolchain_link }}" | sudo tar --strip-components=1 -xj -C /usr/local
+
     - name: Compute sizes
       working-directory: ${{ inputs.path }}
-      run: >-
-          ${{ github.action_path }}/memory_statistics.py
-          --config "${{ inputs.config }}"
-          --output "${{ inputs.output }}"
       shell: bash
+      run: >-
+        ${{ github.action_path }}/memory_statistics.py
+        --config "${{ inputs.config }}"
+        --output "${{ inputs.output }}"
+
     - name: Compare table
       working-directory: ${{ inputs.path }}
-      run: |
-          if [ -n "${{ inputs.check_against }}" ] ; then
-              if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
-                  exit 0
-              else
-                  echo "Size table does not match!"
-                  diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
-                  exit 1
-              fi
-          fi
       shell: bash
+      run: |
+        if [ -n "${{ inputs.check_against }}" ] ; then
+            if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
+                exit 0
+            else
+                echo "Size table does not match!"
+                diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
+                exit 1
+            fi
+        fi

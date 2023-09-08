@@ -15,9 +15,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Install dependencies
-        run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
-        shell: bash
-      - name: Run localhost MQTT broker
-        run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
-        shell: bash
+    - name: Install dependencies
+      run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
+      shell: bash
+    - name: Run localhost MQTT broker
+      run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
+      shell: bash

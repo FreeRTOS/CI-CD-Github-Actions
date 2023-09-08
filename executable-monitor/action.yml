@@ -25,83 +25,83 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - env:
-          # The bash escape character is \033
-          # At time of writing, you can't add a global environment to an
-          # action so stuck with this. If this gets changed please move this
-          bashPass:   \033[32;1mPASSED -
-          bashInfo:   \033[33;1mINFO -
-          bashFail:   \033[31;1mFAILED -
-          bashEnd:    \033[0m
-          stepName: Install Dependencies
-        name: ${{ env.stepName }}
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "::group::Install Dependencies"
-          pip install -r $GITHUB_ACTION_PATH/requirements.txt
-          exitStatus=$?
-          echo -e "::endgroup::"
+    - env:
+        # The bash escape character is \033
+        # At time of writing, you can't add a global environment to an
+        # action so stuck with this. If this gets changed please move this
+        bashPass:   \033[32;1mPASSED -
+        bashInfo:   \033[33;1mINFO -
+        bashFail:   \033[31;1mFAILED -
+        bashEnd:    \033[0m
+        stepName: Install Dependencies
+      name: ${{ env.stepName }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::Install Dependencies"
+        pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        exitStatus=$?
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Run Executable with Monitoring
+      name: ${{ env.stepName }}
+      shell: bash
+      run: |
+        # Run Executable with Monitoring
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+        # Make sure we have an exit condition to look for
+        if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
+          echo -e "::endgroup::\n${{ env.bashFail}} Did not supply an input of success-line or success-exit-code to search for ${{ env.bashEnd }}"
+          exit 1
+        fi
+
+        # Initial Arguments
+        args="$GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }}"
+        args+=" --timeout-seconds=${{ inputs.timeout-seconds }}"
+
+        # Check if an exit code was provided
+        if [ -n "${{ inputs.success-exit-code }}" ]; then
+          args+=" --success-exit-code=${{ inputs.success-exit-code }}"
+        fi
+
+        # Check for log directory/if a log file should be created
+        if [ -n "${{ inputs.log-dir }}" ]; then
+          args+=" --log-dir=${{ inputs.log-dir}}"
+        fi
+
+        # Check for retry attempts
+        if [ -n "${{ inputs.retry-attempts }}" ]; then
+          args+=" --retry-attempts=${{ inputs.retry-attempts }}"
+        fi
+
+
+        # set +e so if the run fails we can capture that and print custom error message
+        set +e
+
+        # Check for success line to search for
+        if [ -n "${{ inputs.success-line }}" ]; then
+          echo -e "${{ env.bashInfo }} Running: python3 ${args} --success-line=${{ inputs.success-line}} ${{ env.bashEnd }}"
+          python3 ${args} --success-line="${{ inputs.success-line}}"
+        else
+          echo -e "${{ env.bashInfo }} Running: python3 ${args} ${{ env.bashEnd }}"
+          python3 ${args}
+        fi
+
+        # Store status as the echo group will overwrite it
+        exitStatus=$?
+        set -e
+        echo -e "::endgroup::"
+
+        if [ $exitStatus -eq 0 ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-      - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Run Executable with Monitoring
-        name: ${{ env.stepName }}
-        shell: bash
-        run: |
-          # Run Executable with Monitoring
-          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-          # Make sure we have an exit condition to look for
-          if [ "${{ inputs.success-exit-code }}" = "" ] && [ "${{ inputs.success-line }}" = "" ]; then
-            echo -e "::endgroup::\n${{ env.bashFail}} Did not supply an input of success-line or success-exit-code to search for ${{ env.bashEnd }}"
-            exit 1
-          fi
-
-          # Initial Arguments
-          args="$GITHUB_ACTION_PATH/executable-monitor.py --exe-path=${{ inputs.exe-path }}"
-          args+=" --timeout-seconds=${{ inputs.timeout-seconds }}"
-
-          # Check if an exit code was provided
-          if [ -n "${{ inputs.success-exit-code }}" ]; then
-            args+=" --success-exit-code=${{ inputs.success-exit-code }}"
-          fi
-
-          # Check for log directory/if a log file should be created
-          if [ -n "${{ inputs.log-dir }}" ]; then
-            args+=" --log-dir=${{ inputs.log-dir}}"
-          fi
-
-          # Check for retry attempts
-          if [ -n "${{ inputs.retry-attempts }}" ]; then
-            args+=" --retry-attempts=${{ inputs.retry-attempts }}"
-          fi
-
-
-          # set +e so if the run fails we can capture that and print custom error message
-          set +e
-
-          # Check for success line to search for
-          if [ -n "${{ inputs.success-line }}" ]; then
-            echo -e "${{ env.bashInfo }} Running: python3 ${args} --success-line=${{ inputs.success-line}} ${{ env.bashEnd }}"
-            python3 ${args} --success-line="${{ inputs.success-line}}"
-          else
-            echo -e "${{ env.bashInfo }} Running: python3 ${args} ${{ env.bashEnd }}"
-            python3 ${args}
-          fi
-
-          # Store status as the echo group will overwrite it
-          exitStatus=$?
-          set -e
-          echo -e "::endgroup::"
-
-          if [ $exitStatus -eq 0 ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          fi
-          exit $exitStatus
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        fi
+        exit $exitStatus

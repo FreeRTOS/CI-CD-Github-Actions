@@ -18,70 +18,70 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      shell: bash
-      run: echo "$GITHUB_CONTEXT"
+  - name: Dump GitHub context
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+    shell: bash
+    run: echo "$GITHUB_CONTEXT"
 
-    - env:
-        stepName: Install Utils
-      shell: bash
-      run: |
-        # ${{ env.stepName }}
-        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-        sudo apt-get update && sudo apt-get --assume-yes install software-properties-common curl jq sed
-        sudo add-apt-repository ppa:git-core/ppa
-        sudo apt-get update && sudo apt-get --assume-yes install git
-        git --version
-        echo -e "::endgroup::"
-        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+  - env:
+      stepName: Install Utils
+    shell: bash
+    run: |
+      # ${{ env.stepName }}
+      echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      sudo apt-get update && sudo apt-get --assume-yes install software-properties-common curl jq sed
+      sudo add-apt-repository ppa:git-core/ppa
+      sudo apt-get update && sudo apt-get --assume-yes install git
+      git --version
+      echo -e "::endgroup::"
+      echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Get Pull Request Info
-      shell: bash
-      id: pr-info
-      run: |
-        echo ${{ github.event.issue.pull_request.url }}
-        echo "RemoteRepo=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.repo.full_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
-        echo "branchName=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.ref' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+  - name: Get Pull Request Info
+    shell: bash
+    id: pr-info
+    run: |
+      echo ${{ github.event.issue.pull_request.url }}
+      echo "RemoteRepo=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.repo.full_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+      echo "branchName=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.ref' | sed 's/\"//g')" >> $GITHUB_OUTPUT
 
-    - name: Echo Upstream Repo:Branch
-      shell: bash
-      run: |
-        echo ${{ steps.pr-info.outputs.RemoteRepo }}:${{ steps.pr-info.outputs.branchName }}
+  - name: Echo Upstream Repo:Branch
+    shell: bash
+    run: |
+      echo ${{ steps.pr-info.outputs.RemoteRepo }}:${{ steps.pr-info.outputs.branchName }}
 
-    - name: Checkout upstream repo
-      uses: actions/checkout@v3
-      with:
-          repository: ${{ steps.pr-info.outputs.RemoteRepo }}
-          ref: ${{ steps.pr-info.outputs.branchName }}
+  - name: Checkout upstream repo
+    uses: actions/checkout@v3
+    with:
+        repository: ${{ steps.pr-info.outputs.RemoteRepo }}
+        ref: ${{ steps.pr-info.outputs.branchName }}
 
-    - name: Check Formatting
-      uses: FreeRTOS/CI-CD-Github-Actions/formatting@main
-      continue-on-error: true
-      id: check-formatting
-      with:
-        path: ${{ inputs.path }}
-        exclude-files: ${{ inputs.exclude-files }}
-        exclude-dirs: ${{ inputs.exclude-dirs }}
-        include-extensions: ${{ inputs.include-extensions }}
+  - name: Check Formatting
+    uses: FreeRTOS/CI-CD-Github-Actions/formatting@main
+    continue-on-error: true
+    id: check-formatting
+    with:
+      path: ${{ inputs.path }}
+      exclude-files: ${{ inputs.exclude-files }}
+      exclude-dirs: ${{ inputs.exclude-dirs }}
+      include-extensions: ${{ inputs.include-extensions }}
 
-    - env:
-        bashPass: \033[32;1m
-        bashInfo: \033[33;1m
-        bashFail: \033[31;1m
-        bashEnd:  \033[0
-        stepName: Apply Formatting Patch
-      shell: bash
-      if: steps.check-formatting.outcome == 'failure'
-      run: |
-        # ${{ env.stepName }}
-        echo -e  "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-        # git apply formattingChanges.patch
-        git config --global --add safe.directory '*'
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-        git commit -am "Uncrustify: triggered by comment."
-        echo "::endgroup::"
-        git push
-        echo -e "${{ env.bashPass }} ${{ env.stepName }}. Don't forget to run 'git pull'! ${{ env.bashEnd }}"
+  - env:
+      bashPass: \033[32;1m
+      bashInfo: \033[33;1m
+      bashFail: \033[31;1m
+      bashEnd:  \033[0
+      stepName: Apply Formatting Patch
+    shell: bash
+    if: steps.check-formatting.outcome == 'failure'
+    run: |
+      # ${{ env.stepName }}
+      echo -e  "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      # git apply formattingChanges.patch
+      git config --global --add safe.directory '*'
+      git config --global user.name 'GitHub Action'
+      git config --global user.email 'action@github.com'
+      git commit -am "Uncrustify: triggered by comment."
+      echo "::endgroup::"
+      git push
+      echo -e "${{ env.bashPass }} ${{ env.stepName }}. Don't forget to run 'git pull'! ${{ env.bashEnd }}"

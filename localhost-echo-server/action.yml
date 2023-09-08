@@ -9,8 +9,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - name: Run localhost Echo server
-        run: |
-          python3 --version
-          python3 $GITHUB_ACTION_PATH/local_echo_server.py --port_number=${{ inputs.port_number }} &
-        shell: bash
+    - name: Run localhost Echo server
+      shell: bash
+      run: |
+        python3 --version
+        python3 $GITHUB_ACTION_PATH/local_echo_server.py --port_number=${{ inputs.port_number }} &
+

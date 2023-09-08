@@ -26,12 +26,14 @@ runs:
   using: "composite"
   steps:
     - name: Install Doxygen
+      shell: bash
       run: |
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
         sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
-      shell: bash
+
     - name: Verify Doxygen build and Generate ZIP (if specified)
       working-directory: ${{ inputs.path }}
+      shell: bash
       run: |
         if [[ ${{ inputs.generate_zip }} == "true" ]]; then
           python3 $GITHUB_ACTION_PATH/generate_doxygen.py --root ./ --library-directories ${{ inputs.libs_parent_dir_path }} --zip
@@ -39,4 +41,3 @@ runs:
           doxygen docs/doxygen/config.doxyfile 2>&1 | tee doxyoutput.txt
           if [[ "$(wc -c < doxyoutput.txt | bc)" = "0" ]]; then exit 0; else exit 1; fi
         fi
-      shell: bash

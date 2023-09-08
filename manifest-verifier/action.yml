@@ -16,49 +16,49 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Install Manifest Verification Dependencies
-        name: ${{ env.stepName }}
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          pip install -r $GITHUB_ACTION_PATH/requirements.txt
-          exitStatus=$?
-          echo -e "::endgroup::"
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install Manifest Verification Dependencies
+      name: ${{ env.stepName }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        pip install -r $GITHUB_ACTION_PATH/requirements.txt
+        exitStatus=$?
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Run Manifest Verification Script
+      name: ${{ env.stepName }}
+      working-directory: ${{ inputs.path }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+        if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
+          echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
+          echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
+          python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
+        else
+          echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} ${{ env.bashEnd }}"
+          python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }}
+        fi
+        exitStatus=$?
+
+        echo -e "::endgroup::"
+        if [ "$exitStatus" = "0" ]; then
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-      - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Run Manifest Verification Script
-        name: ${{ env.stepName }}
-        working-directory: ${{ inputs.path }}
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-
-          if [[ "${{ inputs.fail-on-incorrect-version }}" == "true" ]]; then
-            echo -e "${{ env.bashInfo}} Value of flag is ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
-            echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version ${{ inputs.fail-on-incorrect-version }} ${{ env.bashEnd }}"
-            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }} --fail-on-incorrect-version
-          else
-            echo -e "${{ env.bashInfo}} Running: python3 manifest-verifier.py --ignore-submodule-path=${{ inputs.exclude-submodules }} ${{ env.bashEnd }}"
-            python3 $GITHUB_ACTION_PATH/manifest-verifier.py  --ignore-submodule-path=${{ inputs.exclude-submodules }}
-          fi
-          exitStatus=$?
-
-          echo -e "::endgroup::"
-          if [ "$exitStatus" = "0" ]; then
-            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-            exit 1
-          fi
+        else
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 1
+        fi

@@ -18,140 +18,133 @@ inputs:
 runs:
   using: "composite"
   steps:
-      - env:
-          # At time of writing, you can't add a global environment
-          # to an action file so stuck with this. If this gets changed
-          # Please move this
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Install Clang Format
-        name: ${{ env.stepName }}
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          sudo apt-get install clang-format fd-find dos2unix
-          echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
-          export PATH="$PATH:$GITHUB_ACTION_PATH"
+    - env:
+        # At time of writing, you can't add a global environment
+        # to an action file so stuck with this. If this gets changed
+        # Please move this
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install Clang Format
+      name: ${{ env.stepName }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          fdfind --version
-          fdInstalled=$?
+        sudo apt-get install clang-format fd-find dos2unix
+        echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+        export PATH="$PATH:$GITHUB_ACTION_PATH"
 
-          clang-format --version
-          clangFormatInstalled=$?
+        # Check that the commands installed correctly
+        fdfind --version
+        echo -e "::endgroup::"
 
-          echo -e "::endgroup::"
-          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format --version)" ${{ env.bashEnd }}"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-      - env:
-          bashPass: \033[32;1mPASSED -
-          bashInfo: \033[33;1mINFO -
-          bashFail: \033[31;1mFAILED -
-          bashEnd:  \033[0m
-          stepName: Formatting Check
-        name: ${{ env.stepName }}
-        id: action-formatting-check
-        working-directory: ${{ inputs.path }}
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format --version)" ${{ env.bashEnd }}"
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Formatting Check
+      name: ${{ env.stepName }}
+      id: action-formatting-check
+      working-directory: ${{ inputs.path }}
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          exitCode=0
-          export PATH="$PATH:$GITHUB_ACTION_PATH"
+        exitCode=0
+        export PATH="$PATH:$GITHUB_ACTION_PATH"
 
-          # TODO: These checks should really only run against modified files on PRS
-          # Where when the commit to the actual repo happens, then we should trigger the job
-          # Against all of the files in the repo. That way we can keep checks fast for PRs,
-          # and maintain that we don't have a change in the Repo.
-          # Think this can be done with git clang-format:
-          # https://ortogonal.github.io/cpp/git-clang-format/
+        # Parse the optional inputs
+        args=""
 
-          # Parse the optional inputs
-          args=""
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-dirs }}" ]; then
+          dirs=" -E "
+          dirs+="${{ inputs.exclude-dirs }}"
+          dirs="${dirs//,/ -E }"
+          args+=" ${dirs}"
+        fi
 
-          # fd-find uses -E to exclude a file or directory
-          if [ -n "${{ inputs.exclude-dirs }}" ]; then
-            dirs=" -E "
-            dirs+="${{ inputs.exclude-dirs }}"
-            dirs="${dirs//,/ -E }"
-            args+=" ${dirs}"
-          fi
+        # fd-find uses -E to exclude a file or directory
+        if [ -n "${{ inputs.exclude-files }}" ]; then
+          files=" -E "
+          files+="${{ inputs.exclude-files }}"
+          files="${files//,/ -E }"
+          args+=" ${files}"
+        fi
 
-          # fd-find uses -E to exclude a file or directory
-          if [ -n "${{ inputs.exclude-files }}" ]; then
-            files=" -E "
-            files+="${{ inputs.exclude-files }}"
-            files="${files//,/ -E }"
-            args+=" ${files}"
-          fi
+        # fd-find uses -e to include a file extension
+        if [ -n "${{ inputs.include-file-types }}" ]; then
+          file_types=" -e "
+          file_types+="${{ inputs.include-file-types }}"
+          file_types="${file_types//,/ -e }"
+          args+=" ${file_types}"
+        fi
 
-          # fd-find uses -e to include a file extension
-          if [ -n "${{ inputs.include-file-types }}" ]; then
-            file_types=" -e "
-            file_types+="${{ inputs.include-file-types }}"
-            file_types="${file_types//,/ -e }"
-            args+=" ${file_types}"
-          fi
+        # Get all .c and .h files, as well as any other requested file types.
+        # Then run clang-format with the common config file.
 
-          # Get all .c and .h files, as well as any other requested file types.
-          # Then run clang-format with the common config file.
-          echo -e "::group::${{ env.bashInfo }} Check Formatting ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
-          fdfind -e c -e h ${args} --exec clang-format --verbose -i
+        echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
+        fdfind -e c -e h ${args} --exec clang-format --verbose -i
 
-          # Replace all trailing whitespace, exclude photo and binary files
-          echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
-          fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
+        # Replace all trailing whitespace, exclude photo and binary files
+        echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//' ${{ env.bashEnd }}"
+        fdfind --type=file -E '*.png' -E '*.jpg' -E '*.svg' -E '*.a' -E '*.lib' -E '*.patch' ${args} . --exec sed -Ei 's/[[:blank:]]+$//'
 
-          # Replace all line endings with LF ones instead of CRLF
-          echo -e "${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
-          fdfind --type=file ${args} . --exec dos2unix -q
+        # Replace all line endings with LF ones instead of CRLF
+        echo -e "${{ env.bashInfo }} Check for CRLF Line Endings ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} fdfind --type=file ${args} . --exec dos2unix ${{ env.bashEnd }}"
+        fdfind --type=file ${args} . --exec dos2unix -q
 
-          # Determine if there was a formatting diff.
-          # If there was, create a patch of it.
-          set +e
-          git diff --exit-code >> formattingChanges.patch
-          exitCode=$?
-          set -e
+        # Determine if there was a formatting diff.
+        # If there was, create a patch of it.
+        set +e
+        git diff --exit-code >> formattingChanges.patch
+        exitCode=$?
+        set -e
 
-          if [ $exitCode -eq 0 ]; then
-              echo -e "::endgroup::"
-              echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          else
-              # Run a git diff to print the formatting differences
-              echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
-              git diff --color=always
-              echo -e "::endgroup::${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
-              echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
-              echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
-          fi
-          exit $exitCode
+        if [ $exitCode -eq 0 ]; then
+            echo -e "::endgroup::"
+            echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+            # Run a git diff to print the formatting differences
+            echo -e "::group::${{ env.bashInfo }} Format Difference ${{ env.bashEnd }}"
+            git diff --color=always
+            echo -e "::endgroup::${{ env.bashFail }} List of files with formatting errors: ${{ env.bashEnd }}"
+            echo -e "${{ env.bashFail }} "$(git diff --name-only)" ${{ env.bashEnd }} "
+            echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        fi
+        exit $exitCode
 
-      - name: Upload Formatting Git Patch
-        if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
-        id: upload-formatting-patch
-        uses: actions/upload-artifact@v3
-        with:
-          name: formattingChanges
-          path: ${{ inputs.path }}/formattingChanges.patch
-          retention-days: 7
+    - name: Upload Formatting Git Patch
+      if: failure() && ( steps.action-formatting-check.outcome == 'failure' )
+      id: upload-formatting-patch
+      uses: actions/upload-artifact@v3
+      with:
+        name: formattingChanges
+        path: ${{ inputs.path }}/formattingChanges.patch
+        retention-days: 7
 
-      - env:
-          stepName: Formatting Git Patch Info
-          bashPass: \033[32;1m
-          bashInfo: \033[33;1m
-          bashFail: \033[31;1m
-          bashEnd:  \033[0
-        if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
-        shell: bash
-        run: |
-          # ${{ env.stepName }}
-          echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.patch file that you can download ${{ env.bashEnd }}"
-          echo -e "${{ env.bashInfo }} Copy this patch to your repository and apply it using 'git apply formattingChanges.patch' ${{ env.bashEnd }}"
+    - env:
+        stepName: Formatting Git Patch Info
+        bashPass: \033[32;1m
+        bashInfo: \033[33;1m
+        bashFail: \033[31;1m
+        bashEnd:  \033[0
+      if: failure() && ( steps.upload-formatting-patch.outcome == 'success' )
+      shell: bash
+      run: |
+        # ${{ env.stepName }}
+        echo -e "${{ env.bashInfo }} A git patch of the formatting issues has been attached to this workflow ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} This can be accessed by returning to the bottom of the summary page of the workflow run ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} At the bottom of the page will be a formattingChanges.zip file that you can download. ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} Extract the 'formattingChanges.patch' file inside of it, and copy it to your repository. ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} From here you can apply it using 'git apply formattingChanges.patch', fixing your formatting issues. ${{ env.bashEnd }}"
