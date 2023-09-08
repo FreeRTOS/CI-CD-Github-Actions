@@ -103,14 +103,14 @@ runs:
         args+=" ${file_types}"
       fi
 
-      echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
+      echo -e "${{ env.bashInfo }} Running: fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch cspell lint --no-progress --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml ${{ env.bashEnd }}"
 
       # Wrap in a set +e so Github doesn't stop the spell check from running
       set +e
 
       # Find all relevant files, then check them for spelling mistakes
       fdfind -e c -e h -e md -e txt -e readme ${args} --exec-batch \
-        cspell lint --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
+        cspell lint --no-progress --language-id C --color --show-context --show-suggestions --no-must-find-files -c cspell.config.yaml
       exitStatus=$?
       set -e
 
