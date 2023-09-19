@@ -35,8 +35,12 @@ runs:
       shell: bash
       id: pr-info
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         echo "RemoteRepo=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url "${{ github.event.issue.pull_request.url }}" | jq '.head.repo.full_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
         echo "branchName=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url "${{ github.event.issue.pull_request.url }}" | jq '.head.ref' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - name: Checkout upstream repo
       uses: actions/checkout@v3
