@@ -18,12 +18,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      shell: bash
-      run: echo "$GITHUB_CONTEXT"
-
     - env:
         stepName: Install Utils
       shell: bash
@@ -37,18 +31,17 @@ runs:
         echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Get Pull Request Info
+    - env:
+        stepName: Get Pull Request Info
       shell: bash
       id: pr-info
       run: |
-        echo ${{ github.event.issue.pull_request.url }}
-        echo "RemoteRepo=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.repo.full_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
-        echo "branchName=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url ${{ github.event.issue.pull_request.url }} | jq '.head.ref' | sed 's/\"//g')" >> $GITHUB_OUTPUT
-
-    - name: Echo Upstream Repo:Branch
-      shell: bash
-      run: |
-        echo ${{ steps.pr-info.outputs.RemoteRepo }}:${{ steps.pr-info.outputs.branchName }}
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        echo "RemoteRepo=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url "${{ github.event.issue.pull_request.url }}" | jq '.head.repo.full_name' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+        echo "branchName=$(curl -H "Accept: application/vnd.github.sailor-v-preview+json" --url "${{ github.event.issue.pull_request.url }}" | jq '.head.ref' | sed 's/\"//g')" >> $GITHUB_OUTPUT
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - name: Checkout upstream repo
       uses: actions/checkout@v3
