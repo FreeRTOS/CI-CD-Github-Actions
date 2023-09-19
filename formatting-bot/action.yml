@@ -31,7 +31,8 @@ runs:
         echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Get Pull Request Info
+    - env:
+        stepName: Get Pull Request Info
       shell: bash
       id: pr-info
       run: |
