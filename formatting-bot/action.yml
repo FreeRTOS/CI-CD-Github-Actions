@@ -75,6 +75,6 @@ runs:
       git config --global user.name 'GitHub Action'
       git config --global user.email 'action@github.com'
       git commit -am "Uncrustify: triggered by comment."
-      echo "::endgroup::"
+      echo -e "::endgroup::"
       git push
       echo -e "${{ env.bashPass }} ${{ env.stepName }}. Don't forget to run 'git pull'! ${{ env.bashEnd }}"
