@@ -51,6 +51,7 @@ runs:
         curl -o $CBMC_ARTIFACT_NAME -L $CBMC_DEB
         sudo dpkg -i $CBMC_ARTIFACT_NAME
         rm ./$CBMC_ARTIFACT_NAME
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -69,6 +70,7 @@ runs:
           https://github.com/diffblue/cbmc/releases/download/cbmc-${{ inputs.cbmc_version }}/ubuntu-20.04-cbmc-${{ inputs.cbmc_version }}-Linux.deb
         sudo dpkg -i ./cbmc.deb
         rm ./cbmc.deb
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -86,6 +88,7 @@ runs:
         CBMC_VIEWER_REL="https://api.github.com/repos/model-checking/cbmc-viewer/releases/latest"
         CBMC_VIEWER_VERSION=$(curl -s $CBMC_VIEWER_REL | jq -r .name | sed  's/viewer-//')
         pip3 install cbmc-viewer==$CBMC_VIEWER_VERSION
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -104,6 +107,8 @@ runs:
         sudo apt-get install --no-install-recommends --yes \
           build-essential universal-ctags
         pip3 install cbmc-viewer==${{ inputs.cbmc_viewer_version }}
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
         bashPass: \033[32;1mPASSED -
@@ -125,6 +130,7 @@ runs:
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes ./$DBN_PKG_FILENAME
         rm ./$DBN_PKG_FILENAME
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -144,6 +150,7 @@ runs:
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes ./litani.deb
         rm ./litani.deb
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -174,6 +181,7 @@ runs:
           && cd build \
           && make -j;
         echo "$(pwd)" >> $GITHUB_PATH
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -204,4 +212,5 @@ runs:
           && cd build \
           && make -j;
         echo "$(pwd)" >> $GITHUB_PATH
+        echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
