@@ -19,43 +19,96 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Run CBMC
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Run CBMC
+      name: ${{ env.stepName }}
       shell: bash
       working-directory: ${{ inputs.proofs_dir }}
-      run: ${{ inputs.run_cbmc_proofs_command }}
+      run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        ${{ inputs.run_cbmc_proofs_command }}
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Check repository visibility
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Check repository visibility
+      name: ${{ env.stepName }}
       shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         VIZ="${{ fromJson(toJson(github.event.repository)).visibility }}";
         echo "REPO_VISIBILITY=${VIZ}" | tee -a "${GITHUB_ENV}";
 
-    - name: Set name for zip artifact with CBMC proof results
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Set name for zip artifact with CBMC proof results
+      name: ${{ env.stepName }}
       shell: bash
       id: artifact
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         echo "name=cbmc_proof_results_${{ fromJson(toJson(github.event.repository)).name }}_$(date +%Y_%m_%d_%H_%M_%S)" >> $GITHUB_OUTPUT
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Create zip artifact with CBMC proof results
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Create zip artifact with CBMC proof results
+      name: ${{ env.stepName }}
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         FINAL_REPORT_DIR="${{ inputs.proofs_dir }}/output/latest/html"
         pushd $FINAL_REPORT_DIR \
           && zip -r ${{ steps.artifact.outputs.name }}.zip . \
           && popd \
           && mv $FINAL_REPORT_DIR/${{ steps.artifact.outputs.name }}.zip .
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-    - name: Upload zip artifact of CBMC proof results to GitHub Actions
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Upload zip artifact of CBMC proof results to GitHub Actions
+      name: ${{ env.stepName }}
       if: ${{ env.REPO_VISIBILITY == 'public' }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.artifact.outputs.name }}
         path: ${{ steps.artifact.outputs.name }}.zip
 
-    - name: CBMC proof results
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: CBMC proof results
+      name: ${{ env.stepName }}
       shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         python3 ${{ inputs.proofs_dir }}/lib/summarize.py \
           --run-file ${{ inputs.proofs_dir }}/output/latest/html/run.json
