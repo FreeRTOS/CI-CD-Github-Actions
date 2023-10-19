@@ -31,49 +31,97 @@ runs:
       uses: actions/checkout@v3
       with:
         submodules: 'recursive'
-    - name: Install latest CBMC
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install latest CBMC
+      name: ${{ env.stepName }}
       if: ${{ inputs.cbmc_version == 'latest' }}
       shell: bash
       run: |
-        echo "Using latest CBMC"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         # Search within 5 most recent releases for latest available package
-        CBMC_REL="https://api.github.com/repos/diffblue/cbmc/releases?page=1&per_page=5"
+        CBMC_REL="https://api.github.com/repos/diffblue/cbmc/releases?page=1&per_page=10"
         CBMC_DEB=$(curl -s $CBMC_REL | jq -r '.[].assets[].browser_download_url' | grep -e 'ubuntu-20.04' | head -n 1)
         CBMC_ARTIFACT_NAME=$(basename $CBMC_DEB)
         curl -o $CBMC_ARTIFACT_NAME -L $CBMC_DEB
         sudo dpkg -i $CBMC_ARTIFACT_NAME
         rm ./$CBMC_ARTIFACT_NAME
-    - name: Install CBMC ${{ inputs.cbmc_version }}
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install CBMC ${{ inputs.cbmc_version }}
+      name: ${{ env.stepName }}
       if: ${{ inputs.cbmc_version != 'latest' }}
       shell: bash
       run: |
-        echo "Using CBMC version ${{ inputs.cbmc_version }}"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         curl -o cbmc.deb -L \
           https://github.com/diffblue/cbmc/releases/download/cbmc-${{ inputs.cbmc_version }}/ubuntu-20.04-cbmc-${{ inputs.cbmc_version }}-Linux.deb
         sudo dpkg -i ./cbmc.deb
         rm ./cbmc.deb
-    - name: Install latest CBMC viewer
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install latest CBMC viewer
+      name: ${{ env.stepName }}
       if: ${{ inputs.cbmc_viewer_version == 'latest' }}
       shell: bash
       run: |
-        echo "Using latest CBMC Viewer"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         CBMC_VIEWER_REL="https://api.github.com/repos/model-checking/cbmc-viewer/releases/latest"
         CBMC_VIEWER_VERSION=$(curl -s $CBMC_VIEWER_REL | jq -r .name | sed  's/viewer-//')
         pip3 install cbmc-viewer==$CBMC_VIEWER_VERSION
-    - name: Install CBMC viewer ${{ inputs.cbmc_viewer_version }}
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install CBMC viewer ${{ inputs.cbmc_viewer_version }}
+      name: ${{ env.stepName }}
       if: ${{ inputs.cbmc_viewer_version != 'latest' }}
       shell: bash
       run: |
-        echo "Using CBMC Viewer version ${{ inputs.cbmc_version }}"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes \
           build-essential universal-ctags
         pip3 install cbmc-viewer==${{ inputs.cbmc_viewer_version }}
-    - name: Install latest Litani
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install latest Litani
+      name: ${{ env.stepName }}
       if: ${{ inputs.litani_version == 'latest' }}
       shell: bash
       run: |
-        echo "Using latest Litani"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         # Search within 5 most recent releases for latest available package
         LITANI_REL="https://api.github.com/repos/awslabs/aws-build-accumulator/releases?page=1&per_page=5"
         LITANI_DEB=$(curl -s $LITANI_REL | jq -r '.[].assets[0].browser_download_url' | head -n 1)
@@ -82,20 +130,41 @@ runs:
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes ./$DBN_PKG_FILENAME
         rm ./$DBN_PKG_FILENAME
-    - name: Install Litani ${{ inputs.litani_version }}
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install Litani ${{ inputs.litani_version }}
+      name: ${{ env.stepName }}
       if: ${{ inputs.litani_version != 'latest' }}
       shell: bash
       run: |
-        echo "Using Litani version ${{ inputs.cbmc_version }}"
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         curl -o litani.deb -L \
           https://github.com/awslabs/aws-build-accumulator/releases/download/${{ inputs.litani_version }}/litani-${{ inputs.litani_version }}.deb
         sudo apt-get update
         sudo apt-get install --no-install-recommends --yes ./litani.deb
         rm ./litani.deb
-    - name: Install ${{ inputs.kissat_tag }} kissat
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install ${{ inputs.kissat_tag }} kissat
+      name: ${{ env.stepName }}
       if: ${{ inputs.kissat_tag != '' }}
       shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         if ${{ inputs.kissat_tag == '' }}; then return 0; fi
         if ${{ inputs.kissat_tag == 'latest' }}
         then
@@ -112,10 +181,21 @@ runs:
           && cd build \
           && make -j;
         echo "$(pwd)" >> $GITHUB_PATH
-    - name: Install ${{ inputs.cadical_tag }} cadical
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install ${{ inputs.cadical_tag }} cadical
+      name: ${{ env.stepName }}
       if: ${{ inputs.cadical_tag != '' }}
       shell: bash
       run: |
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         if ${{ inputs.cadical_tag == '' }}; then return 0; fi
         if ${{ inputs.cadical_tag == 'latest' }}
         then
@@ -132,3 +212,5 @@ runs:
           && cd build \
           && make -j;
         echo "$(pwd)" >> $GITHUB_PATH
+        echo -e "::endgroup::"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
