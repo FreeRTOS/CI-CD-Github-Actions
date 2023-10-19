@@ -60,7 +60,7 @@ runs:
         fi
 
         echo -e " ${{ env.bashInfo }} Required Branch Coverage: ${{ inputs.branch-coverage-min }} ${{ env.bashEnd}}"
-        echo -e " ${{ env.bashInfo }} Line Coverage of PR: $BRANCH_COVERAGE ${{ env.bashEnd}}"
+        echo -e " ${{ env.bashInfo }} Branch Coverage of PR: $BRANCH_COVERAGE ${{ env.bashEnd}}"
         if [[ $(echo "$BRANCH_COVERAGE < ${{ inputs.branch-coverage-min }}" | bc) -ne 0 ]]; then
           echo -e "${{ env.bashFail }} Branch Coverage is too low. ${{ env.bashEnd }}"
           RESULT=1
