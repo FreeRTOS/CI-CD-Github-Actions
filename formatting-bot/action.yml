@@ -46,8 +46,8 @@ runs:
     - name: Checkout upstream repo
       uses: actions/checkout@v3
       with:
-          repository: ${{ steps.pr-info.outputs.RemoteRepo }}
-          ref: ${{ steps.pr-info.outputs.branchName }}
+        repository: ${{ steps.pr-info.outputs.RemoteRepo }}
+        ref: ${{ steps.pr-info.outputs.branchName }}
 
     - name: Check Formatting
       uses: FreeRTOS/CI-CD-Github-Actions/formatting@main

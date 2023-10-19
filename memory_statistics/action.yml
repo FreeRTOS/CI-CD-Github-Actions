@@ -22,30 +22,60 @@ inputs:
     description: 'Link to ARM GCC tar.bz2 to use for compiling files (default version 9-2020-q2).'
     required: false
     default: "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A"
+
 runs:
   using: "composite"
   steps:
-    - name: Install ARM GCC
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Install ARM GCC
+      name: ${{ env.stepName }}
+      shell: bash
       run: |
-          wget -qO- "${{ inputs.toolchain_link }}" | sudo tar --strip-components=1 -xj -C /usr/local
-      shell: bash
-    - name: Compute sizes
+        # ${{ env.stepName }}
+        echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        wget -qO- "${{ inputs.toolchain_link }}" | sudo tar --strip-components=1 -xj -C /usr/local
+        echo -e "::endgroup::"
+        echo -e "::group::${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Compute File Sizes
+      name: ${{ env.stepName }}
       working-directory: ${{ inputs.path }}
-      run: >-
-          ${{ github.action_path }}/memory_statistics.py
-          --config "${{ inputs.config }}"
-          --output "${{ inputs.output }}"
       shell: bash
-    - name: Compare table
-      working-directory: ${{ inputs.path }}
       run: |
-          if [ -n "${{ inputs.check_against }}" ] ; then
-              if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
-                  exit 0
-              else
-                  echo "Size table does not match!"
-                  diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
-                  exit 1
-              fi
-          fi
+        # ${{ env.stepName }}
+        echo -e "${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        ${{ github.action_path }}/memory_statistics.py --config "${{ inputs.config }}" --output "${{ inputs.output }}"
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+    - env:
+        bashPass: \033[32;1mPASSED -
+        bashInfo: \033[33;1mINFO -
+        bashFail: \033[31;1mFAILED -
+        bashEnd:  \033[0m
+        stepName: Check File Size
+      name: ${{ env.stepName }}
+      working-directory: ${{ inputs.path }}
       shell: bash
+      if: inputs.check_against
+      run: |
+        # ${{ env.stepName }}
+        echo -e "${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        if cmp "${{ inputs.check_against }}" "${{ inputs.output }}" ; then
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit 0
+        else
+          echo -e "::endgroup::"
+          echo -e "::group::${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }} Sizes of files from provided ${{ inputs.check_against }} are not equal to current file size! ${{ env.bashEnd }}"
+          diff -U 2 "${{ inputs.check_against }}" "${{ inputs.output }}"
+          exit 1
+        fi
