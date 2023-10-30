@@ -55,14 +55,16 @@ int main( int argc, char ** argv )
     if( argc == 1 )
     {
         printf( "This is a basic test application.\n" );
-        printf(
-            "It prints the date and time and then sleeps for loopCount * 3\n" );
+        printf( "It prints the date and time and then sleeps for loopCount * "
+                "3\n" );
         printf( "This program takes in two inputs, a loop count and an exit "
                 "code\n" );
-        printf( "By default it will run %d loops and exit with exit status "
-                "%d\n",
-                totalLoops,
-                exitCode );
+        printf(
+            "By default it will run %d loops and exit with exit status "
+            "%d\n",
+            totalLoops,
+            exitCode
+        );
     }
 
     if( argc == 2 )
@@ -82,13 +84,15 @@ int main( int argc, char ** argv )
     for( int i = 1U; i < totalLoops; i++ )
     {
         getTime( &currentTime );
-        printf( "%02llu:%02llu:%02llu.%03llu TEST APPLICATION SLEEPING FOR %d "
-                "SECONDS\n",
-                currentTime.hour,
-                currentTime.minutes,
-                currentTime.seconds,
-                currentTime.msec,
-                i * 3U );
+        printf(
+            "%02llu:%02llu:%02llu.%03llu TEST APPLICATION SLEEPING FOR %d "
+            "SECONDS\n",
+            currentTime.hour,
+            currentTime.minutes,
+            currentTime.seconds,
+            currentTime.msec,
+            i * 3U
+        );
         sleep( i * 3U );
     }
 

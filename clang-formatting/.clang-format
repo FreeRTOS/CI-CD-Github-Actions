@@ -1,6 +1,7 @@
 ---
 Language: Cpp
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
+AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: None
 AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
 AlignConsecutiveDeclarations: None
@@ -48,10 +49,10 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
-ColumnLimit: 80
+ColumnLimit: 90
 CompactNamespaces: false
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 DeriveLineEnding: false
 DerivePointerAlignment: false
 EmptyLineBeforeAccessModifier: Always
@@ -76,6 +77,7 @@ PenaltyExcessCharacter: 100
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 10000
 PointerAlignment: Middle
+PackConstructorInitializers: Never
 ReflowComments: true
 SortIncludes: true
 SortUsingDeclarations: true
