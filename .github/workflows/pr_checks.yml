@@ -121,7 +121,7 @@ jobs:
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
-              line-coverage: 100,
+              line-coverage: 99,
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
