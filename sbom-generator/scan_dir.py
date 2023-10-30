@@ -103,7 +103,7 @@ def scan_dir():
     #print sbom file to sbom.spdx
     output = open('sbom.spdx', 'w')
     doc_writer(output, manifest['version'], manifest['name'])
-    pacakge_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
+    package_writer(output, manifest['name'], manifest['version'], url, root_license, package_hash(total_file_list), description=manifest['description'])
     output.write(output_buffer[root_name].getvalue())
 
     #print dependencies
@@ -111,7 +111,7 @@ def scan_dir():
         if library_name == root_name:
             continue
         info = dependency_info[library_name]
-        pacakge_writer(output, library_name, info['version'], info['repository']['url'], info['license'], package_hash(dependency_file_list[library_name]))
+        package_writer(output, library_name, info['version'], info['repository']['url'], info['license'], package_hash(dependency_file_list[library_name]))
         output.write(output_buffer[library_name].getvalue())
    
     #print relationships
