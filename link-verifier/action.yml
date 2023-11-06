@@ -29,6 +29,8 @@ runs:
   steps:
   - name: Setup Python for link verifier action
     uses: actions/setup-python@v3
+    with:
+      python-version: '>=3.7' # Minimum version for urllib v2 (https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html)
 
   - env:
       # The bash escape character is \033
