@@ -14,7 +14,7 @@ from multiprocessing import Pool
 import traceback
 from collections import defaultdict
 
-MARKDOWN_SEARCH_TERM = r'\.md$'
+MARKDOWN_SEARCH_TERM = r"\.md$"
 # Regex to find a URL
 URL_SEARCH_TERM = r'(\b(https?)://[^\s\)\]\\"<>]+[^\s\)\.\]\\"<>])'
 HTTP_URL_SEARCH_TERM = r'https?://'
@@ -151,7 +151,11 @@ class HtmlFile:
                 cprint(f'\t{link}','green')
 
         for link in self.external_links:
-            is_broken, status_code = test_url(link)
+            # Remove the trailing slash or trailing coma
+            if(link[-1] == "/" or link[-1] == ","):
+                is_broken, status_code = test_url(link[:-1])
+            else:
+                is_broken, status_code = test_url(link)
             if is_broken:
                 self.broken_links.append(link)
                 file_printed = self.print_filename(files[self.name], file_printed)
@@ -166,7 +170,7 @@ def parse_file(html_file):
     return HtmlFile(html_file)
 
 def html_name_from_markdown(filename):
-    md_pattern = re.compile('\.md', re.IGNORECASE)
+    md_pattern = re.compile("\.md$", re.IGNORECASE)
     return md_pattern.sub('.html', filename)
 
 def create_html(markdown_file):
@@ -254,7 +258,10 @@ def fetch_issues(repo, issue_type, limit):
         if process.returncode == 0:
             key = issue_type + 's'
             for issue in process.stdout.split():
-                main_repo_list[repo][key].add(int(issue))
+                if(issue.isnumeric()):
+                    main_repo_list[repo][key].add(int(issue))
+                else:
+                    raise TypeError(f"Attempted to cast {issue} as an int. Error fetching GitHub Issues")
         return 0
     else:
         use_gh_cache = False
@@ -324,7 +331,6 @@ def main():
     if args.verbose:
         print("Using User-Agent: {}".format(http_headers['User-Agent']))
 
-
     # If any explicit files are passed, add them to md_file_list.
     if args.files is not None:
         md_file_list = args.files
@@ -347,7 +353,7 @@ def main():
                 if any(file.endswith(file_type) for file_type in args.include_files):
                     f_path = os.path.join(root, file)
                     if args.verbose:
-                        print("Processing File: {}".format(f_path))
+                        print("\nProcessing File: {}".format(f_path))
                     with open(f_path, 'r', encoding="utf8", errors='ignore') as f:
                         # errors='ignore' argument Suppresses UnicodeDecodeError
                         # when reading invalid UTF-8 characters.
@@ -393,7 +399,10 @@ def main():
                 os.remove(f)
 
     for link in link_set:
-        is_broken, status_code = test_url(link)
+        if ( ( link[-1] == "/" ) or ( link[-1] == "," ) ):
+            is_broken, status_code = test_url(link[:-1])
+        else:
+            is_broken, status_code = test_url(link)
         if is_broken:
             broken_links.append(link)
             print("FILES:", link_to_files[link])

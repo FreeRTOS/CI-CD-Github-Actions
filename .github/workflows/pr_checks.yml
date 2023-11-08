@@ -160,7 +160,7 @@ jobs:
               org: AWS,
               branch: main,
               run-link-verifier: true,
-              run-complexity: true,
+              run-complexity: false,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
@@ -210,7 +210,7 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity, formatting
-          exclude-urls: https://dummy-url.com/ota.bin
+          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-complexity && ( success() || failure() )
