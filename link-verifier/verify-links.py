@@ -151,7 +151,11 @@ class HtmlFile:
                 cprint(f'\t{link}','green')
 
         for link in self.external_links:
-            is_broken, status_code = test_url(link)
+            # Remove the trailing slash or trailing coma
+            if(link[-1] == "/" or link[-1] == ","):
+                is_broken, status_code = test_url(link[:-1])
+            else:
+                is_broken, status_code = test_url(link)
             if is_broken:
                 self.broken_links.append(link)
                 file_printed = self.print_filename(files[self.name], file_printed)
@@ -254,6 +258,7 @@ def fetch_issues(repo, issue_type, limit):
         if process.returncode == 0:
             key = issue_type + 's'
             for issue in process.stdout.split():
+                print(f"issue= {issue}\nkey = {key}")
                 main_repo_list[repo][key].add(int(issue))
         return 0
     else:
@@ -324,7 +329,6 @@ def main():
     if args.verbose:
         print("Using User-Agent: {}".format(http_headers['User-Agent']))
 
-
     # If any explicit files are passed, add them to md_file_list.
     if args.files is not None:
         md_file_list = args.files
@@ -347,21 +351,15 @@ def main():
                 if any(file.endswith(file_type) for file_type in args.include_files):
                     f_path = os.path.join(root, file)
                     if args.verbose:
-                        print("Processing File: {}".format(f_path))
+                        print("\nProcessing File: {}".format(f_path))
                     with open(f_path, 'r', encoding="utf8", errors='ignore') as f:
                         # errors='ignore' argument Suppresses UnicodeDecodeError
                         # when reading invalid UTF-8 characters.
                         text = f.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
-                            print(url)
-                            # Remove trailing comma or slash
-                            if( url[0].endswith(',') or url[0].endswith('/') ):
-                                link_set.add(url[0][:-1])
-                                link_to_files[url[0][:-1]].add(f_path)
-                            else:
-                                link_set.add(url[0])
-                                link_to_files[url[0]].add(f_path)
+                            link_set.add(url[0])
+                            link_to_files[url[0]].add(f_path)
 
     # If allowlist file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
