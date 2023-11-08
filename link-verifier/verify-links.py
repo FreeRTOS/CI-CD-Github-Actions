@@ -258,6 +258,7 @@ def fetch_issues(repo, issue_type, limit):
         if process.returncode == 0:
             key = issue_type + 's'
             for issue in process.stdout.split():
+                print(f"Stdout = {process.stdout.split()}")
                 print(f"issue= {issue}\nkey = {key}")
                 main_repo_list[repo][key].add(int(issue))
         return 0
@@ -397,7 +398,10 @@ def main():
                 os.remove(f)
 
     for link in link_set:
-        is_broken, status_code = test_url(link)
+        if ( ( link[-1] == "/" ) or ( link[-1] == "," ) ):
+            is_broken, status_code = test_url(link[:-1])
+        else:
+            is_broken, status_code = test_url(link)
         if is_broken:
             broken_links.append(link)
             print("FILES:", link_to_files[link])
