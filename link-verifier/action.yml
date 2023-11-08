@@ -20,6 +20,7 @@ inputs:
   exclude-urls:
     description: 'Comma separated list of URLS not to check'
     required: false
+    default: https://www.misra.org.uk/misra-c, https://www.misra.org.uk
   user-agent:
     description: 'User agent string to use when making http requests.'
     required: false
@@ -29,6 +30,9 @@ runs:
   steps:
   - name: Setup Python for link verifier action
     uses: actions/setup-python@v3
+    with:
+      # Minimum version for urllib v2 (https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html)
+      python-version: '>=3.7'
 
   - env:
       # The bash escape character is \033
@@ -73,6 +77,7 @@ runs:
       bashFail: \033[31;1mFAILED -
       bashEnd:  \033[0m
       stepName: Check Links in Files
+      GITHUB_TOKEN: ${{ github.token }}
     name: ${{ env.stepName }}
     working-directory: ${{ inputs.path }}
     shell: bash
@@ -92,13 +97,17 @@ runs:
         args+=" --include-file-types ${file_types}"
       fi
 
+      # Many of the FreeRTOS-Repos include a link to MISRA's website. This website
+      # now has a CAPTCHA landing page, as such always exclude it from this check.
+      touch allowList.txt
+      echo "https://www.misra.org.uk/misra-c" >> allowList.txt
+      echo "https://www.misra.org.uk" >> allowList.txt
+
       if [ -n "${{ inputs.allowlist-file }}" ]; then
-        touch allowList.txt
         cat ${{ inputs.allowlist-file }} >> allowList.txt
       fi
 
       if [[ "${{ inputs.exclude-urls }}" != "" ]]; then
-        touch allowList.txt
         exclude_urls="${{ inputs.exclude-urls }}"
         exclude_urls="${exclude_urls//,/ }"
         for url in ${exclude_urls[@]}; do echo -e "$url" >> allowList.txt; done
