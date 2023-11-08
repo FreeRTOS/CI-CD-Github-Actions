@@ -77,6 +77,7 @@ runs:
       bashFail: \033[31;1mFAILED -
       bashEnd:  \033[0m
       stepName: Check Links in Files
+      GITHUB_TOKEN: ${{ github.token }}
     name: ${{ env.stepName }}
     working-directory: ${{ inputs.path }}
     shell: bash
