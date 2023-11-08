@@ -258,9 +258,10 @@ def fetch_issues(repo, issue_type, limit):
         if process.returncode == 0:
             key = issue_type + 's'
             for issue in process.stdout.split():
-                print(f"Stdout = {process.stdout.split()}")
-                print(f"issue= {issue}\nkey = {key}")
-                main_repo_list[repo][key].add(int(issue))
+                if(issue.isnumeric()):
+                    main_repo_list[repo][key].add(int(issue))
+                else:
+                    raise TypeError(f"Attempted to cast {issue} as an int. Error fetching GitHub Issues")
         return 0
     else:
         use_gh_cache = False
