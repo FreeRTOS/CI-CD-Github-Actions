@@ -14,7 +14,7 @@ from multiprocessing import Pool
 import traceback
 from collections import defaultdict
 
-MARKDOWN_SEARCH_TERM = r'\.md$'
+MARKDOWN_SEARCH_TERM = r"\.md$"
 # Regex to find a URL
 URL_SEARCH_TERM = r'(\b(https?)://[^\s\)\]\\"<>]+[^\s\)\.\]\\"<>])'
 HTTP_URL_SEARCH_TERM = r'https?://'
@@ -166,7 +166,7 @@ def parse_file(html_file):
     return HtmlFile(html_file)
 
 def html_name_from_markdown(filename):
-    md_pattern = re.compile('\.md', re.IGNORECASE)
+    md_pattern = re.compile("\.md$", re.IGNORECASE)
     return md_pattern.sub('.html', filename)
 
 def create_html(markdown_file):
@@ -354,8 +354,14 @@ def main():
                         text = f.read()
                         urls = re.findall(URL_SEARCH_TERM, text)
                         for url in urls:
-                            link_set.add(url[0])
-                            link_to_files[url[0]].add(f_path)
+                            print(url)
+                            # Remove trailing comma or slash
+                            if( url[0].endswith(',') or url[0].endswith('/') ):
+                                link_set.add(url[0][:-1])
+                                link_to_files[url[0][:-1]].add(f_path)
+                            else:
+                                link_set.add(url[0])
+                                link_to_files[url[0]].add(f_path)
 
     # If allowlist file is passed, add those links to link_cache so that link check on those URLs can be bypassed.
     if args.allowlist is not None:
