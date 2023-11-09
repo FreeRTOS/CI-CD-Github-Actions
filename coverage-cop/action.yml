@@ -7,11 +7,11 @@ inputs:
   branch-coverage-min:
     description: 'The minumum required branch coverage (in %) for success'
     required: false
-    default: 95
+    default: 100
   line-coverage-min:
     description: 'The minumum required line coverage (in %) for success'
     required: false
-    default: 95
+    default: 100
 runs:
   using: "composite"
   steps:
