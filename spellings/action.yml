@@ -33,6 +33,8 @@ runs:
       echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       # Install the Dependencies we need to run the spell-checker
+      sudo apt-get update -y
+      sudo apt-get upgrade -y
       sudo apt-get install util-linux -y
       sudo apt-get install fd-find -y
       sudo apt-get install npm -y
