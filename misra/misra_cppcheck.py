@@ -74,23 +74,26 @@ deviations_map: Dict[str, MisraDeviation] = dict()
 cc_error_list: List[CppcheckError] = list()
 
 
-def cppcheck_do_misra(project_json_path: str, target_files_set: Set[str]):
+def cppcheck_do_misra(project_json_path: Optional[str], target_files_set: Set[str]):
     args: List[str] = ["cppcheck"]
 
     fid, out_file = mkstemp()
     os.close(fid)
 
-    args.append("--project={}".format(project_json_path))
+    if project_json_path:
+        args.append("--project={}".format(project_json_path))
     args.append("--std=c89")
     args.append("--enable=all")
     args.append("--inconclusive")
     args.append("--suppress=unusedFunction")
+    args.append("--suppress=missingIncludeSystem")
     args.append("--xml")
     args.append("--addon=misra")
     args.append("--dump")
     args.append("--output-file={}".format(out_file))
-    for file in target_files_set:
-        args.append(file)
+    if not project_json_path:
+        for file in target_files_set:
+            args.append(file)
 
     logging.info("Calling: " + " ".join(args))
     subprocess.run(args)
@@ -213,6 +216,13 @@ def main():
         default=None,
     )
     parser.add_argument(
+        "-r",
+        "--rule-text",
+        action="store",
+        help="Json format misra rule text",
+        default=None,
+    )
+    parser.add_argument(
         "-p",
         "--compile-commands",
         action="store",
@@ -236,13 +246,14 @@ def main():
 
     base_directory: str = os.path.realpath(args.base_directory)
 
-    if not args.coverity_config or not os.path.exists(args.coverity_config):
-        logging.error(
-            "Configuration file: {} does not exist.".format(args.coverity_config)
-        )
-        sys.exit(1)
-
-    parse_coverity_config(args.coverity_config)
+    if args.coverity_config:
+        if not os.path.exists(args.coverity_config):
+            logging.error(
+                "Configuration file: {} does not exist.".format(args.coverity_config)
+            )
+            sys.exit(1)
+        else:
+            parse_coverity_config(args.coverity_config)
 
     if not args.compile_commands or not os.path.exists(args.compile_commands):
         logging.error(
@@ -287,13 +298,19 @@ def main():
     # Parse cppcheck output file
     filter_cppcheck_output(base_directory, cc_out_file, target_files_set)
 
-    rule_text: Optional[Dict[str, str]]
-    if os.access("misra_rules.json", os.R_OK):
-        with open("misra_rules.json", "r") as file:
-            misra_json = json.load(file)
-            rule_text = dict()
-            for rule in misra_json:
-                rule_text[rule["id"]] = rule
+    rule_text: Optional[Dict[str, str]] = None
+    if args.rule_text:
+        if not os.access(args.rule_text, os.R_OK):
+            logging.error(
+                "Rule text file: {} does not exist.".format(args.rule_text)
+            )
+            sys.exit(1)
+        else:
+            with open(args.rule_text, "r") as file:
+                misra_json = json.load(file)
+                rule_text = dict()
+                for rule in misra_json:
+                    rule_text[rule["id"]] = rule
 
     for error in cc_error_list:
         if error.file_path in target_files_set:
