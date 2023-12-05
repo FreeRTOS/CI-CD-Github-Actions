@@ -1,4 +1,4 @@
-name: 'cppcheck'
+name: 'misra-cppcheck'
 description: 'cppcheck MISRA CI Check'
 inputs:
   path:
