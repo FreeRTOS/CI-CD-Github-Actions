@@ -334,7 +334,7 @@ jobs:
               repository: FreeRTOS,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: ethernet, drivers, FreeRTOS/Demo
+              exclude-dirs: [ethernet, drivers, FreeRTOS/Demo]
             },
             {
               repository: FreeRTOS-Cellular-Interface,
