@@ -4,9 +4,9 @@
 name: Set up CBMC runner
 inputs:
   cbmc_version:
-    description: Version number or 'latest' for CBMC
+    description: Version number or '5.95.1' for CBMC
     required: true
-    default: latest
+    default: 5.95.1
   cbmc_viewer_version:
     description: Version number or 'latest' for CBMC Viewer
     required: true
