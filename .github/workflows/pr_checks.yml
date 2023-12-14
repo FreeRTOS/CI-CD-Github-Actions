@@ -419,4 +419,4 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-files: ${{ matrix.inputs.exclude-files }}
-          exclude-dirs: ethernet, drivers, FreeRTOS/Demo
+          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
