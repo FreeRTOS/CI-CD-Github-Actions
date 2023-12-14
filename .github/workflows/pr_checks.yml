@@ -28,7 +28,6 @@ jobs:
               run-link-verifier: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: portable
             },
             {
               repository: FreeRTOS-Plus-TCP,
@@ -324,6 +323,7 @@ jobs:
               repository: FreeRTOS-Kernel,
               org: FreeRTOS,
               branch: main,
+              exclude-dirs: portable
             },
             {
               repository: FreeRTOS-Plus-TCP,
