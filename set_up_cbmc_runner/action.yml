@@ -4,7 +4,7 @@
 name: Set up CBMC runner
 inputs:
   cbmc_version:
-    description: Version number or '5.95.1' for CBMC. NOTE: This is because of the fact that the 6.0.0 alpha release isn't meant for production use. When the full release happens this should be set back to using the 'latest' https://github.com/diffblue/cbmc/releases/tag/cbmc-6.0.0-alpha
+    description: Version number or '5.95.1' for CBMC. NOTE This is because of the fact that the 6.0.0 alpha release isn't meant for production use. When the full release happens this should be set back to using the 'latest' https://github.com/diffblue/cbmc/releases/tag/cbmc-6.0.0-alpha
     required: true
     default: 5.95.1
   cbmc_viewer_version:
