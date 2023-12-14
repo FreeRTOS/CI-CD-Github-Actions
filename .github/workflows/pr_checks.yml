@@ -28,6 +28,7 @@ jobs:
               run-link-verifier: true,
               run-complexity: false,
               run-doxygen: false,
+              exclude-dirs: portable
             },
             {
               repository: FreeRTOS-Plus-TCP,
