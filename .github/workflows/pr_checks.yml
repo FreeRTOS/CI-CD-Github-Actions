@@ -323,6 +323,7 @@ jobs:
               repository: FreeRTOS-Kernel,
               org: FreeRTOS,
               branch: main,
+              exclude-dirs: 'portable'
             },
             {
               repository: FreeRTOS-Plus-TCP,
@@ -333,6 +334,7 @@ jobs:
               repository: FreeRTOS,
               org: FreeRTOS,
               branch: main,
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
             },
             {
               repository: FreeRTOS-Cellular-Interface,
@@ -418,4 +420,4 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-files: ${{ matrix.inputs.exclude-files }}
-          exclude-dirs: ethernet, drivers, FreeRTOS/Demo
+          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
