@@ -38,7 +38,7 @@ def package_writer(output, packageName: str, version: str, url: str, license: st
     output.write('PackageLicenseDeclared: ' + license + '\n')
     output.write('PackageLicenseConcluded: '+ license + '\n')
     output.write('PackageLicenseInfoFromFiles: '+ file_licenses + '\n')
-    output.write('FilesAnalyzed: '+ str(file_analyzed) + '\n')
+    output.write('FilesAnalyzed: '+ str(file_analyzed).lower() + '\n')
     output.write('PackageVerificationCode: '+ ver_code + '\n')
     output.write('PackageCopyrightText: '+ copyright + '\n')
     output.write('PackageSummary: '+ summary + '\n')
