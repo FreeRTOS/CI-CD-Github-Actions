@@ -1,4 +1,5 @@
 import hashlib
+import re
 from datetime import datetime
 
 SPDX_VERSION = 'SPDX-2.2'
@@ -29,11 +30,31 @@ def file_writer(output, filepath: str, sha1: str, license: str, copyright='NOASS
     output.write('FileComment: '+ comment + '\n')
     output.write('\n')
 
+def cpe_writer(output, packageName: str, version: str):
+    #Example: release/v6.0.5 -> v6.0.5
+    version_stripped = re.sub(r'.*/', '', version)
+    #Example: v6.0.5 -> 6.0.5
+    version_stripped = re.sub('^v', '', version_stripped)
+
+    #Map package name to part:vendor:product
+    #  Note: All of these have existing CPEs in the NVD
+    specifier_lookup = {
+        'FreeRTOS-Kernel': 'o:amazon:freertos:',
+        'FreeRTOS-Plus-FAT': 'o:amazon:freertos\\+fat:',
+        'mbedtls': 'a:arm:mbed_tls:',
+        'llhttp': 'a:llhttp:llhttp:',
+    }
+
+    #If there are no existing CPEs in NVD -- nothing to do for now
+    if packageName in specifier_lookup:
+        output.write('ExternalRef: SECURITY cpe23Type cpe:2.3:' + specifier_lookup[packageName] + version_stripped + ':*:*:*:*:*:*:*' + '\n')
+
 def package_writer(output, packageName: str, version: str, url: str, license: str, ver_code: str, file_analyzed=True,
                    copyright='NOASSERTION', summary='NOASSERTION', description='NOASSERTION', file_licenses='NOASSERTION'):
     output.write('PackageName: '+ packageName + '\n')
     output.write('SPDXID: SPDXRef-Package-'+ packageName + '\n')
     output.write('PackageVersion: '+ version + '\n')
+    cpe_writer(output, packageName, version)
     output.write('PackageDownloadLocation: '+ url + '\n')
     output.write('PackageLicenseDeclared: ' + license + '\n')
     output.write('PackageLicenseConcluded: '+ license + '\n')
