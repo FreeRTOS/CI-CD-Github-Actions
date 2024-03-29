@@ -10,6 +10,13 @@ from sbom_utils import *
 REPO_PATH = ''
 SOURCE_PATH = ''
 
+def needs_licenseref(license):
+    #SPDX license list can be found at https://spdx.org/licenses/
+    not_in_spdx = ["OASIS-IPR"]
+    if license in not_in_spdx:
+        return True
+    return False
+
 def scan_dir():
     dependency_path = os.path.join(REPO_PATH, 'source/dependency')
     path_3rdparty = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
@@ -20,6 +27,7 @@ def scan_dir():
     total_file_list = []
     dependency_info = {}
     dependency_file_list = {}
+    licenseref_info = ""
     with open(manifest_path) as f:
         manifest = yaml.load(f, Loader=SafeLoader)
     root_license = manifest['license']
@@ -111,7 +119,17 @@ def scan_dir():
         if library_name == root_name:
             continue
         info = dependency_info[library_name]
-        package_writer(output, library_name, info['version'], info['repository']['url'], info['license'], package_hash(dependency_file_list[library_name]))
+
+        #Is this license part of the SPDX license list?  If not, then we need to use LicenseRef for proper SPDX validation
+        if needs_licenseref(info['license']):
+            license = "LicenseRef-" + info['license']
+            licenseref_info += "\nLicenseID: LicenseRef-%s\n" % info['license']
+            licenseref_info += "LicenseName: %s\n" % info['license']
+            licenseref_info += "ExtractedText: <text>%s</text>\n" % info['license']
+        else:
+            license = info['license']
+
+        package_writer(output, library_name, info['version'], info['repository']['url'], license, package_hash(dependency_file_list[library_name]))
         output.write(output_buffer[library_name].getvalue())
    
     #print relationships
@@ -119,6 +137,10 @@ def scan_dir():
         if library_name == root_name:
             continue
         output.write('Relationship: SPDXRef-Package-' + manifest['name'] + ' DEPENDS_ON SPDXRef-Package-' + library_name + '\n')
+
+    #print any LicenseRef info
+    if licenseref_info != "":
+        output.write(licenseref_info)
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='SBOM generator')
