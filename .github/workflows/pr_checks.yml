@@ -179,10 +179,16 @@ jobs:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-python@v3
 
-      - name: Install Common Tools
+      - env:
+          stepName: Install Common Tools
         shell: bash
         run: |
+          # ${{ env.stepName }}
+          echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          sudo apt-get -y update
           sudo apt-get install -y lcov sed build-essential cmake
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         uses: actions/checkout@v4.1.1
@@ -250,15 +256,13 @@ jobs:
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
         run: |
           # ${{ env.stepName }}
-          echo -e "::group::${{ env.bashInfo }} Install lcov ${{ env.bashEnd }}"
-          sudo apt-get update -y
-          sudo apt-get install -y lcov
-
-          echo -e "::endgroup::"
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
           cmake -S ./test -B build/ ${{ matrix.inputs.build-flags }} -DUNITTEST=ON
           make -C build/ all
+
+          echo -e "::endgroup::"
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
       - name: Test
         if: matrix.inputs.run-complexity && ( success() || failure() )
@@ -283,7 +287,7 @@ jobs:
           check_against: docs/doxygen/include/size_table.md
 
       - env:
-          stepName: Run Coverage ${{matrix.inputs.repository}}
+          stepName: Coverage ${{matrix.inputs.repository}}
         if: matrix.inputs.run-complexity && ( success() || failure() )
         shell: bash
         working-directory: repo/${{matrix.inputs.repository}}_Recursive
