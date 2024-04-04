@@ -95,6 +95,7 @@ jobs:
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              branch-coverage: 90,
             },
             {
               repository: coreSNTP,
@@ -308,6 +309,7 @@ jobs:
         uses: ./coverage-cop
         with:
           coverage-file: repo/${{matrix.inputs.repository}}_Recursive/build/coverage.info
+          branch-coverage-min: ${{ matrix.inputs.branch_coverage }}
 
   PR-uncrustify-checks:
     runs-on: ubuntu-20.04
