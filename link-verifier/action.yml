@@ -29,7 +29,7 @@ runs:
   using: "composite"
   steps:
   - name: Setup Python for link verifier action
-    uses: actions/setup-python@v3
+    uses: actions/setup-python@v5.1.0
     with:
       # Minimum version for urllib v2 (https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html)
       python-version: '>=3.7'

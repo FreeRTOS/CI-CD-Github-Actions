@@ -177,7 +177,7 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5.1.0
 
       - env:
           stepName: Install Common Tools
@@ -409,7 +409,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5.1.0
 
       - name: "Clone: ${{ matrix.inputs.repository }}"
         uses: actions/checkout@v4.1.1
