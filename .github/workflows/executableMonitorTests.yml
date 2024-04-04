@@ -23,7 +23,7 @@ jobs:
           os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
       - env:
           stepName: Install Windows Build tools
@@ -185,7 +185,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.1.1
     - env:
         stepName: Install Windows Build tools
       name: ${{ env.stepName }}

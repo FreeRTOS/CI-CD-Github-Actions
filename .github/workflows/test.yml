@@ -18,8 +18,8 @@ jobs:
   test-format-check:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           path: coreMQTT
@@ -34,8 +34,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -51,9 +51,9 @@ jobs:
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
       - uses: actions/setup-python@v3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
         with:
           repository: aws/aws-iot-device-sdk-embedded-C
           submodules: recursive
@@ -70,9 +70,9 @@ jobs:
   test-doxygen-non-zip-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -86,8 +86,8 @@ jobs:
   test-spell-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -101,9 +101,9 @@ jobs:
   test-spell-checker-find-mistake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -140,8 +140,8 @@ jobs:
   test-coverage-cop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/coreMQTT
           ref: main
@@ -251,7 +251,7 @@ jobs:
   test-memory-statistics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
       - name: Test memory statistics action
         uses: ./memory_statistics
@@ -264,7 +264,7 @@ jobs:
   test-link-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
       - name: Setup python environment
         uses: actions/setup-python@v3
@@ -319,13 +319,13 @@ jobs:
   test-manifest-verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
 
       - name: Setup python environment
         uses: actions/setup-python@v3
 
       - name: Checkout the FreeRTOS/FreeRTOS repository for testing action on.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           repository: FreeRTOS/FreeRTOS
           ref: '202107.00'
