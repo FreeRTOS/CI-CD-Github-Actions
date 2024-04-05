@@ -18,7 +18,7 @@ jobs:
   uncrustify-formatting-success-cases:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.1.1
 
     - env:
         stepName: "Functional | Success | Exclude Files and Dirs"
@@ -61,7 +61,7 @@ jobs:
   uncrustify-formatting-error-cases:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
       - env:
           stepName: "Functional | Failure | Whitespace, CRLF, and Format Failure"
         name: ${{ env.stepName }}
@@ -297,7 +297,7 @@ jobs:
   clang-formatting-success-cases:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.1.1
 
     - env:
         stepName: "Functional | Success | Exclude Files and Dirs"
@@ -340,7 +340,7 @@ jobs:
   clang-formatting-error-cases:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.1
       - env:
           stepName: "Functional | Failure | Whitespace, CRLF, and Format Failure"
         name: ${{ env.stepName }}
