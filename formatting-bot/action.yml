@@ -44,7 +44,7 @@ runs:
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - name: Checkout upstream repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.1
       with:
         repository: ${{ steps.pr-info.outputs.RemoteRepo }}
         ref: ${{ steps.pr-info.outputs.branchName }}

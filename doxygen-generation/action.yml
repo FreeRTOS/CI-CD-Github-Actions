@@ -32,7 +32,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout the repo for generating doxygen
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.1
       with:
         path: doxygen_source
         ref: ${{ inputs.ref }}
@@ -51,7 +51,7 @@ runs:
       run: ${{ inputs.generate_command }}
 
     - name: Checkout the repo for storing doxygen
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.1
       with:
         path: doxygen_store
 
