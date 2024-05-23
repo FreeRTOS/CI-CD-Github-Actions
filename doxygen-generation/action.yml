@@ -107,8 +107,9 @@ runs:
       run: |
         jq '.releases|=if index("${{ inputs.ref }}") then . else ["${{ inputs.ref }}"]+. end' _data/doc_config.json > tmp.json
         mv tmp.json _data/doc_config.json
-        rm -f latest
-        ln -s "${{ inputs.ref }}" latest
+        rm -rf latest
+        mkdir latest
+        cp -r "${{ inputs.ref }}"/* latest
 
     - name: Commit new doxygen
       working-directory: ./doxygen_store
