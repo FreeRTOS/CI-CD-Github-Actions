@@ -14,6 +14,9 @@ from multiprocessing import Pool
 import traceback
 from collections import defaultdict
 
+THIS_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+TRUSTED_CA_BUNDLE = os.path.join(THIS_FILE_PATH, 'trusted_certs', 'ca_bundle.crt')
+
 MARKDOWN_SEARCH_TERM = r"\.md$"
 # Regex to find a URL
 URL_SEARCH_TERM = r'(\b(https?)://[^\s\)\]\\"<>]+[^\s\)\.\]\\"<>])'
@@ -189,12 +192,61 @@ def create_html(markdown_file):
     )
     return process
 
+def access_url(url):
+    global http_headers
+    status = ''
+    is_broken = False
+    try_with_trusted_ca_bundle = False
+
+    try:
+        r = requests.head(url, allow_redirects=True, headers=http_headers)
+        # Some sites may return 404 for head but not get, e.g.
+        # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
+        if r.status_code >= 400:
+            # Allow redirects is already enabled by default for GET.
+            r = requests.get(url, headers=http_headers)
+        # It's likely we will run into GitHub's rate-limiting if there are many links.
+        if r.status_code == 429:
+            time.sleep(int(r.headers['Retry-After']))
+            r = requests.head(url, allow_redirects=True)
+        if r.status_code >= 400:
+            is_broken = True
+        status = r.status_code
+    except requests.exceptions.SSLError as e:
+        print(str(e))
+        try_with_trusted_ca_bundle = True
+    except Exception as e:
+        print(str(e))
+        is_broken = True
+        status = 'Error'
+
+    if try_with_trusted_ca_bundle == True:
+        try:
+            r = requests.head(url, allow_redirects=True, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
+            # Some sites may return 404 for head but not get, e.g.
+            # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
+            if r.status_code >= 400:
+                # Allow redirects is already enabled by default for GET.
+                r = requests.get(url, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
+            # It's likely we will run into GitHub's rate-limiting if there are many links.
+            if r.status_code == 429:
+                time.sleep(int(r.headers['Retry-After']))
+                r = requests.head(url, allow_redirects=True, verify=TRUSTED_CA_BUNDLE)
+            if r.status_code >= 400:
+                is_broken = True
+            status = r.status_code
+        except Exception as e:
+            print(str(e))
+            is_broken = True
+            status = 'Error'
+
+    return is_broken, status
+
 def test_url(url):
     """Tests a single url"""
     global use_gh_cache
     global main_repo_list
     global link_cache
-    global http_headers
     status = ''
     is_broken = False
     # Test if link was already tested before.
@@ -215,26 +267,8 @@ def test_url(url):
                 if int(issue_match.group(3)) in main_repo_list[repo_key][ISSUE_KEY]:
                     status = 'Good'
     if status != 'Good':
-        try:
-            r = requests.head(url, allow_redirects=True, headers=http_headers)
-            # Some sites may return 404 for head but not get, e.g.
-            # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
-            if r.status_code >= 400:
-                # Allow redirects is already enabled by default for GET.
-                r = requests.get(url, headers=http_headers)
-            # It's likely we will run into GitHub's rate-limiting if there are many links.
-            if r.status_code == 429:
-                time.sleep(int(r.headers['Retry-After']))
-                r = requests.head(url, allow_redirects=True)
-            if r.status_code >= 400:
-                is_broken = True
-            status = r.status_code
-        # requests.exceptions.ConnectionError if URL does not exist, but we capture
-        # all possible exceptions from trying the link to be safe.
-        except Exception as e:
-            print(str(e))
-            is_broken = True
-            status = 'Error'
+        is_broken, status = access_url(url)
+
     # Add result to cache so it won't be tested again.
     link_cache[url] = (is_broken, status)
     return is_broken, status
