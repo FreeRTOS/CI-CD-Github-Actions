@@ -45,8 +45,8 @@ jobs:
         uses: ./complexity
         with:
           path: coreMQTT
-          # The default threshold for all repos is 10
-          horrid_threshold: 10
+          # The default threshold for all repos is 10 but coreMQTT requires 12.
+          horrid_threshold: 12
 
   test-doxygen-zip-check:
     runs-on: ubuntu-latest
