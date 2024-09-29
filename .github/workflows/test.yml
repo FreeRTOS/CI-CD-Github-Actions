@@ -213,6 +213,7 @@ jobs:
           echo -e "::endgroup::"
 
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          declare -a INCLUDE=("\*")
           declare -a EXCLUDE=("\*test/\*")
           set +e
           lcov --rc lcov_branch_coverage=1 --remove build/coverage.info -o build/coverage.info
