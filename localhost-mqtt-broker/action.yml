@@ -2,6 +2,10 @@ name: 'Localhost MQTT Broker'
 description: 'Starts an MQTT Broker using Python. For TLS connections (including mutual authentication), connect to localhost:8883. For plaintext connections, connect to localhost:1883.'
 
 inputs:
+  host_address:
+    description: "Host address for echo server."
+    required: false
+    default: "127.0.0.1"
   root-ca-cert-path:
     description: "Root CA certificate file path."
     required: True
@@ -19,5 +23,12 @@ runs:
       run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
       shell: bash
     - name: Run localhost MQTT broker
-      run: python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
+      run: |
+        python3 --version
+        # Use the host_address input if provided, otherwise default to 127.0.0.1
+        HOST=${{ inputs.host_address }}
+        if [[ -z "$HOST" ]]; then
+          HOST="127.0.0.1"
+        fi
+        python3 $GITHUB_ACTION_PATH/localhost_mqtt_broker.py --host=$HOST --root-ca-cert-path=${{ inputs.root-ca-cert-path }} --server-priv-key-path=${{ inputs.server-priv-key-path }} --server-cert-path=${{ inputs.server-cert-path }} &
       shell: bash
