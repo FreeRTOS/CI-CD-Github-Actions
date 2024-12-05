@@ -17,6 +17,10 @@ async def echo_handler(reader, writer):
 
 if __name__ == '__main__':
   parser = ArgumentParser(description='Localhost Echo server.')
+  parser.add_argument('--host',
+                      type=str,
+                      required=True,
+                      help='Host address for the echo server.')
   parser.add_argument('--port_number',
                       type=int,
                       required=True,
@@ -28,7 +32,7 @@ if __name__ == '__main__':
   asyncio.set_event_loop(loop)
   factory = asyncio.start_server(
     echo_handler,
-    os.environ.get('HOST'),
+    os.environ.get('HOST', args.host),
     os.environ.get('PORT', args.port_number)
   )
   server = loop.run_until_complete(factory)
