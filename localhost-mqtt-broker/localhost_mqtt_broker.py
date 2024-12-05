@@ -12,6 +12,10 @@ LOCAL_HOST_IP = socket.gethostbyname("localhost")
 # Parse passed in credentials
 parser = ArgumentParser(description='Localhost MQTT broker.')
 
+parser.add_argument('--host',
+                    type=str,
+                    required=True,
+                    help='Host address for the echo server.')
 parser.add_argument('--root-ca-cert-path',
                     type=str,
                     required=True,
@@ -31,12 +35,12 @@ config = {
     "listeners": {
         "default": {
             "type": "tcp",
-            "bind": f"{LOCAL_HOST_IP}:1883",
+            "bind": f"{args.host}:1883",
             "max-connections": 1000,
         },
         "tls": {
             "type": "tcp",
-            "bind": f"{LOCAL_HOST_IP}:8883",
+            "bind": f"{args.host}:8883",
             "max-connections": 1000,
             "ssl": "on",
             "cafile": args.root_ca_cert_path,
