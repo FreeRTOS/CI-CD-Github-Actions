@@ -5,6 +5,7 @@ import sys
 import time
 import argparse
 import re
+import urllib
 import subprocess
 import requests
 import shutil
@@ -256,21 +257,15 @@ def access_url(url):
             is_broken = False
             status = http_status_code
 
-    # Use wget as a fallback.
+    # Use urllib as a fallback.
     if is_broken == True:
-        wget_cmd = f'wget --server-response --spider --quiet {url} 2>&1 | awk \'NR==1{{print $2}}\''
-        process = subprocess.run(
-            wget_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True,
-            encoding="utf-8",
-            universal_newlines=True
-        )
-        http_status_code = int(process.stdout)
-        if http_status_code == 200:
+        req = urllib.request.Request(url, headers=http_headers)
+        try:
+            response = urllib.request.urlopen(req)
             is_broken = False
-            status = http_status_code
+            status = response.getcode()
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            print(f"urllib: {url} error: {e}")
 
     return is_broken, status
 
