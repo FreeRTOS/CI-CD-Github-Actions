@@ -38,6 +38,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
+              exclude-dirs: 'source/portable/NetworkInterface/STM32'
             },
             {
               repository: FreeRTOS,
@@ -47,7 +48,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: ethernet, drivers, FreeRTOS/Demo,
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
             },
             {
               repository: backoffAlgorithm,
@@ -246,7 +247,7 @@ jobs:
         uses: ./spellings
         with:
           path: repo/${{ matrix.inputs.repository }}
-          exclude-dirs: ${{ matrix.inputs.repository }}
+          exclude-dirs: ${{ matrix.inputs.exclude-dirs }}
 
       - name: "Recursive Clone: ${{ matrix.inputs.repository }}"
         if: success() || failure()
@@ -349,6 +350,7 @@ jobs:
               repository: FreeRTOS-Plus-TCP,
               org: FreeRTOS,
               branch: main,
+              exclude-dirs: 'source/portable/NetworkInterface/STM32'
             },
             {
               repository: FreeRTOS,
