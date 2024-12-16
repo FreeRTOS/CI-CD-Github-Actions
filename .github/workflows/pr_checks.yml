@@ -38,7 +38,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: source/portable/NetworkInterface/STM32
+              exclude-dirs: 'source/portable/NetworkInterface/STM32'
             },
             {
               repository: FreeRTOS,
@@ -350,7 +350,7 @@ jobs:
               repository: FreeRTOS-Plus-TCP,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: source/portable/NetworkInterface/STM32
+              exclude-dirs: 'source/portable/NetworkInterface/STM32'
             },
             {
               repository: FreeRTOS,
