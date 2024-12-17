@@ -5,6 +5,7 @@ import sys
 import time
 import argparse
 import re
+import urllib
 import subprocess
 import requests
 import shutil
@@ -255,6 +256,16 @@ def access_url(url):
         if http_status_code == 200:
             is_broken = False
             status = http_status_code
+
+    # Use urllib as a fallback.
+    if is_broken == True:
+        req = urllib.request.Request(url, headers=http_headers)
+        try:
+            response = urllib.request.urlopen(req)
+            is_broken = False
+            status = response.getcode()
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            print(f"urllib: {url} error: {e}")
 
     return is_broken, status
 
