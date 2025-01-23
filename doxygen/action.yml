@@ -37,6 +37,8 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
         wget -qO- "${{ inputs.doxygen_link }}" | sudo tar --strip-components=1 -xz -C /usr/local
+        lsb_release -a
+        sudo apt-cache pkgnames libclang
         sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
         echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
