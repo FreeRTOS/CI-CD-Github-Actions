@@ -316,7 +316,7 @@ jobs:
       uses: ./clang-formatting
       with:
         path: clang-formatting/goodFiles
-        exclude-dirs: ",,,"
+        exclude-dirs: ""
         exclude-files: "errorFileInDirectory.h, formatErrorTest.h, errorFileInDirectory.c, formatErrorTest.c"
 
     - name: Remove Error Files at Top Directory
