@@ -80,7 +80,7 @@ runs:
     - name: Upload Failed Codecov HTML Report
       if: failure() && ( steps.action-check-line-and-branch-coverage.outcome == 'failure' )
       id: upload-codecov-report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: CodecovHTMLReport
         path: CodecovHTMLReport.zip
