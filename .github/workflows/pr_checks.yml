@@ -58,7 +58,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
             },
             {
@@ -69,7 +69,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
             },
             {
@@ -80,7 +80,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
             },
             {
@@ -91,7 +91,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -102,7 +102,7 @@ jobs:
               run-spelling-check: false,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               branch-coverage: 90,
             },
@@ -114,7 +114,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -125,7 +125,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -136,7 +136,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+              build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -146,7 +146,7 @@ jobs:
                run-link-verifier: true,
                run-spelling-check: true,
                run-complexity: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
                coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -157,7 +157,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: true,
                run-doxygen: true,
-               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
+               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
                coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
@@ -168,7 +168,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: false,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
                coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
             },
             {
@@ -179,7 +179,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: true,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
             },
             {
                repository: SigV4-for-AWS-IoT-embedded-sdk,
@@ -188,7 +188,7 @@ jobs:
                run-complexity: true,
                run-spelling-check: true,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
                coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
           ]
