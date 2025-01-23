@@ -94,7 +94,7 @@ runs:
         stepName: Upload zip artifact of CBMC proof results to GitHub Actions
       name: ${{ env.stepName }}
       if: ${{ env.REPO_VISIBILITY == 'public' }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.artifact.outputs.name }}
         path: ${{ steps.artifact.outputs.name }}.zip
