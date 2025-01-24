@@ -69,6 +69,7 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
+              coverage-skips: "*3rdparty*",
             },
             {
               repository: coreJSON,
@@ -88,7 +89,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
             },
             {
               repository: corePKCS11,
@@ -208,7 +209,7 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity, formatting
-          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota
+          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota, https://www.gnu.org/software/complexity/manual/complexity.html, https://www.u-blox.com/en/product/sara-r4-series
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-complexity && ( success() || failure() )
@@ -303,7 +304,12 @@ jobs:
           echo -e "::endgroup::"
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          if [[ "${{ matrix.inputs.coverage-skips }}" != "" ]]; then
+            declare -a EXCLUDE=( ${{ matrix.inputs.coverage-skips }} )
+            echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          else
+            lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+          fi
 
           echo -e "::endgroup::"
 
