@@ -59,7 +59,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
             },
             {
               repository: coreHTTP,
