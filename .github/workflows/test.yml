@@ -163,7 +163,7 @@ jobs:
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
-          -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG'
           make -C build/ all
           exitStatus=$?
           echo -e "::endgroup::"
@@ -214,7 +214,7 @@ jobs:
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
           declare -a EXCLUDE=("\*test/\*")
           set +e
-          lcov --directory build/ --base-directory build/ --initial --capture --rc lcov_branch_coverage=1 --output-file=build/base_coverage.info
+          lcov --directory build/ --base-directory build/ --initial --capture --rc lcov_branch_coverage=1 --exclude "*CMakeCCompilerId.c" --output-file=build/base_coverage.info
           lcov --base-directory build/ --directory build/ --add-tracefile build/base_coverage.info --add-tracefile build/second_coverage.info --output-file build/coverage.info --rc lcov_branch_coverage=1
           echo -e "::endgroup::"
 
