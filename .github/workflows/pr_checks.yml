@@ -69,7 +69,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
             },
             {
               repository: coreJSON,
@@ -80,7 +79,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
             },
             {
               repository: coreMQTT,
@@ -91,7 +89,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
               repository: corePKCS11,
@@ -102,7 +99,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
               branch-coverage: 90,
             },
             {
@@ -114,7 +110,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
               repository: FreeRTOS-Cellular-Interface,
@@ -125,7 +120,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
@@ -136,7 +130,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
                repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
@@ -146,7 +139,6 @@ jobs:
                run-spelling-check: true,
                run-complexity: true,
                build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
                repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
@@ -157,7 +149,6 @@ jobs:
                run-complexity: true,
                run-doxygen: true,
                build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
                repository: Jobs-for-AWS-IoT-embedded-sdk,
@@ -168,7 +159,6 @@ jobs:
                run-complexity: false,
                run-doxygen: true,
                build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
             },
             {
                repository: ota-for-AWS-IoT-embedded-sdk,
@@ -188,7 +178,6 @@ jobs:
                run-spelling-check: true,
                run-doxygen: true,
                build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
           ]
     steps:
@@ -314,12 +303,8 @@ jobs:
           echo -e "::endgroup::"
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          if [[ "${{ matrix.inputs.coverage-skips }}" != "" ]]; then
-            declare -a EXCLUDE=( ${{ matrix.inputs.coverage-skips }} )
-            echo ${EXCLUDE[@]} | xargs lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
-          else
-            lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
-          fi
+          lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
+
           echo -e "::endgroup::"
 
           lcov --rc lcov_branch_coverage=1 --summary build/coverage.info
