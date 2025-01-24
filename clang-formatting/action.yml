@@ -133,6 +133,7 @@ runs:
         name: formattingChanges
         path: ${{ inputs.path }}/formattingChanges.patch
         retention-days: 7
+        overwrite: true
 
     - env:
         bashPass: \033[32;1m
