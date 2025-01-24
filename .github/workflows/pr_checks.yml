@@ -58,8 +58,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
             },
             {
               repository: coreHTTP,
@@ -69,8 +68,8 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*3rdparty\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
+              coverage-skips: "*3rdparty*",
             },
             {
               repository: coreJSON,
@@ -80,8 +79,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON  -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
             },
             {
               repository: coreMQTT,
@@ -92,7 +90,6 @@ jobs:
               run-complexity: true,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
             },
             {
               repository: corePKCS11,
@@ -102,8 +99,7 @@ jobs:
               run-spelling-check: false,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DSYSTEM_TESTS=0 -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
               branch-coverage: 90,
             },
             {
@@ -114,8 +110,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG -Wno-error=pedantic -Wno-variadic-macros -DLOGGING_LEVEL_DEBUG=1',
             },
             {
               repository: FreeRTOS-Cellular-Interface,
@@ -125,8 +120,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
             },
             {
               repository: Device-Defender-for-AWS-IoT-embedded-sdk,
@@ -136,8 +130,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: true,
               run-doxygen: true,
-              build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
-              coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+              build-flags: -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
             },
             {
                repository: Device-Shadow-for-AWS-IoT-embedded-sdk,
@@ -146,8 +139,7 @@ jobs:
                run-link-verifier: true,
                run-spelling-check: true,
                run-complexity: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
             },
             {
                repository: Fleet-Provisioning-for-AWS-IoT-embedded-sdk,
@@ -157,8 +149,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: true,
                run-doxygen: true,
-               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+               build-flags:  -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror -DNDEBUG',
             },
             {
                repository: Jobs-for-AWS-IoT-embedded-sdk,
@@ -168,8 +159,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: false,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*" "\*source\*"',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -Werror',
             },
             {
                repository: ota-for-AWS-IoT-embedded-sdk,
@@ -179,7 +169,7 @@ jobs:
                run-spelling-check: true,
                run-complexity: true,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG',
             },
             {
                repository: SigV4-for-AWS-IoT-embedded-sdk,
@@ -188,8 +178,7 @@ jobs:
                run-complexity: true,
                run-spelling-check: true,
                run-doxygen: true,
-               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
-               coverage-skips: '"\*test\*" "\*CMakeCCompilerId\*" "\*mocks\*"',
+               build-flags: -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='-Wall -Wextra -DNDEBUG -DLOGGING_LEVEL_DEBUG=1',
             },
           ]
     steps:
@@ -220,7 +209,7 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity, formatting
-          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota
+          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota, https://www.gnu.org/software/complexity/manual/complexity.html, https://www.u-blox.com/en/product/sara-r4-series
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-complexity && ( success() || failure() )
@@ -321,9 +310,10 @@ jobs:
           else
             lcov --rc lcov_branch_coverage=1 -r build/coverage.info -o build/coverage.info
           fi
+
           echo -e "::endgroup::"
 
-          lcov --rc lcov_branch_coverage=1 --list build/coverage.info
+          lcov --rc lcov_branch_coverage=1 --summary build/coverage.info
 
       - name: Test coverage cop action ${{matrix.inputs.repository}}
         if: matrix.inputs.run-complexity && ( success() || failure() )

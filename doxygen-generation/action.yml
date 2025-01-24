@@ -26,7 +26,7 @@ inputs:
   doxygen_dependencies:
     description: 'Space-separated dependencies for doxygen.'
     required: false
-    default: libclang-11-dev libclang-cpp11 graphviz
+    default: libclang-18-dev libclang-cpp18 graphviz
 
 runs:
   using: "composite"

@@ -46,9 +46,9 @@ runs:
         # TODO: The way it grabs the line/branch coverage is a little complicated
         # I'd like to see if this can be done simpler.
         echo -e " ${{ env.bashInfo }} Received LCov Report: ${{ inputs.coverage-file }} ${{ env.bashEnd}}"
-        lcov --list --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
-        LINE_COVERAGE=$(lcov --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 2 | sed -n "s/\([^%]*\)%.*/\1/p")
-        BRANCH_COVERAGE=$(lcov --rc lcov_branch_coverage=1 --list ${{ inputs.coverage-file }} | tail -n 1 | cut -d '|' -f 4 | sed -n "s/\([^%]*\)%.*/\1/p")
+        lcov --summary --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }}
+        LINE_COVERAGE=$(lcov --summary --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }} | grep -E line.*: | cut -d ':' -f 2 | cut -d '%' -f 1 | xargs)
+        BRANCH_COVERAGE=$(lcov --summary --rc lcov_branch_coverage=1 ${{ inputs.coverage-file }} | grep -E branches.*: | cut -d ':' -f 2 | cut -d '%' -f 1 | xargs)
         RESULT=0
 
         # Check Line Coverage
@@ -80,7 +80,7 @@ runs:
     - name: Upload Failed Codecov HTML Report
       if: failure() && ( steps.action-check-line-and-branch-coverage.outcome == 'failure' )
       id: upload-codecov-report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: CodecovHTMLReport
         path: CodecovHTMLReport.zip
