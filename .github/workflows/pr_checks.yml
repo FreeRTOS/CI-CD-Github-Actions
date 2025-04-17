@@ -38,7 +38,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: 'source/portable/NetworkInterface/STM32'
+              exclude-dirs: 'source/portable/NetworkInterface/STM32, test/Coverity/ConfigFiles'
             },
             {
               repository: FreeRTOS,
@@ -48,7 +48,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo, FreeRTOS/Test/CBMC/include'
             },
             {
               repository: backoffAlgorithm,
