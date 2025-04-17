@@ -340,13 +340,13 @@ jobs:
               repository: FreeRTOS-Plus-TCP,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: 'source/portable/NetworkInterface/STM32'
+              exclude-dirs: 'source/portable/NetworkInterface/STM32, test/Coverity/ConfigFiles'
             },
             {
               repository: FreeRTOS,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo, FreeRTOS/Test/CBMC/include'
             },
             {
               repository: FreeRTOS-Cellular-Interface,
