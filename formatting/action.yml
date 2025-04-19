@@ -33,7 +33,7 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-        sudo apt-get install cmake build-essentials fd-find dos2unix
+        sudo apt-get install cmake build-essential fd-find dos2unix
         echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
         export PATH="$PATH:$GITHUB_ACTION_PATH"
 
