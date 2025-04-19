@@ -45,7 +45,7 @@ runs:
 
     - name: Cache uncrustify
       uses: actions/cache@v4
-      id: cache-uncrustify-0.69.0
+      id: cache-uncrustify_0_69_0
       with:
         path: |
           ~/uncrustify
