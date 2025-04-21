@@ -73,6 +73,10 @@ runs:
         mkdir ~/uncrustify
         cd build && cp uncrustify ~/uncrustify/
 
+        # Delete uncrustify source after installing.
+        cd ../..
+        rm -rf uncrustify*
+
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
