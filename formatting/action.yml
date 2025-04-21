@@ -70,7 +70,7 @@ runs:
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build -- -j$(nproc) -s
 
-        mkdir ~/uncrustify
+        mkdir -p ~/uncrustify
         cd build && cp uncrustify ~/uncrustify/
 
         # Delete uncrustify source after installing.
