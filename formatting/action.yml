@@ -45,11 +45,11 @@ runs:
 
     - name: Cache uncrustify
       uses: actions/cache@v4
-      id: cache-uncrustify_0_69_0
+      id: cache-uncrustify
       with:
         path: |
           ~/uncrustify
-        key: ${{ runner.os }}-uncrustify-0.69.0
+        key: ${{ runner.os }}-uncrustify
 
     - env:
         bashPass: \033[32;1mPASSED -
@@ -59,7 +59,7 @@ runs:
         stepName: Build uncrustify version 0.69.0
       name: ${{ env.stepName }}
       shell: bash
-      if: steps.cache-uncrustify_0_69_0.outputs.cache-hit != 'true'
+      if: steps.cache-uncrustify.outputs.cache-hit != 'true'
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
@@ -70,7 +70,7 @@ runs:
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build -- -j$(nproc) -s
 
-        mkdir ~/uncrustify
+        mkdir -p ~/uncrustify
         cd build && cp uncrustify ~/uncrustify/
 
         # Delete uncrustify source after installing.
