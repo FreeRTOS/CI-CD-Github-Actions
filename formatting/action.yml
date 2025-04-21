@@ -125,7 +125,7 @@ runs:
         # Then run uncrustify with the common config file.
 
         echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec ~/uncrustify/uncrustify --no-backup --replace --if-changed -c https://github.com/FreeRTOS/CI-CD-Github-Actions/blob/main/formatting/uncrustify.cfg -l C ${{ env.bashEnd }}"
-        fdfind -e c -e h ${args} --exec ~/uncrustify/uncrustify -q --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
+        fdfind -e c -e h ${args} --exec ~/uncrustify/uncrustify --no-backup --replace --if-changed -c $GITHUB_ACTION_PATH/uncrustify.cfg -l C
 
         # Replace all trailing whitespace, exclude photo and binary files
         echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
