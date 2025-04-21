@@ -73,7 +73,6 @@ runs:
         mkdir ~/uncrustify
         cd build && cp uncrustify ~/uncrustify/
 
-        echo -e "${{ env.bashInfo }} Using Uncrustify Version: "$(~/uncrustify/uncrustify --version)" ${{ env.bashEnd }}"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -89,6 +88,8 @@ runs:
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+        echo -e "${{ env.bashInfo }} Using Uncrustify Version: "$(~/uncrustify/uncrustify --version)" ${{ env.bashEnd }}"
 
         exitCode=0
         export PATH="$PATH:$GITHUB_ACTION_PATH"
