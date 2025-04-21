@@ -323,7 +323,7 @@ jobs:
           branch-coverage-min: ${{ matrix.inputs.branch_coverage }}
 
   PR-uncrustify-checks:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ github.event.pull_request }} || ${{ github.event.workflow }}
     strategy:
       fail-fast: false
