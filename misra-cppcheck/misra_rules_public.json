@@ -1,0 +1,1386 @@
+[
+    {
+        "id": "misra-c2012-d1.1",
+        "type": "Directive",
+        "section": "1",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_01_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d2.1",
+        "type": "Directive",
+        "section": "2",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_02_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d3.1",
+        "type": "Directive",
+        "section": "3",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_03_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.1",
+        "type": "Directive",
+        "section": "4",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.2",
+        "type": "Directive",
+        "section": "4",
+        "item": "2",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_02.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.3",
+        "type": "Directive",
+        "section": "4",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_03.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.4",
+        "type": "Directive",
+        "section": "4",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S125/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.5",
+        "type": "Directive",
+        "section": "4",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S800/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.6",
+        "type": "Directive",
+        "section": "4",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_06.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.7",
+        "type": "Directive",
+        "section": "4",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S899/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.8",
+        "type": "Directive",
+        "section": "4",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.9",
+        "type": "Directive",
+        "section": "4",
+        "item": "9",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S960/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.10",
+        "type": "Directive",
+        "section": "4",
+        "item": "10",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S973/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.11",
+        "type": "Directive",
+        "section": "4",
+        "item": "11",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_11.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.12",
+        "type": "Directive",
+        "section": "4",
+        "item": "12",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_12.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-d4.13",
+        "type": "Directive",
+        "section": "4",
+        "item": "13",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_13.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-d4.14",
+        "type": "Directive",
+        "section": "4",
+        "item": "14",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/D_04_14.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-1.1",
+        "type": "Rule",
+        "section": "1",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S779/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-1.2",
+        "type": "Rule",
+        "section": "1",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S780/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-1.3",
+        "type": "Rule",
+        "section": "1",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_01_03.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-2.1",
+        "type": "Rule",
+        "section": "2",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1763/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-2.2",
+        "type": "Rule",
+        "section": "2",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S901/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-2.3",
+        "type": "Rule",
+        "section": "2",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_02_03.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-2.4",
+        "type": "Rule",
+        "section": "2",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_02_04.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-2.5",
+        "type": "Rule",
+        "section": "2",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_02_05.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-2.6",
+        "type": "Rule",
+        "section": "2",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1065/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-2.7",
+        "type": "Rule",
+        "section": "2",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1172/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-3.1",
+        "type": "Rule",
+        "section": "3",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1103/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-3.2",
+        "type": "Rule",
+        "section": "3",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2323/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-4.1",
+        "type": "Rule",
+        "section": "4",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2335/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-4.2",
+        "type": "Rule",
+        "section": "4",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S797/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-5.1",
+        "type": "Rule",
+        "section": "5",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S799/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.2",
+        "type": "Rule",
+        "section": "5",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1117/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.3",
+        "type": "Rule",
+        "section": "5",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1117/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.4",
+        "type": "Rule",
+        "section": "5",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.5",
+        "type": "Rule",
+        "section": "5",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_05.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.6",
+        "type": "Rule",
+        "section": "5",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_06.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.7",
+        "type": "Rule",
+        "section": "5",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_07.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.8",
+        "type": "Rule",
+        "section": "5",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-5.9",
+        "type": "Rule",
+        "section": "5",
+        "item": "89",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_05_09.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-6.1",
+        "type": "Rule",
+        "section": "6",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S814/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-6.2",
+        "type": "Rule",
+        "section": "6",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2216/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-7.1",
+        "type": "Rule",
+        "section": "7",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1314/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-7.2",
+        "type": "Rule",
+        "section": "7",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S854/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-7.3",
+        "type": "Rule",
+        "section": "7",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S818/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-7.4",
+        "type": "Rule",
+        "section": "7",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_07_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.1",
+        "type": "Rule",
+        "section": "8",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S820/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.2",
+        "type": "Rule",
+        "section": "8",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S926/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.3",
+        "type": "Rule",
+        "section": "8",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S927/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.4",
+        "type": "Rule",
+        "section": "8",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_08_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.5",
+        "type": "Rule",
+        "section": "8",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S823/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.6",
+        "type": "Rule",
+        "section": "8",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S828/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.7",
+        "type": "Rule",
+        "section": "8",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_08_07.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-8.8",
+        "type": "Rule",
+        "section": "8",
+        "item": "8",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S833/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.9",
+        "type": "Rule",
+        "section": "8",
+        "item": "9",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S825/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-8.10",
+        "type": "Rule",
+        "section": "8",
+        "item": "10",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_08_10.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.11",
+        "type": "Rule",
+        "section": "8",
+        "item": "11",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S834/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-8.12",
+        "type": "Rule",
+        "section": "8",
+        "item": "12",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2747/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-8.13",
+        "type": "Rule",
+        "section": "8",
+        "item": "13",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S5350/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-8.14",
+        "type": "Rule",
+        "section": "8",
+        "item": "14",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1836/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-9.1",
+        "type": "Rule",
+        "section": "9",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_09_01.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-9.2",
+        "type": "Rule",
+        "section": "9",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S835/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-9.3",
+        "type": "Rule",
+        "section": "9",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S835/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-9.4",
+        "type": "Rule",
+        "section": "9",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_09_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-9.5",
+        "type": "Rule",
+        "section": "9",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S834/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.1",
+        "type": "Rule",
+        "section": "10",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S874/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.2",
+        "type": "Rule",
+        "section": "10",
+        "item": "2",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_02.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.3",
+        "type": "Rule",
+        "section": "10",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_03.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.4",
+        "type": "Rule",
+        "section": "10",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.5",
+        "type": "Rule",
+        "section": "10",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_05.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-10.6",
+        "type": "Rule",
+        "section": "10",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_06.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.7",
+        "type": "Rule",
+        "section": "10",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_07.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-10.8",
+        "type": "Rule",
+        "section": "10",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_10_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.1",
+        "type": "Rule",
+        "section": "11",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.2",
+        "type": "Rule",
+        "section": "11",
+        "item": "2",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_02.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.3",
+        "type": "Rule",
+        "section": "11",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S856/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.4",
+        "type": "Rule",
+        "section": "11",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1767/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-11.5",
+        "type": "Rule",
+        "section": "11",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_05.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-11.6",
+        "type": "Rule",
+        "section": "11",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_06.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.7",
+        "type": "Rule",
+        "section": "11",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_07.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.8",
+        "type": "Rule",
+        "section": "11",
+        "item": "8",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S859/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-11.9",
+        "type": "Rule",
+        "section": "11",
+        "item": "9",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_11_09.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-12.1",
+        "type": "Rule",
+        "section": "12",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1987/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-12.2",
+        "type": "Rule",
+        "section": "12",
+        "item": "2",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_12_02.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-12.3",
+        "type": "Rule",
+        "section": "12",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S878/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-12.4",
+        "type": "Rule",
+        "section": "12",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_12_04.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-12.5",
+        "type": "Rule",
+        "section": "12",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_12_05.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-13.1",
+        "type": "Rule",
+        "section": "13",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_13_01_1.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-13.2",
+        "type": "Rule",
+        "section": "13",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1987/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-13.3",
+        "type": "Rule",
+        "section": "13",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1987/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-13.4",
+        "type": "Rule",
+        "section": "13",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1121/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-13.5",
+        "type": "Rule",
+        "section": "13",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S912/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-13.6",
+        "type": "Rule",
+        "section": "13",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S922/cfamilyy",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-14.1",
+        "type": "Rule",
+        "section": "14",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2193/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-14.2",
+        "type": "Rule",
+        "section": "14",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S886/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-14.3",
+        "type": "Rule",
+        "section": "14",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2583/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-14.4",
+        "type": "Rule",
+        "section": "14",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_14_04.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-15.1",
+        "type": "Rule",
+        "section": "15",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S907/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-15.2",
+        "type": "Rule",
+        "section": "15",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S999/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-15.3",
+        "type": "Rule",
+        "section": "15",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1909/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-15.4",
+        "type": "Rule",
+        "section": "15",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S924/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-15.5",
+        "type": "Rule",
+        "section": "15",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1005/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-15.6",
+        "type": "Rule",
+        "section": "15",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S121/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-15.7",
+        "type": "Rule",
+        "section": "15",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S126/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.1",
+        "type": "Rule",
+        "section": "16",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1219/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.2",
+        "type": "Rule",
+        "section": "16",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S916/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.3",
+        "type": "Rule",
+        "section": "16",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S128/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.4",
+        "type": "Rule",
+        "section": "16",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S131/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.5",
+        "type": "Rule",
+        "section": "16",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S131/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.6",
+        "type": "Rule",
+        "section": "16",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1301/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-16.7",
+        "type": "Rule",
+        "section": "16",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S920/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-17.1",
+        "type": "Rule",
+        "section": "17",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_17_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-17.2",
+        "type": "Rule",
+        "section": "17",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S925/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-17.3",
+        "type": "Rule",
+        "section": "17",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S819/cfamily",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-17.4",
+        "type": "Rule",
+        "section": "17",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S935/cfamily",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-17.5",
+        "type": "Rule",
+        "section": "17",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_17_05.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-17.6",
+        "type": "Rule",
+        "section": "17",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1831/cfamily",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-17.7",
+        "type": "Rule",
+        "section": "17",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2201/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-17.8",
+        "type": "Rule",
+        "section": "17",
+        "item": "8",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1226/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-18.1",
+        "type": "Rule",
+        "section": "18",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S941/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-18.2",
+        "type": "Rule",
+        "section": "18",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S941/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-18.3",
+        "type": "Rule",
+        "section": "18",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_18_03.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-18.4",
+        "type": "Rule",
+        "section": "18",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S941/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-18.5",
+        "type": "Rule",
+        "section": "18",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S943/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-18.6",
+        "type": "Rule",
+        "section": "18",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S946/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-18.7",
+        "type": "Rule",
+        "section": "18",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2324/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-18.8",
+        "type": "Rule",
+        "section": "18",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_18_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-19.1",
+        "type": "Rule",
+        "section": "19",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_19_01.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-19.2",
+        "type": "Rule",
+        "section": "19",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S953/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-20.1",
+        "type": "Rule",
+        "section": "20",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S954/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-20.2",
+        "type": "Rule",
+        "section": "20",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S955/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.3",
+        "type": "Rule",
+        "section": "20",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S956/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.4",
+        "type": "Rule",
+        "section": "20",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S5266/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.5",
+        "type": "Rule",
+        "section": "20",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S959/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-20.6",
+        "type": "Rule",
+        "section": "20",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_20_06.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.7",
+        "type": "Rule",
+        "section": "20",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_20_07.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.8",
+        "type": "Rule",
+        "section": "20",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_20_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.9",
+        "type": "Rule",
+        "section": "20",
+        "item": "9",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S966/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.10",
+        "type": "Rule",
+        "section": "20",
+        "item": "10",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S968/cfamily",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-20.11",
+        "type": "Rule",
+        "section": "20",
+        "item": "11",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S967/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.12",
+        "type": "Rule",
+        "section": "20",
+        "item": "12",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_20_12.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.13",
+        "type": "Rule",
+        "section": "20",
+        "item": "13",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S977/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-20.14",
+        "type": "Rule",
+        "section": "20",
+        "item": "14",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S970/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.1",
+        "type": "Rule",
+        "section": "21",
+        "item": "1",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S1761/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.2",
+        "type": "Rule",
+        "section": "21",
+        "item": "2",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S978/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.3",
+        "type": "Rule",
+        "section": "21",
+        "item": "3",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S984/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.4",
+        "type": "Rule",
+        "section": "21",
+        "item": "4",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S982/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.5",
+        "type": "Rule",
+        "section": "21",
+        "item": "5",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S987/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.6",
+        "type": "Rule",
+        "section": "21",
+        "item": "6",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S988/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.7",
+        "type": "Rule",
+        "section": "21",
+        "item": "7",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S989/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.8",
+        "type": "Rule",
+        "section": "21",
+        "item": "8",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S990/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.9",
+        "type": "Rule",
+        "section": "21",
+        "item": "9",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S2393/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.10",
+        "type": "Rule",
+        "section": "21",
+        "item": "10",
+        "description": "https://sonarsource.github.io/rspec/#/rspec/S991/cfamily",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.11",
+        "type": "Rule",
+        "section": "21",
+        "item": "11",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_11.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.12",
+        "type": "Rule",
+        "section": "21",
+        "item": "12",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_12.c",
+        "category": "Advisory"
+    },
+    {
+        "id": "misra-c2012-21.13",
+        "type": "Rule",
+        "section": "21",
+        "item": "13",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_13.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-21.14",
+        "type": "Rule",
+        "section": "21",
+        "item": "14",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_14.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.15",
+        "type": "Rule",
+        "section": "21",
+        "item": "15",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_15.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.16",
+        "type": "Rule",
+        "section": "21",
+        "item": "16",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_16.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-21.17",
+        "type": "Rule",
+        "section": "21",
+        "item": "17",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_17.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-21.18",
+        "type": "Rule",
+        "section": "21",
+        "item": "18",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_18.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-21.19",
+        "type": "Rule",
+        "section": "21",
+        "item": "19",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_19.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-21.20",
+        "type": "Rule",
+        "section": "21",
+        "item": "20",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_21_20.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-22.1",
+        "type": "Rule",
+        "section": "22",
+        "item": "1",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_01.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-22.2",
+        "type": "Rule",
+        "section": "22",
+        "item": "2",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_02.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-22.3",
+        "type": "Rule",
+        "section": "22",
+        "item": "3",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_03.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-22.4",
+        "type": "Rule",
+        "section": "22",
+        "item": "4",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_04.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-22.5",
+        "type": "Rule",
+        "section": "22",
+        "item": "5",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_05.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-22.6",
+        "type": "Rule",
+        "section": "22",
+        "item": "6",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_06.c",
+        "category": "Mandatory"
+    },
+    {
+        "id": "misra-c2012-22.7",
+        "type": "Rule",
+        "section": "22",
+        "item": "7",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_07.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-22.8",
+        "type": "Rule",
+        "section": "22",
+        "item": "8",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_08.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-22.9",
+        "type": "Rule",
+        "section": "22",
+        "item": "9",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_09.c",
+        "category": "Required"
+    },
+    {
+        "id": "misra-c2012-22.10",
+        "type": "Rule",
+        "section": "22",
+        "item": "10",
+        "description": "https://gitlab.com/MISRA/MISRA-C/MISRA-C-2012/Example-Suite/-/raw/master/R_22_10.c",
+        "category": "Required"
+    }
+]
