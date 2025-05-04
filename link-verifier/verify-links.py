@@ -193,6 +193,27 @@ def create_html(markdown_file):
     )
     return process
 
+def issue_request(method, url, **kwargs):
+    retries = 0
+
+    while retries < 3:
+        try:
+            r = method(url, **kwargs)
+            if r.status_code == 429:
+                retry_after = int(r.headers.get("Retry-After", 60))
+                time.sleep(retry_after)
+                retries += 1
+            else:
+                return r
+        except Exception as e:
+            if e.code == 429:
+                retry_after = int(e.headers.get("Retry-After", 60))
+                time.sleep(retry_after)
+                retries += 1
+            else:
+                raise e
+    raise Exception("Max retries exceeded")
+
 def access_url(url):
     global http_headers
     status = ''
@@ -200,16 +221,13 @@ def access_url(url):
     try_with_trusted_ca_bundle = False
 
     try:
-        r = requests.head(url, allow_redirects=True, headers=http_headers)
+        r = issue_request(requests.head, url, allow_redirects=True, headers=http_headers)
         # Some sites may return 404 for head but not get, e.g.
         # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
         if r.status_code >= 400:
             # Allow redirects is already enabled by default for GET.
-            r = requests.get(url, headers=http_headers)
-        # It's likely we will run into GitHub's rate-limiting if there are many links.
-        if r.status_code == 429:
-            time.sleep(int(r.headers['Retry-After']))
-            r = requests.head(url, allow_redirects=True)
+            r = issue_request(requests.get, url, headers=http_headers)
+
         if r.status_code >= 400:
             is_broken = True
         status = r.status_code
@@ -223,16 +241,13 @@ def access_url(url):
 
     if try_with_trusted_ca_bundle == True:
         try:
-            r = requests.head(url, allow_redirects=True, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
+            r = issue_request(requests.head, url, allow_redirects=True, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
             # Some sites may return 404 for head but not get, e.g.
             # https://tls.mbed.org/kb/development/thread-safety-and-multi-threading
             if r.status_code >= 400:
                 # Allow redirects is already enabled by default for GET.
-                r = requests.get(url, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
-            # It's likely we will run into GitHub's rate-limiting if there are many links.
-            if r.status_code == 429:
-                time.sleep(int(r.headers['Retry-After']))
-                r = requests.head(url, allow_redirects=True, verify=TRUSTED_CA_BUNDLE)
+                r = issue_request(requests.get, url, headers=http_headers, verify=TRUSTED_CA_BUNDLE)
+
             if r.status_code >= 400:
                 is_broken = True
             status = r.status_code
