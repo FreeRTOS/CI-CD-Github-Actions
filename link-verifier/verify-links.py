@@ -197,21 +197,13 @@ def issue_request(method, url, **kwargs):
     retries = 0
 
     while retries < 3:
-        try:
-            r = method(url, **kwargs)
-            if r.status_code == 429:
-                retry_after = int(r.headers.get("Retry-After", 60))
-                time.sleep(retry_after)
-                retries += 1
-            else:
-                return r
-        except Exception as e:
-            if e.code == 429:
-                retry_after = int(e.headers.get("Retry-After", 60))
-                time.sleep(retry_after)
-                retries += 1
-            else:
-                raise e
+        r = method(url, **kwargs)
+        if r.status_code == 429:
+            retry_after = int(r.headers.get("Retry-After", 60))
+            time.sleep(retry_after)
+            retries += 1
+        else:
+            return r
     raise Exception("Max retries exceeded")
 
 def access_url(url):
