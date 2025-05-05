@@ -48,7 +48,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
-              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo, WinPCap, libslirp-version.h, CMSIS, Trace_Recorder_Configuration, ThirdParty, conssole.h, syscalls.c, Demo_IP_Protocols, Reliance-Edge'
             },
             {
               repository: backoffAlgorithm,
@@ -346,7 +346,7 @@ jobs:
               repository: FreeRTOS,
               org: FreeRTOS,
               branch: main,
-              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo'
+              exclude-dirs: 'ethernet, drivers, FreeRTOS/Demo, WinPCap, libslirp-version.h, CMSIS, Trace_Recorder_Configuration, ThirdParty, conssole.h, syscalls.c, Demo_IP_Protocols, Reliance-Edge'
             },
             {
               repository: FreeRTOS-Cellular-Interface,
