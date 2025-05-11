@@ -64,7 +64,7 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-        wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz
+        wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz -O uncrustify-0.69.0.tar.gz
         tar xzvf uncrustify-0.69.0.tar.gz && cd uncrustify-uncrustify-0.69.0
 
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
