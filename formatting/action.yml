@@ -64,20 +64,31 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
+        sudo apt install sha256sum
+
         wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz -O uncrustify-0.69.0.tar.gz
-        tar xzvf uncrustify-0.69.0.tar.gz && cd uncrustify-uncrustify-0.69.0
 
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-        cmake --build build -- -j$(nproc) -s
+        EXPECTED_SHA256="1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        GENERATED_SHA256=$(sha256sum uncrustify-0.69.0.tar.gz | awk '{print $1}')
 
-        mkdir -p ~/uncrustify
-        cd build && cp uncrustify ~/uncrustify/
+        if [ "$GENERATED_SHA256" = "$EXPECTED_SHA256" ]; then
+          tar xzvf uncrustify-0.69.0.tar.gz && cd uncrustify-uncrustify-0.69.0
 
-        # Delete uncrustify source after installing.
-        cd ../..
-        rm -rf uncrustify*
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -- -j$(nproc) -s
 
-        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          mkdir -p ~/uncrustify
+          cd build && cp uncrustify ~/uncrustify/
+
+          # Delete uncrustify source after installing.
+          cd ../..
+          rm -rf uncrustify*
+
+          echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        else
+          echo -e "${{ env.bashFail }} SHA256 checksum verification failed for uncrustify-0.69.0.tar.gz ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+        fi
 
     - env:
         bashPass: \033[32;1mPASSED -
