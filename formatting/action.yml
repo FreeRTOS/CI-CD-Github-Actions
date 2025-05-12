@@ -64,8 +64,6 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-        sudo apt install sha256sum
-
         wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz -O uncrustify-0.69.0.tar.gz
 
         EXPECTED_SHA256="1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
