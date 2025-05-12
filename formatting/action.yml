@@ -59,7 +59,7 @@ runs:
         stepName: Build uncrustify version 0.69.0
       name: ${{ env.stepName }}
       shell: bash
-      if: steps.cache-uncrustify.outputs.cache-hit == 'true'
+      if: steps.cache-uncrustify.outputs.cache-hit != 'true'
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
