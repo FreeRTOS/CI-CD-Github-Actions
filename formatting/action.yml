@@ -66,7 +66,7 @@ runs:
 
         wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz -O uncrustify-0.69.0.tar.gz
 
-        EXPECTED_SHA256="1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        EXPECTED_SHA256="33bd97a07f7c4bd114874f73171aca220bf05c17108f8505a117b97374a347b6"
         GENERATED_SHA256=$(sha256sum uncrustify-0.69.0.tar.gz | awk '{print $1}')
 
         if [ "$GENERATED_SHA256" = "$EXPECTED_SHA256" ]; then
