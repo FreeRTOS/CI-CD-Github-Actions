@@ -86,6 +86,7 @@ runs:
         else
           echo -e "${{ env.bashFail }} SHA256 checksum verification failed for uncrustify-0.69.0.tar.gz ${{ env.bashEnd }}"
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit -1
         fi
 
     - env:
