@@ -67,10 +67,10 @@ runs:
       run: |
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
-        curl -o cbmc.deb -L \
+        curl -o "$HOME/cbmc.deb" -L \
           https://github.com/diffblue/cbmc/releases/download/cbmc-${{ inputs.cbmc_version }}/ubuntu-20.04-cbmc-${{ inputs.cbmc_version }}-Linux.deb
-        sudo dpkg -i ./cbmc.deb
-        rm ./cbmc.deb
+        sudo dpkg -i "$HOME/cbmc.deb"
+        rm "$HOME/cbmc.deb"
         echo -e "::endgroup::"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 

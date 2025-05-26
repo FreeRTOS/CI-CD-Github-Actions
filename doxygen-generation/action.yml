@@ -40,9 +40,9 @@ runs:
     - name: Install Doxygen
       shell: bash
       run: |
-        wget -O doxygen.tgz "${{ inputs.doxygen_link }}"
+        wget -O "$HOME/doxygen.tgz" "${{ inputs.doxygen_link }}"
         if [ $? -ne 0 ]; then exit 1; fi
-        sudo tar --strip-components=1 -xzf doxygen.tgz -C /usr/local
+        sudo tar --strip-components=1 -xzf "$HOME/doxygen.tgz" -C /usr/local
         sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
 
     - name: Generate doxygen
