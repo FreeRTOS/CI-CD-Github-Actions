@@ -42,8 +42,18 @@ runs:
       run: |
         wget -O "$HOME/doxygen.tgz" "${{ inputs.doxygen_link }}"
         if [ $? -ne 0 ]; then exit 1; fi
-        sudo tar --strip-components=1 -xzf "$HOME/doxygen.tgz" -C /usr/local
-        sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
+
+        EXPECTED_MD5="b6193a16bc5128597f5affd878dbd7b7"
+        GENERATED_MD5=$(md5sum "$HOME/doxygen.tgz" | awk '{print $1}')
+
+        if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
+          sudo tar --strip-components=1 -xzf "$HOME/doxygen.tgz" -C /usr/local
+          sudo apt-get install -y ${{ inputs.doxygen_dependencies }}
+        else
+          echo -e "${{ env.bashFail }} MD5 checksum verification failed for doxygen.tgz ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+          exit -1          
+        fi
 
     - name: Generate doxygen
       working-directory: ./doxygen_source
