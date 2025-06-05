@@ -43,7 +43,7 @@ runs:
         wget -O "$HOME/doxygen.tgz" "${{ inputs.doxygen_link }}"
         if [ $? -ne 0 ]; then exit 1; fi
 
-        EXPECTED_MD5="b6193a16bc5128597f5affd878dbd7b7"
+        EXPECTED_MD5="b6193a16bc5128597f5affd878dbd7b8"
         GENERATED_MD5=$(md5sum "$HOME/doxygen.tgz" | awk '{print $1}')
 
         if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
