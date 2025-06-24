@@ -1,0 +1,85 @@
+name: 'artifact-backup'
+description: 'Backup release artifacts to S3'
+inputs:
+  release_tag:
+    description: 'Tag of the release'
+    required: true
+  artifact_path:
+    description: 'Path to the generated artifact'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+      - name: Extract repository name
+        id: repo-name
+        shell: bash
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          echo "name=$REPO_NAME" >> $GITHUB_OUTPUT
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Repository Owner: $GITHUB_REPOSITORY_OWNER"
+          echo "Repository Name: $REPO_NAME"
+
+      - name: Get temporary AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::178185592318:role/GHRole-${{ github.repository_owner }}-${{ steps.repo-name.outputs.name }}
+          role-duration-seconds: 900
+          unset-current-credentials: true
+
+      - name: Add file to s3 bucket
+        env:
+          BUCKET_NAME: frtos-artifact-bckup-us-east-1-alpha
+        shell: bash
+        run: |
+          # Get the artifact file name and extension
+          FILE=${{ inputs.artifact_path }}
+          FILENAME=$(basename "$FILE")
+          EXTENSION="${FILENAME##*.}"
+          BASENAME="${FILENAME%.*}"
+
+          # Rename with timestamp
+          TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+          NEW_FILENAME="${BASENAME}.${TIMESTAMP}.${EXTENSION}"
+
+          # Upload to S3 without overwriting
+          if ! aws s3api put-object \
+            --bucket ${{ env.BUCKET_NAME }} \
+            --key ${{ github.repository }}/${{ inputs.release_tag }}/${NEW_FILENAME} \
+            --body ${{ inputs.artifact_path }} \
+            --if-none-match "*"; then
+            echo "::error::Failed to upload artifact to S3"
+            exit 1
+          fi
+          
+          echo "Successfully uploaded artifact to S3"
+
+      - name: Upload SHA256 of the artifact
+        env:
+          BUCKET_NAME: frtos-artifact-bckup-us-east-1-alpha
+        shell: bash
+        run: |
+          # Calculate and upload SHA256 hash with platform compatibility
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS uses shasum
+            HASH=$(shasum -a 256 "${{ inputs.artifact_path }}" | awk '{print $1}')
+          else
+            # Linux uses sha256sum
+            HASH=$(sha256sum "${{ inputs.artifact_path }}" | awk '{print $1}')
+          fi
+          
+          echo "$HASH" > SHA256.txt
+          
+          echo "Uploading SHA256.txt to S3..."
+          if ! aws s3api put-object \
+            --bucket ${{ env.BUCKET_NAME }} \
+            --key ${{ github.repository }}/${{ inputs.release_tag }}/SHA256.txt \
+            --body SHA256.txt \
+            --if-none-match "*"; then
+            echo "::error::Failed to upload SHA256 hash to S3"
+            exit 1
+          fi
+          
+          echo "Successfully uploaded SHA256 hash to S3"
