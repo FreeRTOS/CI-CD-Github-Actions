@@ -162,7 +162,7 @@ runs:
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
-          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG'
+          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror'
           make -C build/ all
           cd build/
           ctest -E system --output-on-failure
