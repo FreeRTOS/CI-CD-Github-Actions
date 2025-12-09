@@ -1,0 +1,129 @@
+name: 'Core Library Release'
+description: 'Universal release action for FreeRTOS core libraries'
+inputs:
+  version_number:
+    description: 'Release Version Number (e.g., v1.0.0)'
+    required: true
+  branch:
+    description: 'Branch to release from'
+    required: false
+    default: 'main'
+  github_token:
+    description: 'GitHub token for creating releases'
+    required: true
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure git identity
+      shell: bash
+      run: |
+        git config --global user.name ${{ github.actor }}
+        git config --global user.email ${{ github.actor }}@users.noreply.github.com
+
+    - name: Update version number in manifest.yml
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        if [ -f "./manifest.yml" ]; then
+          sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
+          git add manifest.yml
+          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
+        fi
+
+    - name: Update version number in doxygen
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        if [ -f "./docs/doxygen/config.doxyfile" ]; then
+          sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
+          git add docs/doxygen/config.doxyfile
+          git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
+        fi
+
+    - name: Push version updates
+      shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        if ! git diff --quiet HEAD~1; then
+          git push origin "$BRANCH"
+        fi
+
+    - name: Tag and push
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        REPO_NAME: ${{ github.event.repository.name }}
+      run: |
+        git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
+        git push origin --tags
+
+    - name: Create temporary directory for ZIP
+      shell: bash
+      run: mkdir -p /tmp/release-build
+
+    - name: Checkout code for ZIP
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.version_number }}
+        path: /tmp/release-build/${{ github.event.repository.name }}
+        submodules: recursive
+
+    - name: Checkout disabled submodules
+      shell: bash
+      run: |
+        cd /tmp/release-build/${{ github.event.repository.name }}
+        git submodule update --init --checkout --recursive
+
+    - name: Generate SBOM for ZIP
+      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      with:
+        repo_path: /tmp/release-build/${{ github.event.repository.name }}
+        source_path: /tmp/release-build/${{ github.event.repository.name }}/source
+
+    - name: Create ZIP
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        REPO_NAME: ${{ github.event.repository.name }}
+      run: |
+        cd /tmp/release-build
+        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_NAME" -x "*.git*"
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        tag_name: ${{ inputs.version_number }}
+        release_name: ${{ inputs.version_number }}
+        body: Release ${{ inputs.version_number }} of the ${{ github.event.repository.name }} Library.
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /tmp/release-build/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_content_type: application/zip
+
+    - name: Backup Release Asset
+      uses: FreeRTOS/CI-CD-Github-Actions/artifact-backup@main
+      with:
+        artifact_path: /tmp/release-build/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        release_tag: ${{ inputs.version_number }}
+
+    - name: Deploy doxygen documentation
+      uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
+      with:
+        ref: ${{ inputs.version_number }}
+        add_release: "true"
