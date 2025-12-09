@@ -70,6 +70,19 @@ runs:
           git push origin "$BRANCH"
         fi
 
+    - name: Update version number in doxygen
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        if [ -f "./docs/doxygen/config.doxyfile" ]; then
+          sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
+          git add docs/doxygen/config.doxyfile
+          git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
+          git push origin "$BRANCH"
+        fi
+
     - name: Tag and push
       shell: bash
       env:
