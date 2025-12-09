@@ -204,5 +204,5 @@ runs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ github.event.repository.name }}/sbom.spdx
-        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}-sbom.spdx
+        asset_name: sbom.spdx
         asset_content_type: text/plain
