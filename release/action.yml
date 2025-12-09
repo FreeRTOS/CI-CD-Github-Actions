@@ -112,7 +112,7 @@ runs:
     - name: Generate SBOM for ZIP
       uses: anchore/sbom-action@v0
       with:
-        path: ./${{ github.event.repository.name }}
+        path: ./${{ github.event.repository.name }}/source
         format: spdx-tag-value
         output-file: ./${{ github.event.repository.name }}-sbom.spdx
 
