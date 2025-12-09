@@ -110,7 +110,7 @@ runs:
         git submodule update --init --checkout --recursive
 
     - name: Generate SBOM for ZIP
-      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       with:
         repo_path: ./${{ github.event.repository.name }}
         source_path: ./${{ github.event.repository.name }}/source
