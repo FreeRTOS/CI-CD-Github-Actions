@@ -113,7 +113,8 @@ runs:
       uses: anchore/sbom-action@v0
       with:
         path: ./${{ github.event.repository.name }}
-        format: spdx-json
+        format: spdx-tag-value
+        output-file: ./${{ github.event.repository.name }}-sbom.spdx
 
     - name: Create ZIP
       shell: bash
