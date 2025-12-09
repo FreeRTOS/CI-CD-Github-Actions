@@ -18,6 +18,11 @@ def needs_licenseref(license):
     return False
 
 def scan_dir():
+    print(f"DEBUG: Starting scan_dir function")
+    print(f"DEBUG: REPO_PATH = {REPO_PATH}")
+    print(f"DEBUG: SOURCE_PATH = {SOURCE_PATH}")
+    print(f"DEBUG: SOURCE_PATH exists: {os.path.exists(SOURCE_PATH)}")
+    
     dependency_path = os.path.join(REPO_PATH, 'source/dependency')
     path_3rdparty = os.path.join(REPO_PATH, 'source/dependency/3rdparty')
     manifest_path = os.path.join(REPO_PATH, 'manifest.yml')
@@ -156,7 +161,9 @@ if __name__ == "__main__":
                         default=os.path.join(os.getcwd(), 'source'),
                         help='Path to the source code dir.')
     args = parser.parse_args()
+    print(f"DEBUG: Parsed args - repo_root_path: {args.repo_root_path}, source_path: {args.source_path}")
     REPO_PATH = os.path.abspath(args.repo_root_path)
     SOURCE_PATH = os.path.abspath(args.source_path)
+    print(f"DEBUG: Absolute paths - REPO_PATH: {REPO_PATH}, SOURCE_PATH: {SOURCE_PATH}")
    
     scan_dir()
