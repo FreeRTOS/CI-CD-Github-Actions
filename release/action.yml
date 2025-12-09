@@ -109,6 +109,15 @@ runs:
         cd ${{ github.event.repository.name }}
         git submodule update --init --checkout --recursive
 
+    - name: Debug source path
+      shell: bash
+      env:
+        SOURCE_PATH: ./${{ github.event.repository.name }}/source
+      run: |
+        echo "Source path: $SOURCE_PATH"
+        echo "Contents of source directory:"
+        ls -la "$SOURCE_PATH"
+
     - name: Generate SBOM for ZIP
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       with:
