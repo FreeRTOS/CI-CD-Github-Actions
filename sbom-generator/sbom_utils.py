@@ -1,4 +1,5 @@
 import hashlib
+import os
 import re
 from datetime import datetime
 
@@ -69,7 +70,9 @@ def package_writer(output, packageName: str, version: str, url: str, license: st
 def doc_writer(output, version: str, name: str, creator_comment='NOASSERTION',
                doc_comment='NOASSERTION'):
     today = datetime.now()
-    namespace = 'https://github.com/FreeRTOS/'+name+'/blob/'+version+'/sbom.spdx'
+    # Get organization name from environment variable or default to FreeRTOS
+    org_name = os.environ.get('GITHUB_REPOSITORY_OWNER', 'FreeRTOS')
+    namespace = f'https://github.com/{org_name}/{name}/releases/download/{version}/sbom.spdx'
     output.write('SPDXVersion: ' + SPDX_VERSION + '\n')
     output.write('DataLicense: ' + DATA_LICENSE  + '\n')
     output.write('SPDXID: SPDXRef-DOCUMENT\n')

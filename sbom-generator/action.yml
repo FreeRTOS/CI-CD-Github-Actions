@@ -9,6 +9,9 @@ inputs:
     description: 'Path to source code'
     required: false
     default: ./source
+  namespace:
+    description: 'SPDX document namespace URL'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -19,5 +22,7 @@ runs:
     - name: Run generator script
       working-directory: ${{ inputs.repo_path }}
       shell: bash
+      env:
+        SBOM_NAMESPACE: ${{ inputs.namespace }}
       run: |
         python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
