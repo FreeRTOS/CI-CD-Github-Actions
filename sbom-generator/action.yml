@@ -24,5 +24,7 @@ runs:
       shell: bash
       env:
         SBOM_NAMESPACE: ${{ inputs.namespace }}
+        PYTHONUNBUFFERED: 1
       run: |
-        python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
+        echo "Running SBOM generator with source path: ${{ inputs.source_path }}"
+        python3 -u $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
