@@ -116,12 +116,6 @@ runs:
         asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
         asset_content_type: application/zip
 
-    - name: Backup Release Asset
-      uses: FreeRTOS/CI-CD-Github-Actions/artifact-backup@main
-      with:
-        artifact_path: /tmp/release-build/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
-        release_tag: ${{ inputs.version_number }}
-
     - name: Deploy doxygen documentation
       uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
       with:
