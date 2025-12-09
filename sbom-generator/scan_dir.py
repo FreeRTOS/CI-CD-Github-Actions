@@ -43,6 +43,7 @@ def scan_dir():
 
     #scan the source code
     for subdir, dirs, files in os.walk(SOURCE_PATH):
+        print(f"DEBUG: subdir={subdir}, dirs={dirs}, files={files}")
         if 'dependency' in subdir:
             continue
         for file in files:
@@ -51,7 +52,7 @@ def scan_dir():
             filepath = os.path.join(subdir, file)
             file_checksum = hash_sha1(filepath)
             total_file_list.append(file_checksum)
-            if file.endswith('.c'):
+            if file.endswith('.c') or file.endswith('.h'):
                 file_writer(output_buffer[root_name], filepath.replace(SOURCE_PATH, ''), file_checksum, root_license)
 
     #scan dependencies
