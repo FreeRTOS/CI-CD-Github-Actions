@@ -122,7 +122,7 @@ runs:
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       with:
         repo_path: ./${{ github.event.repository.name }}
-        source_path: ./source
+        source_path: ./${{ github.event.repository.name }}/source
 
     - name: Create ZIP
       shell: bash

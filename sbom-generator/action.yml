@@ -20,11 +20,10 @@ runs:
       run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
 
     - name: Run generator script
-      working-directory: ${{ inputs.repo_path }}
       shell: bash
       env:
         SBOM_NAMESPACE: ${{ inputs.namespace }}
         PYTHONUNBUFFERED: 1
       run: |
         echo "Running SBOM generator with source path: ${{ inputs.source_path }}"
-        python3 -u $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
+        python3 -u $GITHUB_ACTION_PATH/scan_dir.py --repo-root-path ${{ inputs.repo_path }} --source-path ${{ inputs.source_path }}
