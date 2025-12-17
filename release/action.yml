@@ -130,7 +130,7 @@ runs:
         REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         find $REPO_DIR -type f -name ".*" -delete
-        find $REPO_DIR -type d -name ".*" -delete
+        find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
 
     - name: Validate that the tests still build and pass.
       shell: bash
