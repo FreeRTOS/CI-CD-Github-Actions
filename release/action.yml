@@ -226,29 +226,31 @@ runs:
         asset_name: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
         asset_content_type: application/zip
 
-    - name: Generate SBOM file matrix
-      id: sbom_matrix
+    - name: Upload SBOM Assets
       shell: bash
       env:
-        REPO_NAME: ${{ github.event.repository.name }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
-      run: |
-        files=$(find . -name "*.spdx*" -type f -printf '%f\n' | jq -R -s -c 'split("\n")[:-1]')
-        echo "matrix={\"file\":$files}" >> $GITHUB_OUTPUT
-
-    - name: Upload SBOM Assets
-      uses: actions/upload-release-asset@v1
-      env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      strategy:
-        matrix: ${{ fromJson(steps.sbom_matrix.outputs.matrix) }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ matrix.file }}
-        asset_name: ${{ matrix.file }}
-        asset_content_type: >
-          ${{ endsWith(matrix.file, '.spdx.json') && 'application/json' ||
-              endsWith(matrix.file, '.spdx.xml') && 'application/xml' ||
-              endsWith(matrix.file, '.spdx.yaml') && 'application/yaml' ||
-              'text/plain' }}
+        UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+      run: |
+        for file in *.spdx*; do
+          if [ -f "$file" ]; then
+            # Determine content type
+            if [[ "$file" == *.spdx.json ]]; then
+              content_type="application/json"
+            elif [[ "$file" == *.spdx.xml ]]; then
+              content_type="application/xml"
+            elif [[ "$file" == *.spdx.yaml ]]; then
+              content_type="application/yaml"
+            else
+              content_type="text/plain"
+            fi
+            
+            # Upload file
+            curl -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: $content_type" \
+              --data-binary @"$file" \
+              "${UPLOAD_URL%\{*}?name=$file"
+          fi
+        done
 
