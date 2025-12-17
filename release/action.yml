@@ -53,9 +53,11 @@ runs:
 
     - name: Configure git identity
       shell: bash
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
       run: |
-        git config --global user.name ${{ github.actor }}
-        git config --global user.email ${{ github.actor }}@users.noreply.github.com
+        git config --global user.name $GITHUB_ACTOR
+        git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
 
     - name: Update version number in manifest.yml
       shell: bash
@@ -92,82 +94,51 @@ runs:
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
 
-    - name: Install ZIP tools
-      shell: bash
-      run: sudo apt-get install zip unzip
-
-    - name: Checkout code for ZIP
+    - name: Checkout code
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.version_number }}
         path: ${{ github.event.repository.name }}
         submodules: recursive
 
-    - name: Checkout disabled submodules
-      shell: bash
-      run: |
-        cd ${{ github.event.repository.name }}
-        git submodule update --init --checkout --recursive
-
     - name: Debug source path
       shell: bash
       env:
-        SOURCE_PATH: ./${{ github.event.repository.name }}/source
+        SOURCE_PATH: ./${{ github.event.repository.name }}
       run: |
         echo "Source path: $SOURCE_PATH"
         echo "Contents of source directory:"
         ls -la "$SOURCE_PATH"
 
-    - name: Generate SBOM for ZIP
+    - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        ORG_NAME: ${{ github.repository_owner }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        repo_path: ./${{ github.event.repository.name }}
-        source_path: ./${{ github.event.repository.name }}/source
+        directory: "./$REPO_NAME"
+        distribution-type: repository
+        creator: Amazon Web Services, Inc.
+        download-location: "git+https://github.com/$ORG_NAME/$REPO_NAME@$VERSION_NUMBER"
+        homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
+        namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
 
-    - name: Create ZIP
+    - name: Remove hidden files and directories from repo to make zip archive
       shell: bash
       env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
-        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_NAME" -x "*.git*"
+        find $REPO_DIR -type f -name ".*" -delete
+        find $REPO_DIR -type d -name ".*" -delete
 
-    - name: Validate created ZIP
+    - name: Validate that the tests still build and pass.
       shell: bash
       env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
-        mkdir zip-check
-        mv "$REPO_NAME-$VERSION_NUMBER.zip" zip-check
-        cd zip-check
-        unzip "$REPO_NAME-$VERSION_NUMBER.zip" -d "$REPO_NAME-$VERSION_NUMBER"
-        diff -r -x "*.git*" "$REPO_NAME-$VERSION_NUMBER"/"$REPO_NAME"/ ../"$REPO_NAME"/
-
-    - name: Check version number in manifest.yml
-      shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
-      run: |
-        cd zip-check/"$REPO_NAME-$VERSION_NUMBER"/"$REPO_NAME"
-        if [ -f "./manifest.yml" ]; then
-          MANIFEST_VERSION_NUMBER=$(grep -m 1 -E "^version:[ ]*\".*\"[ ]*" manifest.yml | awk -F: '{ gsub(" ","",$2); gsub("\"","",$2); print $2 }')
-          [[ $MANIFEST_VERSION_NUMBER == $VERSION_NUMBER ]] \
-          && echo "manifest.yml : match $VERSION_NUMBER" \
-          || { echo "manifest.yml : $MANIFEST_VERSION_NUMBER doesn't match $VERSION_NUMBER"; exit 255; }
-        fi
-
-    - name: Build and test
-      shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
-      run: |
-        cd zip-check/"$REPO_NAME-$VERSION_NUMBER"/"$REPO_NAME"
-        if [ -d "test" ]; then
           sudo apt-get install -y lcov
-          cmake -S test -B build/ \
+          cmake -S $REPO_DIR/test -B build/ \
           -G "Unix Makefiles" \
           -DCMAKE_BUILD_TYPE=Debug \
           -DBUILD_CLONE_SUBMODULES=ON \
@@ -176,7 +147,54 @@ runs:
           cd build/
           ctest -E system --output-on-failure
           cd ..
-        fi
+
+    - name: Remove test directory from repo to make zip archive
+      shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
+      run: |
+        rm -rf "$REPO_DIR/test"
+
+    - name: Update README.md to remove testing information.
+      shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
+      run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $REPO_DIR/README.md   
+
+    - name: Generate SBOM for ZIP archive
+      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        ORG_NAME: ${{ github.repository_owner }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      with:
+        directory: "./$REPO_NAME"
+        distribution-type: archive
+        creator: Amazon Web Services, Inc.
+        download-location: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip"
+        homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
+        namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
+
+    - name: Copy ZIP Archive SBOMs into repository folder
+      shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        cp *archive-SPDX* $REPO_DIR
+    
+    - name: Install ZIP tools
+      shell: bash
+      run: sudo apt-get install zip unzip
+    
+    - name: Create ZIP
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        REPO_DIR: ./${{ github.event.repository.name }}
+        REPO_NAME: ${{ github.event.repository.name }}
+      run: |
+        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_DIR"
 
     - name: Deploy doxygen documentation
       uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
@@ -196,22 +214,41 @@ runs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload ZIP Archive Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        REPO_NAME: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./zip-check/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
-        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_path: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
+        asset_name: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
         asset_content_type: application/zip
 
-    - name: Upload SBOM Release Asset
+    - name: Generate SBOM file matrix
+      id: sbom_matrix
+      shell: bash
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        files=$(find . -name "*.spdx*" -type f -printf '%f\n' | jq -R -s -c 'split("\n")[:-1]')
+        echo "matrix={\"file\":$files}" >> $GITHUB_OUTPUT
+
+    - name: Upload SBOM Assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+      strategy:
+        matrix: ${{ fromJson(steps.sbom_matrix.outputs.matrix) }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ github.event.repository.name }}/sbom.spdx
-        asset_name: sbom.spdx
-        asset_content_type: text/plain
+        asset_path: ${{ matrix.file }}
+        asset_name: ${{ matrix.file }}
+        asset_content_type: >
+          ${{ endsWith(matrix.file, '.spdx.json') && 'application/json' ||
+              endsWith(matrix.file, '.spdx.xml') && 'application/xml' ||
+              endsWith(matrix.file, '.spdx.yaml') && 'application/yaml' ||
+              'text/plain' }}
+
