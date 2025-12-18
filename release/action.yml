@@ -124,14 +124,6 @@ runs:
         homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
         namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
 
-    - name: Remove hidden files and directories from repo to make zip archive
-      shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: |
-        find $REPO_DIR -type f -name ".*" -delete
-        find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
-
     - name: Validate that the tests still build and pass.
       shell: bash
       env:
@@ -148,6 +140,14 @@ runs:
           ctest -E system --output-on-failure
           cd ..
 
+    - name: Remove hidden files and directories from repo to make zip archive
+      shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
+      run: |
+        find $REPO_DIR -type f -name ".*" -delete
+        find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
+
     - name: Remove test directory from repo to make zip archive
       shell: bash
       env:
@@ -160,6 +160,16 @@ runs:
       env:
         REPO_DIR: ./${{ github.event.repository.name }}
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $REPO_DIR/README.md   
+
+    - name: Build repository with root CMakeLists.txt
+      shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
+      run: |
+        cmake -S $REPO_DIR -B repo-build/ \
+        -G "Unix Makefiles" \
+        -DCMAKE_BUILD_TYPE=Release
+        make -C repo-build/ all
 
     - name: Generate SBOM for ZIP archive
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
