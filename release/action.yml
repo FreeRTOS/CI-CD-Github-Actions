@@ -8,62 +8,45 @@ inputs:
     description: 'Branch to release from'
     required: false
     default: 'main'
-  delete_existing_tag_release:
-    description: 'Is this a re-release of existing tag/release? (Default: false)'
-    default: 'false'
-    required: false
   github_token:
     description: 'GitHub token for creating releases'
     required: true
     default: ${{ github.token }}
+  run_test_command:
+    description: 'Command to build and run tests'
+    required: false
+    default: 'sudo apt-get install -y lcov && cmake -S $REPO_DIR/test -B build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C build/ all && cd build/ && ctest -E system --output-on-failure && cd ..'
+  repo_build_command:
+    description: 'Command to build repository'
+    required: false
+    default: 'cmake -S $REPO_DIR -B repo-build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make -C repo-build/ all'
 
 runs:
   using: 'composite'
+  env:
+    VERSION_NUMBER: ${{ inputs.version_number }}
+    BRANCH: ${{ inputs.branch }}
+    GITHUB_TOKEN: ${{ inputs.github_token }}
+    REPO_NAME: ${{ github.event.repository.name }}
+    REPO_DIR: ./${{ github.event.repository.name }}
+    ORG_NAME: ${{ github.repository_owner }}
+    GITHUB_ACTOR: ${{ github.actor }}
   steps:
-    - name: Check if tag exists
-      if: ${{ inputs.delete_existing_tag_release == 'true' }}
+    - name: Capture initial commits of library and GitHub pages for rollback
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
-        git fetch origin
-        if git tag --list $VERSION_NUMBER
-        then
-            echo "Deleting existing tag for $VERSION_NUMBER"
-            git push origin --delete tags/$VERSION_NUMBER
-        fi
-
-    - name: Check if release exists
-      if: ${{ inputs.delete_existing_tag_release == 'true' }}
-      shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-      run: |
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 23F3D4EA75716059
-        sudo apt-add-repository https://cli.github.com/packages
-        sudo apt update
-        sudo apt-get install gh
-        if gh release list | grep $VERSION_NUMBER
-        then
-            echo "Deleting existing release for $VERSION_NUMBER"
-            gh release delete --yes $VERSION_NUMBER
-        fi
+        echo "INITIAL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        git fetch origin gh-pages:gh-pages || true
+        echo "INITIAL_GHPAGES_COMMIT=$(git rev-parse gh-pages 2>/dev/null || echo 'none')" >> $GITHUB_ENV
 
     - name: Configure git identity
       shell: bash
-      env:
-        GITHUB_ACTOR: ${{ github.actor }}
       run: |
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
 
     - name: Update version number in manifest.yml
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        BRANCH: ${{ inputs.branch }}
       run: |
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
@@ -74,9 +57,6 @@ runs:
 
     - name: Update version number in doxygen
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        BRANCH: ${{ inputs.branch }}
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
           sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
@@ -87,9 +67,6 @@ runs:
 
     - name: Tag and push
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
       run: |
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
@@ -103,19 +80,13 @@ runs:
 
     - name: Debug source path
       shell: bash
-      env:
-        SOURCE_PATH: ./${{ github.event.repository.name }}
       run: |
-        echo "Source path: $SOURCE_PATH"
+        echo "Source path: $REPO_DIR"
         echo "Contents of source directory:"
-        ls -la "$SOURCE_PATH"
+        ls -la "$REPO_DIR"
 
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
-      env:
-        REPO_NAME: ${{ github.event.repository.name }}
-        ORG_NAME: ${{ github.repository_owner }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         directory: "./$REPO_NAME"
         distribution-type: repository
@@ -126,70 +97,39 @@ runs:
 
     - name: Validate that the tests still build and pass.
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: |
-          sudo apt-get install -y lcov
-          cmake -S $REPO_DIR/test -B build/ \
-          -G "Unix Makefiles" \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DBUILD_CLONE_SUBMODULES=ON \
-          -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror'
-          make -C build/ all
-          cd build/
-          ctest -E system --output-on-failure
-          cd ..
+      run: ${{ inputs.run_test_command }}
 
     - name: Remove hidden files and directories from repo to make zip archive
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         find $REPO_DIR -type f -name ".*" -delete
         find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
 
     - name: Remove test directory from repo to make zip archive
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         rm -rf "$REPO_DIR/test"
 
     - name: Update README.md to remove testing information.
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $REPO_DIR/README.md   
 
     - name: Build repository with root CMakeLists.txt
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: |
-        cmake -S $REPO_DIR -B repo-build/ \
-        -G "Unix Makefiles" \
-        -DCMAKE_BUILD_TYPE=Release
-        make -C repo-build/ all
+      run: ${{ inputs.repo_build_command }}
 
     - name: Generate SBOM for ZIP archive
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
-      env:
-        REPO_NAME: ${{ github.event.repository.name }}
-        ORG_NAME: ${{ github.repository_owner }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        directory: "./$REPO_NAME"
+        directory: ./$REPO_NAME
         distribution-type: archive
         creator: Amazon Web Services, Inc.
-        download-location: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip"
-        homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
-        namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
+        download-location: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip
+        homepage: https://www.github.com/$ORG_NAME/$REPO_NAME
+        namespace-prefix: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/
 
     - name: Copy ZIP Archive SBOMs into repository folder
       shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
         cp *archive-SPDX* $REPO_DIR
     
@@ -199,10 +139,6 @@ runs:
     
     - name: Create ZIP
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_DIR: ./${{ github.event.repository.name }}
-        REPO_NAME: ${{ github.event.repository.name }}
       run: |
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_DIR"
 
@@ -215,8 +151,6 @@ runs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
         tag_name: ${{ inputs.version_number }}
         release_name: ${{ inputs.version_number }}
@@ -226,20 +160,15 @@ runs:
 
     - name: Upload ZIP Archive Release Asset
       uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-        REPO_NAME: ${{ github.event.repository.name }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
         asset_name: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
         asset_content_type: application/zip
 
-    - name: Upload SBOM Assets
+    - name: Upload SBOMs to release.
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
         UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
       run: |
         for file in *.spdx*; do
@@ -263,4 +192,14 @@ runs:
               "${UPLOAD_URL%\{*}?name=$file"
           fi
         done
+
+    - name: Rollback on failure
+      if: failure()
+      uses: jasonpcarroll/CI-CD-Github-Actions/release-rollback@main
+      with:
+        version_number: ${{ inputs.version_number }}
+        branch: ${{ inputs.branch }}
+        initial_commit: ${{ env.INITIAL_COMMIT }}
+        initial_ghpages_commit: ${{ env.INITIAL_GHPAGES_COMMIT }}
+        github_token: ${{ inputs.github_token }}
 
