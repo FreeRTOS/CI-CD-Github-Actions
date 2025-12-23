@@ -27,10 +27,6 @@ runs:
     VERSION_NUMBER: ${{ inputs.version_number }}
     BRANCH: ${{ inputs.branch }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
-    REPO_NAME: ${{ github.event.repository.name }}
-    REPO_DIR: ./${{ github.event.repository.name }}
-    ORG_NAME: ${{ github.repository_owner }}
-    GITHUB_ACTOR: ${{ github.actor }}
   steps:
     - name: Capture initial commits of library and GitHub pages for rollback
       shell: bash
@@ -41,6 +37,8 @@ runs:
 
     - name: Configure git identity
       shell: bash
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
       run: |
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
@@ -67,6 +65,8 @@ runs:
 
     - name: Tag and push
       shell: bash
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
       run: |
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
@@ -80,6 +80,8 @@ runs:
 
     - name: Debug source path
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         echo "Source path: $REPO_DIR"
         echo "Contents of source directory:"
@@ -87,6 +89,9 @@ runs:
 
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        ORG_NAME: ${{ github.repository_owner }}
       with:
         directory: "./$REPO_NAME"
         distribution-type: repository
@@ -97,29 +102,42 @@ runs:
 
     - name: Validate that the tests still build and pass.
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: ${{ inputs.run_test_command }}
 
     - name: Remove hidden files and directories from repo to make zip archive
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         find $REPO_DIR -type f -name ".*" -delete
         find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
 
     - name: Remove test directory from repo to make zip archive
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         rm -rf "$REPO_DIR/test"
 
     - name: Update README.md to remove testing information.
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $REPO_DIR/README.md   
 
     - name: Build repository with root CMakeLists.txt
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: ${{ inputs.repo_build_command }}
 
     - name: Generate SBOM for ZIP archive
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        ORG_NAME: ${{ github.repository_owner }}
       with:
         directory: ./$REPO_NAME
         distribution-type: archive
@@ -130,6 +148,8 @@ runs:
 
     - name: Copy ZIP Archive SBOMs into repository folder
       shell: bash
+      env:
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         cp *archive-SPDX* $REPO_DIR
     
@@ -139,6 +159,9 @@ runs:
     
     - name: Create ZIP
       shell: bash
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        REPO_DIR: ./${{ github.event.repository.name }}
       run: |
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_DIR"
 
@@ -160,6 +183,9 @@ runs:
 
     - name: Upload ZIP Archive Release Asset
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        REPO_NAME: ${{ github.event.repository.name }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
