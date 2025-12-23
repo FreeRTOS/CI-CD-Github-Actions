@@ -27,16 +27,49 @@ runs:
     VERSION_NUMBER: ${{ inputs.version_number }}
     BRANCH: ${{ inputs.branch }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
+    REPO_DIR: ${{ github.event.repository.name }}
   steps:
-    - name: Capture initial commits of library and GitHub pages for rollback
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}
+        submodules: recursive
+
+    - name: Validate version number format
       shell: bash
       run: |
-        echo "INITIAL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        git fetch origin gh-pages:gh-pages || true
-        echo "INITIAL_GHPAGES_COMMIT=$(git rev-parse gh-pages 2>/dev/null || echo 'none')" >> $GITHUB_ENV
+        if [[ ! "$VERSION_NUMBER" =~ ^[vV][0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Error: Version number must be in format vX.Y.Z or VX.Y.Z"
+          exit 1
+        fi
+
+    - name: Check if tag already exists
+      shell: bash
+      working-directory: $REPO_DIR
+      run: |
+        git fetch origin
+        if git tag --list | grep -q "^$VERSION_NUMBER$"; then
+          echo "Error: Tag $VERSION_NUMBER already exists"
+          exit 1
+        fi
+
+    - name: Check if release already exists
+      shell: bash
+      working-directory: $REPO_DIR
+      run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 23F3D4EA75716059
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt update
+        sudo apt-get install gh
+        if gh release list | grep -q "$VERSION_NUMBER"; then
+          echo "Error: Release $VERSION_NUMBER already exists"
+          exit 1
+        fi
 
     - name: Configure git identity
       shell: bash
+      working-directory: $REPO_DIR
       env:
         GITHUB_ACTOR: ${{ github.actor }}
       run: |
@@ -45,38 +78,43 @@ runs:
 
     - name: Update version number in manifest.yml
       shell: bash
+      working-directory: $REPO_DIR
       run: |
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
           git add manifest.yml
           git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
-          git push origin "$BRANCH"
         fi
 
     - name: Update version number in doxygen
       shell: bash
+      working-directory: $REPO_DIR
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
           sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
           git add docs/doxygen/config.doxyfile
           git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
-          git push origin "$BRANCH"
         fi
 
-    - name: Tag and push
+    - name: Validate that the tests still build and pass
       shell: bash
+      working-directory: $REPO_DIR
+      run: ${{ inputs.run_test_command }}
+
+    - name: Build repository with root CMakeLists.txt
+      shell: bash
+      working-directory: $REPO_DIR
+      run: ${{ inputs.repo_build_command }}
+
+    - name: Push changes and create tag
+      shell: bash
+      working-directory: $REPO_DIR
       env:
         REPO_NAME: ${{ github.event.repository.name }}
       run: |
+        git push origin $BRANCH
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.version_number }}
-        path: ${{ github.event.repository.name }}
-        submodules: recursive
 
     - name: Debug source path
       shell: bash
@@ -218,14 +256,4 @@ runs:
               "${UPLOAD_URL%\{*}?name=$file"
           fi
         done
-
-    - name: Rollback on failure
-      if: failure()
-      uses: jasonpcarroll/CI-CD-Github-Actions/release-rollback@main
-      with:
-        version_number: ${{ inputs.version_number }}
-        branch: ${{ inputs.branch }}
-        initial_commit: ${{ env.INITIAL_COMMIT }}
-        initial_ghpages_commit: ${{ env.INITIAL_GHPAGES_COMMIT }}
-        github_token: ${{ inputs.github_token }}
 
