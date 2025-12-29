@@ -34,19 +34,30 @@ runs:
           exit 1
         fi
 
-    - name: Check if tag and release already exist
+    - name: Install GitHub CLI
       shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        GH_TOKEN: ${{ inputs.github_token }}
       run: |
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
         sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
         sudo apt install gh
-        
-        if git ls-remote --tags origin | grep -q "refs/tags/$VERSION_NUMBER$"; then
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}
+        submodules: recursive
+
+    - name: Check if tag and release already exist
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}
+      run: |
+        if git tag --list | grep -q "^$VERSION_NUMBER$"; then
           echo "Error: Tag $VERSION_NUMBER already exists"
           exit 1
         fi
@@ -55,13 +66,6 @@ runs:
           echo "Error: Release $VERSION_NUMBER already exists"
           exit 1
         fi
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.branch }}
-        path: ${{ github.event.repository.name }}
-        submodules: recursive
 
     - name: Configure git identity
       shell: bash
