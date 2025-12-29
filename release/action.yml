@@ -39,10 +39,11 @@ runs:
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 23F3D4EA75716059
-        sudo apt-add-repository https://cli.github.com/packages
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
-        sudo apt-get install gh
+        sudo apt install gh
         
         if git ls-remote --tags origin | grep -q "refs/tags/$VERSION_NUMBER$"; then
           echo "Error: Tag $VERSION_NUMBER already exists"
