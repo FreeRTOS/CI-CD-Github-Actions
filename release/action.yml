@@ -101,17 +101,13 @@ runs:
 
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
-      env:
-        REPO_NAME: ${{ github.event.repository.name }}
-        ORG_NAME: ${{ github.repository_owner }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        directory: ./$REPO_NAME-repository
+        directory: ./${{ github.event.repository.name }}-repository
         distribution-type: repository
         creator: Amazon Web Services, Inc.
-        download-location: git+https://github.com/$ORG_NAME/$REPO_NAME.git@$VERSION_NUMBER
-        homepage: https://github.com/$ORG_NAME/$REPO_NAME
-        namespace-prefix: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/
+        download-location: git+https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git@${{ inputs.version_number }}
+        homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+        namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
 
     - name: Run tests for the repository.
       shell: bash
@@ -146,18 +142,13 @@ runs:
 
     - name: Generate SBOM for archive.
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
-      env:
-        REPO_NAME: ${{ github.event.repository.name }}
-        ORG_NAME: ${{ github.repository_owner }}
-        ARCHIVE_DIR: ${{ github.event.repository.name }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        directory: ./$ARCHIVE_DIR
+        directory: ./${{ github.event.repository.name }}
         distribution-type: archive
         creator: Amazon Web Services, Inc.
-        download-location: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip
-        homepage: https://github.com/$ORG_NAME/$REPO_NAME
-        namespace-prefix: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/
+        download-location: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+        namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
 
     - name: Copy archive SBOMs into archive folder
       shell: bash
@@ -207,12 +198,10 @@ runs:
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
-        REPO_NAME: ${{ github.event.repository.name }}
       with:
-        tag_name: $VERSION_NUMBER
-        release_name: $VERSION_NUMBER
-        body: Release $VERSION_NUMBER of the $REPO_NAME Library.
+        tag_name: ${{ inputs.version_number }}
+        release_name: ${{ inputs.version_number }}
+        body: Release ${{ inputs.version_number }} of the ${{ github.event.repository.name }} Library.
         draft: false
         prerelease: false
 
@@ -246,12 +235,9 @@ runs:
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-        UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
-        REPO_NAME: ${{ github.event.repository.name }}
-        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        upload_url: $UPLOAD_URL
-        asset_path: $REPO_NAME-$VERSION_NUMBER.zip
-        asset_name: $REPO_NAME-$VERSION_NUMBER.zip
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
         asset_content_type: application/zip
 
