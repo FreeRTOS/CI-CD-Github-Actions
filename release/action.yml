@@ -57,7 +57,7 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
       working-directory: ${{ github.event.repository.name }}-repository
       run: |
-        if git tag --list | grep -q "^$VERSION_NUMBER$"; then
+        if git ls-remote --tags origin | grep -q "refs/tags/$VERSION_NUMBER$"; then
           echo "Error: Tag $VERSION_NUMBER already exists"
           exit 1
         fi
