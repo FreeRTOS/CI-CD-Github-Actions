@@ -57,12 +57,9 @@ runs:
 
     - name: Checkout code
       uses: actions/checkout@v4
-      env:
-        REPO_DIR: ${{ github.event.repository.name }}
-        BRANCH: ${{ inputs.branch }}
       with:
-        ref: $BRANCH
-        path: $REPO_DIR
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}
         submodules: recursive
 
     - name: Configure git identity
