@@ -106,7 +106,7 @@ runs:
         ORG_NAME: ${{ github.repository_owner }}
         VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        directory: ./$REPO_NAME
+        directory: ./$REPO_NAME-repository
         distribution-type: repository
         creator: Amazon Web Services, Inc.
         download-location: git+https://github.com/$ORG_NAME/$REPO_NAME.git@$VERSION_NUMBER
