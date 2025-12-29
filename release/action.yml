@@ -13,13 +13,13 @@ inputs:
     required: true
     default: ${{ github.token }}
   run_test_command:
-    description: 'Command to build and run tests'
+    description: 'Command to build and run tests from root of library directory.'
     required: false
-    default: 'sudo apt-get install -y lcov && cmake -S $REPO_DIR/test -B build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C build/ all && cd build/ && ctest -E system --output-on-failure && cd ..'
+    default: 'sudo apt-get install -y lcov && rm -rf ../build && cmake -S ./test -B ../build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C ../build all && cd ../build && ctest -E system --output-on-failure'
   repo_build_command:
-    description: 'Command to build repository'
+    description: 'Command to build from root of library directory.'
     required: false
-    default: 'cmake -S $REPO_DIR -B repo-build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make -C repo-build/ all'
+    default: 'rm -rf ../build && cmake -S . -B ../build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make -C ../build all'
 
 runs:
   using: 'composite'
@@ -99,6 +99,14 @@ runs:
           git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
         fi
 
+    - name: Copy repository folder for archive
+      shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+      run: |
+        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
+
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       env:
@@ -112,20 +120,12 @@ runs:
         homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
         namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
 
-    - name: Run tests for the repository
+    - name: Run tests for the repository.
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
       working-directory: $REPO_DIR
       run: $RUN_TEST_COMMAND
-
-    - name: Copy repository folder for archive
-      shell: bash
-      env:
-        REPO_DIR: ${{ github.event.repository.name }}
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
-      run: |
-        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
 
     - name: Remove hidden files and test directory from archive
       shell: bash
@@ -136,13 +136,13 @@ runs:
         find $ARCHIVE_DIR -type d -name ".*" -exec rm -rf {} + 2>/dev/null || true
         rm -rf "$ARCHIVE_DIR/test"
 
-    - name: Update README.md to remove testing information
+    - name: Update README.md to remove testing information from archive
       shell: bash
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
-    - name: Generate SBOM for ZIP archive
+    - name: Generate SBOM for archive.
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       env:
         REPO_NAME: ${{ github.event.repository.name }}
@@ -179,7 +179,7 @@ runs:
         sudo apt-get install zip unzip
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
 
-    - name: Push changes to branch
+    - name: Push changes version number changes.
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
@@ -187,7 +187,7 @@ runs:
       run: |
         git push origin $BRANCH
 
-    - name: Create and push tag
+    - name: Create and push tag for release.
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
@@ -197,7 +197,7 @@ runs:
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
 
-    - name: Create Release
+    - name: Create GitHub release.
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -209,7 +209,7 @@ runs:
         draft: false
         prerelease: false
 
-    - name: Upload SBOMs to release
+    - name: Upload SBOMs to GitHub release.
       shell: bash
       env:
         UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
@@ -234,7 +234,7 @@ runs:
           fi
         done
 
-    - name: Upload ZIP Archive Release Asset
+    - name: Upload library archive to GitHub release.
       uses: actions/upload-release-asset@v1
       env:
         REPO_NAME: ${{ github.event.repository.name }}
