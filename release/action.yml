@@ -15,7 +15,7 @@ inputs:
   run_test_command:
     description: 'Command to build and run tests from root of library directory.'
     required: false
-    default: 'sudo apt-get install -y lcov && rm -rf ../build && cmake -S ./test -B ../build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C ../build all && cd ../build && ctest -E system --output-on-failure'
+    default: 'sudo apt-get install -y lcov && rm -f ../build && cmake -S ./test -B ../build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C ../build all && cd ../build && ctest -E system --output-on-failure'
   repo_build_command:
     description: 'Command to build from root of library directory.'
     required: false
