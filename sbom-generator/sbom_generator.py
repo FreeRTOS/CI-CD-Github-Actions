@@ -137,8 +137,8 @@ def process_directory(directory, excluded_files=None):
         if file_path.is_file():
             relative_path = f"./{file_path.relative_to(directory)}"
 
-            # Always ignore .git folders and their contents
-            if "/.git/" in relative_path or relative_path.startswith("./.git/"):
+            # Always ignore .git folders and .git files (including submodule .git files)
+            if "/.git/" in relative_path or relative_path.endswith("/.git"):
                 continue
 
             # Check if file should be excluded
