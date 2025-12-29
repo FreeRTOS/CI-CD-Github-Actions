@@ -45,9 +45,12 @@ runs:
 
     - name: Checkout code
       uses: actions/checkout@v4
+      env:
+        BRANCH: ${{ inputs.branch }}
+        REPO_DIR: ${{ github.event.repository.name }}
       with:
-        ref: ${{ inputs.branch }}
-        path: ${{ github.event.repository.name }}
+        ref: $BRANCH
+        path: $REPO_DIR
         submodules: recursive
 
     - name: Check if tag and release already exist
@@ -215,10 +218,12 @@ runs:
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        REPO_NAME: ${{ github.event.repository.name }}
       with:
-        tag_name: ${{ inputs.version_number }}
-        release_name: ${{ inputs.version_number }}
-        body: Release ${{ inputs.version_number }} of the ${{ github.event.repository.name }} Library.
+        tag_name: $VERSION_NUMBER
+        release_name: $VERSION_NUMBER
+        body: Release $VERSION_NUMBER of the $REPO_NAME Library.
         draft: false
         prerelease: false
 
@@ -252,9 +257,12 @@ runs:
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        REPO_NAME: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
-        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        upload_url: $UPLOAD_URL
+        asset_path: $REPO_NAME-$VERSION_NUMBER.zip
+        asset_name: $REPO_NAME-$VERSION_NUMBER.zip
         asset_content_type: application/zip
 
