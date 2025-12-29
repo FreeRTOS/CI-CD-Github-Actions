@@ -121,12 +121,12 @@ runs:
         ORG_NAME: ${{ github.repository_owner }}
         VERSION_NUMBER: ${{ inputs.version_number }}
       with:
-        directory: "./$REPO_NAME"
+        directory: ./$REPO_NAME
         distribution-type: repository
         creator: Amazon Web Services, Inc.
-        download-location: "git+https://github.com/$ORG_NAME/$REPO_NAME@$VERSION_NUMBER"
-        homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
-        namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
+        download-location: git+https://github.com/$ORG_NAME/$REPO_NAME.git@$VERSION_NUMBER
+        homepage: https://github.com/$ORG_NAME/$REPO_NAME
+        namespace-prefix: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/
 
     - name: Run tests for the repository.
       shell: bash
@@ -163,9 +163,9 @@ runs:
         directory: ./$ARCHIVE_DIR
         distribution-type: archive
         creator: Amazon Web Services, Inc.
-        download-location: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip
-        homepage: https://www.github.com/$ORG_NAME/$REPO_NAME
-        namespace-prefix: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/
+        download-location: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip
+        homepage: https://github.com/$ORG_NAME/$REPO_NAME
+        namespace-prefix: https://github.com/$ORG_NAME/$REPO_NAME/releases/download/$VERSION_NUMBER/
 
     - name: Copy archive SBOMs into archive folder
       shell: bash
