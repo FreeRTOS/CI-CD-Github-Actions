@@ -45,12 +45,9 @@ runs:
 
     - name: Checkout code
       uses: actions/checkout@v4
-      env:
-        BRANCH: ${{ inputs.branch }}
-        REPO_DIR: ${{ github.event.repository.name }}-repository
       with:
-        ref: $BRANCH
-        path: $REPO_DIR
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}-repository
         submodules: recursive
 
     - name: Check if tag and release already exist
