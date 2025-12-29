@@ -47,7 +47,7 @@ runs:
       uses: actions/checkout@v4
       env:
         BRANCH: ${{ inputs.branch }}
-        REPO_DIR: ${{ github.event.repository.name }}
+        REPO_DIR: ${{ github.event.repository.name }}-repository
       with:
         ref: $BRANCH
         path: $REPO_DIR
@@ -58,7 +58,7 @@ runs:
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
         GH_TOKEN: ${{ inputs.github_token }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         if git tag --list | grep -q "^$VERSION_NUMBER$"; then
           echo "Error: Tag $VERSION_NUMBER already exists"
@@ -73,9 +73,7 @@ runs:
     - name: Configure git identity
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         GITHUB_ACTOR: ${{ github.actor }}
-      working-directory: ${{ github.event.repository.name }}
       run: |
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
@@ -83,9 +81,8 @@ runs:
     - name: Update version number in manifest.yml
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
@@ -96,23 +93,14 @@ runs:
     - name: Update version number in doxygen
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
           sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
           git add docs/doxygen/config.doxyfile
           git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
         fi
-
-    - name: Copy repository folder for archive
-      shell: bash
-      env:
-        REPO_DIR: ${{ github.event.repository.name }}
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
-      run: |
-        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
 
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
@@ -131,25 +119,32 @@ runs:
     - name: Run tests for the repository.
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         eval "$RUN_TEST_COMMAND"
 
-    - name: Remove hidden files and test directory from archive
+    - name: Copy repository folder for archive
       shell: bash
       env:
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        REPO_DIR: ${{ github.event.repository.name }}-repository
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+      run: |
+        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
+
+    - name: Remove hidden files and test directory from archive directory
+      shell: bash
+      env:
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
       run: |
         find $ARCHIVE_DIR -type f -name ".*" -delete
         find $ARCHIVE_DIR -type d -name ".*" -exec rm -rf {} + 2>/dev/null || true
         rm -rf "$ARCHIVE_DIR/test"
 
-    - name: Update README.md to remove testing information from archive
+    - name: Update README.md to remove testing information from archive directory
       shell: bash
       env:
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
     - name: Generate SBOM for archive.
@@ -157,7 +152,7 @@ runs:
       env:
         REPO_NAME: ${{ github.event.repository.name }}
         ORG_NAME: ${{ github.repository_owner }}
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         directory: ./$ARCHIVE_DIR
@@ -170,16 +165,15 @@ runs:
     - name: Copy archive SBOMs into archive folder
       shell: bash
       env:
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
       run: |
         cp *archive-SPDX* $ARCHIVE_DIR/
 
     - name: Build archive folder
       shell: bash
       env:
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
         REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
-      working-directory: ${{ github.event.repository.name }}-archive
+      working-directory: ${{ github.event.repository.name }}
       run: |
         eval "$REPO_BUILD_COMMAND"
 
@@ -187,28 +181,26 @@ runs:
       shell: bash
       env:
         REPO_NAME: ${{ github.event.repository.name }}
-        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
         sudo apt-get install zip unzip
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
 
-    - name: Push changes version number changes.
+    - name: Push release changes to repository.
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         BRANCH: ${{ inputs.branch }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         git push origin $BRANCH
 
     - name: Create and push tag for release.
       shell: bash
       env:
-        REPO_DIR: ${{ github.event.repository.name }}
         REPO_NAME: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: ${{ github.event.repository.name }}
+      working-directory: ${{ github.event.repository.name }}-repository
       run: |
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
