@@ -23,15 +23,11 @@ inputs:
 
 runs:
   using: 'composite'
-  env:
-    VERSION_NUMBER: ${{ inputs.version_number }}
-    BRANCH: ${{ inputs.branch }}
-    GITHUB_TOKEN: ${{ inputs.github_token }}
-    RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
-    REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
   steps:
     - name: Validate version number format
       shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
         if [[ ! "$VERSION_NUMBER" =~ ^[vV][0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           echo "Error: Version number must be in format vX.Y.Z or VX.Y.Z"
@@ -40,6 +36,8 @@ runs:
 
     - name: Check if tag and release already exist
       shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
         sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 23F3D4EA75716059
         sudo apt-add-repository https://cli.github.com/packages
@@ -60,6 +58,7 @@ runs:
       uses: actions/checkout@v4
       env:
         REPO_DIR: ${{ github.event.repository.name }}
+        BRANCH: ${{ inputs.branch }}
       with:
         ref: $BRANCH
         path: $REPO_DIR
@@ -79,6 +78,7 @@ runs:
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       working-directory: $REPO_DIR
       run: |
         if [ -f "./manifest.yml" ]; then
@@ -91,6 +91,7 @@ runs:
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       working-directory: $REPO_DIR
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
@@ -112,6 +113,7 @@ runs:
       env:
         REPO_NAME: ${{ github.event.repository.name }}
         ORG_NAME: ${{ github.repository_owner }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         directory: "./$REPO_NAME"
         distribution-type: repository
@@ -124,6 +126,7 @@ runs:
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
+        RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
       working-directory: $REPO_DIR
       run: $RUN_TEST_COMMAND
 
@@ -148,6 +151,7 @@ runs:
         REPO_NAME: ${{ github.event.repository.name }}
         ORG_NAME: ${{ github.repository_owner }}
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         directory: ./$ARCHIVE_DIR
         distribution-type: archive
@@ -167,6 +171,7 @@ runs:
       shell: bash
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
       working-directory: $ARCHIVE_DIR
       run: $REPO_BUILD_COMMAND
 
@@ -175,6 +180,7 @@ runs:
       env:
         REPO_NAME: ${{ github.event.repository.name }}
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+        VERSION_NUMBER: ${{ inputs.version_number }}
       run: |
         sudo apt-get install zip unzip
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
@@ -183,6 +189,7 @@ runs:
       shell: bash
       env:
         REPO_DIR: ${{ github.event.repository.name }}
+        BRANCH: ${{ inputs.branch }}
       working-directory: $REPO_DIR
       run: |
         git push origin $BRANCH
@@ -192,6 +199,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         REPO_NAME: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       working-directory: $REPO_DIR
       run: |
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
@@ -202,6 +210,8 @@ runs:
       uses: actions/create-release@v1
       env:
         REPO_NAME: ${{ github.event.repository.name }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         tag_name: $VERSION_NUMBER
         release_name: $VERSION_NUMBER
@@ -213,6 +223,7 @@ runs:
       shell: bash
       env:
         UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         for file in *.spdx*; do
           if [ -f "$file" ]; then
@@ -239,6 +250,8 @@ runs:
       env:
         REPO_NAME: ${{ github.event.repository.name }}
         UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
       with:
         upload_url: $UPLOAD_URL
         asset_path: $REPO_NAME-$VERSION_NUMBER.zip
