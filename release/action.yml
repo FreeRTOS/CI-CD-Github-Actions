@@ -27,15 +27,9 @@ runs:
     VERSION_NUMBER: ${{ inputs.version_number }}
     BRANCH: ${{ inputs.branch }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
-    REPO_DIR: ${{ github.event.repository.name }}
+    RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
+    REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.branch }}
-        path: ${{ github.event.repository.name }}
-        submodules: recursive
-
     - name: Validate version number format
       shell: bash
       run: |
@@ -44,40 +38,47 @@ runs:
           exit 1
         fi
 
-    - name: Check if tag already exists
+    - name: Check if tag and release already exist
       shell: bash
-      working-directory: $REPO_DIR
-      run: |
-        git fetch origin
-        if git tag --list | grep -q "^$VERSION_NUMBER$"; then
-          echo "Error: Tag $VERSION_NUMBER already exists"
-          exit 1
-        fi
-
-    - name: Check if release already exists
-      shell: bash
-      working-directory: $REPO_DIR
       run: |
         sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 23F3D4EA75716059
         sudo apt-add-repository https://cli.github.com/packages
         sudo apt update
         sudo apt-get install gh
+        
+        if git ls-remote --tags origin | grep -q "refs/tags/$VERSION_NUMBER$"; then
+          echo "Error: Tag $VERSION_NUMBER already exists"
+          exit 1
+        fi
+        
         if gh release list | grep -q "$VERSION_NUMBER"; then
           echo "Error: Release $VERSION_NUMBER already exists"
           exit 1
         fi
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
+      with:
+        ref: $BRANCH
+        path: $REPO_DIR
+        submodules: recursive
+
     - name: Configure git identity
       shell: bash
-      working-directory: $REPO_DIR
       env:
+        REPO_DIR: ${{ github.event.repository.name }}
         GITHUB_ACTOR: ${{ github.actor }}
+      working-directory: $REPO_DIR
       run: |
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
 
     - name: Update version number in manifest.yml
       shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
       working-directory: $REPO_DIR
       run: |
         if [ -f "./manifest.yml" ]; then
@@ -88,6 +89,8 @@ runs:
 
     - name: Update version number in doxygen
       shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
       working-directory: $REPO_DIR
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
@@ -95,35 +98,6 @@ runs:
           git add docs/doxygen/config.doxyfile
           git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
         fi
-
-    - name: Validate that the tests still build and pass
-      shell: bash
-      working-directory: $REPO_DIR
-      run: ${{ inputs.run_test_command }}
-
-    - name: Build repository with root CMakeLists.txt
-      shell: bash
-      working-directory: $REPO_DIR
-      run: ${{ inputs.repo_build_command }}
-
-    - name: Push changes and create tag
-      shell: bash
-      working-directory: $REPO_DIR
-      env:
-        REPO_NAME: ${{ github.event.repository.name }}
-      run: |
-        git push origin $BRANCH
-        git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
-        git push origin --tags
-
-    - name: Debug source path
-      shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: |
-        echo "Source path: $REPO_DIR"
-        echo "Contents of source directory:"
-        ls -la "$REPO_DIR"
 
     - name: Generate SBOM for Git Repository
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
@@ -138,106 +112,110 @@ runs:
         homepage: "https://www.github.com/$ORG_NAME/$REPO_NAME"
         namespace-prefix: "https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/"
 
-    - name: Validate that the tests still build and pass.
+    - name: Run tests for the repository
       shell: bash
       env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: ${{ inputs.run_test_command }}
+        REPO_DIR: ${{ github.event.repository.name }}
+      working-directory: $REPO_DIR
+      run: $RUN_TEST_COMMAND
 
-    - name: Remove hidden files and directories from repo to make zip archive
+    - name: Copy repository folder for archive
       shell: bash
       env:
-        REPO_DIR: ./${{ github.event.repository.name }}
+        REPO_DIR: ${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       run: |
-        find $REPO_DIR -type f -name ".*" -delete
-        find $REPO_DIR -type d -name ".*" -exec rm -rf {} +
+        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
 
-    - name: Remove test directory from repo to make zip archive
+    - name: Remove hidden files and test directory from archive
       shell: bash
       env:
-        REPO_DIR: ./${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       run: |
-        rm -rf "$REPO_DIR/test"
+        find $ARCHIVE_DIR -type f -name ".*" -delete
+        find $ARCHIVE_DIR -type d -name ".*" -exec rm -rf {} + 2>/dev/null || true
+        rm -rf "$ARCHIVE_DIR/test"
 
-    - name: Update README.md to remove testing information.
+    - name: Update README.md to remove testing information
       shell: bash
       env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $REPO_DIR/README.md   
-
-    - name: Build repository with root CMakeLists.txt
-      shell: bash
-      env:
-        REPO_DIR: ./${{ github.event.repository.name }}
-      run: ${{ inputs.repo_build_command }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+      run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
     - name: Generate SBOM for ZIP archive
       uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       env:
         REPO_NAME: ${{ github.event.repository.name }}
         ORG_NAME: ${{ github.repository_owner }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       with:
-        directory: ./$REPO_NAME
+        directory: ./$ARCHIVE_DIR
         distribution-type: archive
         creator: Amazon Web Services, Inc.
         download-location: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/$REPO_NAME-$VERSION_NUMBER.zip
         homepage: https://www.github.com/$ORG_NAME/$REPO_NAME
         namespace-prefix: https://github.com/$REPO_NAME/releases/download/$VERSION_NUMBER/
 
-    - name: Copy ZIP Archive SBOMs into repository folder
+    - name: Copy archive SBOMs into archive folder
       shell: bash
       env:
-        REPO_DIR: ./${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       run: |
-        cp *archive-SPDX* $REPO_DIR
-    
-    - name: Install ZIP tools
+        cp *archive-SPDX* $ARCHIVE_DIR/
+
+    - name: Build archive folder
       shell: bash
-      run: sudo apt-get install zip unzip
-    
-    - name: Create ZIP
+      env:
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
+      working-directory: $ARCHIVE_DIR
+      run: $REPO_BUILD_COMMAND
+
+    - name: Install ZIP tools and create ZIP
       shell: bash
       env:
         REPO_NAME: ${{ github.event.repository.name }}
-        REPO_DIR: ./${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
       run: |
-        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$REPO_DIR"
+        sudo apt-get install zip unzip
+        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
 
-    - name: Deploy doxygen documentation
-      uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
-      with:
-        ref: ${{ inputs.version_number }}
-        add_release: "true"
+    - name: Push changes to branch
+      shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
+      working-directory: $REPO_DIR
+      run: |
+        git push origin $BRANCH
+
+    - name: Create and push tag
+      shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}
+        REPO_NAME: ${{ github.event.repository.name }}
+      working-directory: $REPO_DIR
+      run: |
+        git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
+        git push origin --tags
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
       with:
-        tag_name: ${{ inputs.version_number }}
-        release_name: ${{ inputs.version_number }}
-        body: Release ${{ inputs.version_number }} of the ${{ github.event.repository.name }} Library.
+        tag_name: $VERSION_NUMBER
+        release_name: $VERSION_NUMBER
+        body: Release $VERSION_NUMBER of the $REPO_NAME Library.
         draft: false
         prerelease: false
 
-    - name: Upload ZIP Archive Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-        REPO_NAME: ${{ github.event.repository.name }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
-        asset_name: ${{ env.REPO_NAME }}-${{ env.VERSION_NUMBER }}.zip
-        asset_content_type: application/zip
-
-    - name: Upload SBOMs to release.
+    - name: Upload SBOMs to release
       shell: bash
       env:
         UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
       run: |
         for file in *.spdx*; do
           if [ -f "$file" ]; then
-            # Determine content type
             if [[ "$file" == *.spdx.json ]]; then
               content_type="application/json"
             elif [[ "$file" == *.spdx.xml ]]; then
@@ -248,7 +226,6 @@ runs:
               content_type="text/plain"
             fi
             
-            # Upload file
             curl -X POST \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Content-Type: $content_type" \
@@ -256,4 +233,15 @@ runs:
               "${UPLOAD_URL%\{*}?name=$file"
           fi
         done
+
+    - name: Upload ZIP Archive Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+      with:
+        upload_url: $UPLOAD_URL
+        asset_path: $REPO_NAME-$VERSION_NUMBER.zip
+        asset_name: $REPO_NAME-$VERSION_NUMBER.zip
+        asset_content_type: application/zip
 
