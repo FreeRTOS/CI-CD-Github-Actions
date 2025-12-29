@@ -127,7 +127,8 @@ runs:
         REPO_DIR: ${{ github.event.repository.name }}
         RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
       working-directory: ${{ github.event.repository.name }}
-      run: $RUN_TEST_COMMAND
+      run: |
+        eval "$RUN_TEST_COMMAND"
 
     - name: Remove hidden files and test directory from archive
       shell: bash
@@ -172,7 +173,8 @@ runs:
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
         REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
       working-directory: ${{ github.event.repository.name }}-archive
-      run: $REPO_BUILD_COMMAND
+      run: |
+        eval "$REPO_BUILD_COMMAND"
 
     - name: Install ZIP tools and create ZIP
       shell: bash
