@@ -38,6 +38,7 @@ runs:
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
+        GH_TOKEN: ${{ inputs.github_token }}
       run: |
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
         sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
@@ -67,7 +68,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         GITHUB_ACTOR: ${{ github.actor }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: |
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
@@ -77,7 +78,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: |
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
@@ -90,7 +91,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: |
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
           sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
@@ -125,7 +126,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: $RUN_TEST_COMMAND
 
     - name: Remove hidden files and test directory from archive
@@ -170,7 +171,7 @@ runs:
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}-archive
         REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
-      working-directory: $ARCHIVE_DIR
+      working-directory: ${{ github.event.repository.name }}-archive
       run: $REPO_BUILD_COMMAND
 
     - name: Install ZIP tools and create ZIP
@@ -188,7 +189,7 @@ runs:
       env:
         REPO_DIR: ${{ github.event.repository.name }}
         BRANCH: ${{ inputs.branch }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: |
         git push origin $BRANCH
 
@@ -198,7 +199,7 @@ runs:
         REPO_DIR: ${{ github.event.repository.name }}
         REPO_NAME: ${{ github.event.repository.name }}
         VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: $REPO_DIR
+      working-directory: ${{ github.event.repository.name }}
       run: |
         git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
         git push origin --tags
