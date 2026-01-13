@@ -29,6 +29,7 @@ jobs:
               run-spelling-check: true,
               run-complexity: false,
               run-doxygen: false,
+              exclude-urls: 'https://www.microchip.com, https://www.microchip.com/support',
             },
             {
               repository: FreeRTOS-Plus-TCP,
@@ -39,6 +40,7 @@ jobs:
               run-complexity: false,
               run-doxygen: false,
               exclude-dirs: 'source/portable/NetworkInterface/STM32'
+              exclude-urls: 'https://www.microchip.com/en-us/support/design-help, http://www.atmel.com/design-support'
             },
             {
               repository: FreeRTOS,
@@ -209,7 +211,7 @@ jobs:
         with:
           path: repo/${{ matrix.inputs.repository }}
           exclude-dirs: complexity, formatting
-          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota, https://www.gnu.org/software/complexity/manual/complexity.html, https://www.u-blox.com/en/product/sara-r4-series
+          exclude-urls: https://dummy-url.com/ota.bin, https://s3.region.amazonaws.com/joe-ota, https://www.gnu.org/software/complexity/manual/complexity.html, https://www.u-blox.com/en/product/sara-r4-series${{ matrix.inputs.exclude-urls && format(',{0}', matrix.inputs.exclude-urls) || '' }}
 
       - name: "Complexity Check: ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-complexity && ( success() || failure() )
