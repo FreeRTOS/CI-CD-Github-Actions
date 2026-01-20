@@ -1,0 +1,73 @@
+name: 'misra-cppcheck'
+description: 'cppcheck MISRA CI Check'
+inputs:
+  path:
+    description: 'Path to repository folder to check with cppcheck.'
+    required: false
+    default: source/*.c
+  cmake-src-dir:
+    description: 'Path to repository folder which contains a CMakeLists.txt file.'
+    required: false
+    default: test/
+  cmake-args:
+    description: 'Additional arguments to pass to cmake.'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  - env:
+      bashPass: \033[32;1mPASSED -
+      bashInfo: \033[33;1mINFO -
+      bashFail: \033[31;1mFAILED -
+      bashEnd:  \033[0m
+      stepName: Set-Up Cppcheck
+    name: ${{ env.stepName }}
+    id: spell-checker-setup
+    shell: bash
+    run: |
+      # ${{ env.stepName }}
+      echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      set -e
+
+      # Install the Dependencies we need to run the spell-checker
+      sudo apt-get update -y
+      sudo apt-get -y install cppcheck
+
+      echo -e "::endgroup::"
+      # Only reach this line if no errors were hit above
+      echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+  - env:
+      bashPass: \033[32;1mPASSED -
+      bashInfo: \033[33;1mINFO -
+      bashFail: \033[31;1mFAILED -
+      bashEnd:  \033[0m
+      stepName: Spell Checker
+    name: ${{ env.stepName }}
+    id: run-spell-checker
+    working-directory: ${{ inputs.path }}
+    shell: bash
+    run: |
+      echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
+
+      export PATH="$GITHUB_ACTION_PATH:$PATH"
+      export PATH="/usr/lib/x86_64-linux-gnu/cppcheck/addons:${PATH}"
+      exitStatus=0
+
+      cmake -B build -G Ninja -D CMAKE_EXPORT_COMPILE_COMMANDS=1 -S "${{ cmake-src-dir }}"
+
+      python3 misra_cppcheck.py \
+        --rule-text "${GITHUB_ACTION_PATH}/misra_rules_public.json" \
+        --compile-commands build/compile_commands.json \
+        "${{ inputs.path }}"
+
+      exitStatus="$?"
+
+      echo -e "::endgroup::"
+      if [ $exitStatus -eq 0 ]; then
+        echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      else
+        echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
+      fi
+      exit $exitStatus
