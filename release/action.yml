@@ -1,0 +1,251 @@
+name: 'Core Library Release'
+description: 'Universal release action for FreeRTOS core libraries'
+inputs:
+  version_number:
+    description: 'Release Version Number (e.g., v1.0.0)'
+    required: true
+  branch:
+    description: 'Branch to release from'
+    required: false
+    default: 'main'
+  github_token:
+    description: 'GitHub token for creating releases'
+    required: true
+    default: ${{ github.token }}
+  run_test_command:
+    description: 'Command to build and run tests from root of library directory.'
+    required: false
+    default: 'sudo apt-get install -y lcov && rm -f ../build && cmake -S ./test -B ../build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS="--coverage -Wall -Wextra -Werror" && make -C ../build all && cd ../build && ctest -E system --output-on-failure'
+  repo_build_command:
+    description: 'Command to build from root of library directory.'
+    required: false
+    default: 'rm -rf ../build && cmake -S . -B ../build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make -C ../build all'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate version number format
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        if [[ ! "$VERSION_NUMBER" =~ ^[vV][0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Error: Version number must be in format vX.Y.Z or VX.Y.Z"
+          exit 1
+        fi
+
+    - name: Install GitHub CLI
+      shell: bash
+      run: |
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+        sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}-repository
+        submodules: recursive
+
+    - name: Check if tag and release already exist
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        if git ls-remote --tags origin | grep -q "refs/tags/$VERSION_NUMBER$"; then
+          echo "Error: Tag $VERSION_NUMBER already exists"
+          exit 1
+        fi
+        
+        if gh release list | grep -q "$VERSION_NUMBER"; then
+          echo "Error: Release $VERSION_NUMBER already exists"
+          exit 1
+        fi
+
+    - name: Configure git identity
+      shell: bash
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+      run: |
+        git config --global user.name $GITHUB_ACTOR
+        git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
+
+    - name: Update version number in manifest.yml
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        if [ -f "./manifest.yml" ]; then
+          sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
+          git add manifest.yml
+          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
+        fi
+
+    - name: Update version number in doxygen
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        if [ -f "./docs/doxygen/config.doxyfile" ]; then
+          sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
+          git add docs/doxygen/config.doxyfile
+          git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
+        fi
+
+    - name: Generate SBOM for Git Repository
+      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      with:
+        directory: ./${{ github.event.repository.name }}-repository
+        distribution-type: repository
+        creator: Amazon Web Services, Inc.
+        download-location: git+https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git@${{ inputs.version_number }}
+        homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+        namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
+        include-file-hashes: true
+
+    - name: Run tests for the repository.
+      shell: bash
+      env:
+        RUN_TEST_COMMAND: ${{ inputs.run_test_command }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        eval "$RUN_TEST_COMMAND"
+
+    - name: Copy repository folder for archive
+      shell: bash
+      env:
+        REPO_DIR: ${{ github.event.repository.name }}-repository
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+      run: |
+        cp -r "$REPO_DIR" "$ARCHIVE_DIR"
+
+    - name: Remove hidden files and test directory from archive directory
+      shell: bash
+      env:
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+      run: |
+        find $ARCHIVE_DIR -type f -name ".*" -delete
+        find $ARCHIVE_DIR -type d -name ".*" -exec rm -rf {} + 2>/dev/null || true
+        rm -rf "$ARCHIVE_DIR/test"
+
+    - name: Update README.md to remove testing information from archive directory
+      shell: bash
+      env:
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+      run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
+
+    - name: Generate SBOM for archive.
+      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      with:
+        directory: ./${{ github.event.repository.name }}
+        distribution-type: archive
+        creator: Amazon Web Services, Inc.
+        download-location: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+        namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
+        include-file-hashes: true
+
+    - name: Copy archive SBOMs into archive folder
+      shell: bash
+      env:
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+      run: |
+        cp *archive-SPDX* $ARCHIVE_DIR/
+
+    - name: Build archive folder
+      shell: bash
+      env:
+        REPO_BUILD_COMMAND: ${{ inputs.repo_build_command }}
+      working-directory: ${{ github.event.repository.name }}
+      run: |
+        eval "$REPO_BUILD_COMMAND"
+
+    - name: Install ZIP tools and create ZIP
+      shell: bash
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        ARCHIVE_DIR: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      run: |
+        sudo apt-get install zip unzip
+        zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
+
+    - name: Push release changes to repository.
+      shell: bash
+      env:
+        BRANCH: ${{ inputs.branch }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git push origin $BRANCH
+
+    - name: Create and push tag for release.
+      shell: bash
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git tag "$VERSION_NUMBER" -a -m "$REPO_NAME Library $VERSION_NUMBER"
+        git push origin --tags
+
+    - name: Create GitHub release.
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        tag_name: ${{ inputs.version_number }}
+        release_name: ${{ inputs.version_number }}
+        body: Release ${{ inputs.version_number }} of the ${{ github.event.repository.name }} Library.
+        draft: false
+        prerelease: false
+
+    - name: Upload SBOMs to GitHub release.
+      shell: bash
+      env:
+        UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: |
+        for file in *.spdx*; do
+          if [ -f "$file" ]; then
+            if [[ "$file" == *.spdx.json ]]; then
+              content_type="application/json"
+            elif [[ "$file" == *.spdx.xml ]]; then
+              content_type="application/xml"
+            elif [[ "$file" == *.spdx.yaml ]]; then
+              content_type="application/yaml"
+            else
+              content_type="text/plain"
+            fi
+            
+            curl -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: $content_type" \
+              --data-binary @"$file" \
+              "${UPLOAD_URL%\{*}?name=$file"
+          fi
+        done
+
+    - name: Upload library archive to GitHub release.
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        asset_content_type: application/zip
+
+    - name: Deploy GitHub pages for release.
+      uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
+      with:
+        ref: ${{ inputs.version_number }}
+        add_release: "true"
+

@@ -1,1 +1,2 @@
-pyyaml
+spdx-tools>=0.8.0
+PyYAML>=6.0

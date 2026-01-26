@@ -1,23 +1,77 @@
-name: 'generate-sbom'
-description: 'Generate SBOM for FreeRTOS libraries'
+name: 'SBOM Generator'
+description: 'Generate SPDX 2.3 Software Bill of Materials (SBOM) from directory with manifest.yml'
+author: 'AWS'
+
 inputs:
-  repo_path:
-    description: 'Path to repository folder containing manifest.yml to verify.'
+  directory:
+    description: 'Path to directory containing manifest.yml'
+    required: true
+  distribution-type:
+    description: 'Distribution method of package (archive or repository)'
+    required: true
+  creator:
+    description: 'Creator organization name'
+    required: true
+  download-location:
+    description: 'Package download location URL'
+    required: true
+  homepage:
+    description: 'Package homepage URL'
+    required: true
+  namespace-prefix:
+    description: 'Document namespace prefix URI'
+    required: true
+  include-file-hashes:
+    description: 'Include individual file information with hashes'
     required: false
-    default: ./
-  source_path:
-    description: 'Path to source code'
+    default: false
+  exclude:
+    description: 'Exclude files/directories from verification code (comma-separated)'
     required: false
-    default: ./source
+
+outputs:
+  sbom-files:
+    description: 'Generated SBOM file paths'
+
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
     - name: Install dependencies
       shell: bash
-      run: pip install -r $GITHUB_ACTION_PATH/requirements.txt
-
-    - name: Run generator script
-      working-directory: ${{ inputs.repo_path }}
+      run: |
+        pip install -r ${{ github.action_path }}/requirements.txt
+    
+    - name: Generate SBOM
       shell: bash
       run: |
-        python3 $GITHUB_ACTION_PATH/scan_dir.py --source-path ${{ inputs.source_path }}
+        cd ${{ github.workspace }}
+        
+        # Build command
+        cmd="python3 ${{ github.action_path }}/sbom_generator.py"
+        cmd="$cmd ${{ inputs.directory }}"
+        cmd="$cmd -t ${{ inputs.distribution-type }}"
+        cmd="$cmd -c '${{ inputs.creator }}'"
+        cmd="$cmd -d '${{ inputs.download-location }}'"
+        cmd="$cmd -p '${{ inputs.homepage }}'"
+        cmd="$cmd -n '${{ inputs.namespace-prefix }}'"
+        
+        # Add optional flags
+        if [ "${{ inputs.include-file-hashes }}" = "true" ]; then
+          cmd="$cmd -f"
+        fi
+        
+        # Add exclusions
+        if [ -n "${{ inputs.exclude }}" ]; then
+          IFS=',' read -ra EXCLUDES <<< "${{ inputs.exclude }}"
+          for exclude in "${EXCLUDES[@]}"; do
+            cmd="$cmd -e '$exclude'"
+          done
+        fi
+        
+        # Execute command
+        eval $cmd
