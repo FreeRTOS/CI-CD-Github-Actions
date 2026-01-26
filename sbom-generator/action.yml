@@ -24,7 +24,7 @@ inputs:
   include-file-hashes:
     description: 'Include individual file information with hashes'
     required: false
-    default: 'false'
+    default: false
   exclude:
     description: 'Exclude files/directories from verification code (comma-separated)'
     required: false

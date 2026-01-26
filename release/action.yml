@@ -100,7 +100,7 @@ runs:
         fi
 
     - name: Generate SBOM for Git Repository
-      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       with:
         directory: ./${{ github.event.repository.name }}-repository
         distribution-type: repository
@@ -108,6 +108,7 @@ runs:
         download-location: git+https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git@${{ inputs.version_number }}
         homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
         namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
+        include-file-hashes: true
 
     - name: Run tests for the repository.
       shell: bash
@@ -141,7 +142,7 @@ runs:
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
     - name: Generate SBOM for archive.
-      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
+      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
       with:
         directory: ./${{ github.event.repository.name }}
         distribution-type: archive
@@ -149,6 +150,7 @@ runs:
         download-location: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
         homepage: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
         namespace-prefix: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/releases/download/${{ inputs.version_number }}/
+        include-file-hashes: true
 
     - name: Copy archive SBOMs into archive folder
       shell: bash
