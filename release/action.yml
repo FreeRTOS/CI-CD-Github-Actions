@@ -100,7 +100,7 @@ runs:
         fi
 
     - name: Generate SBOM for Git Repository
-      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
       with:
         directory: ./${{ github.event.repository.name }}-repository
         distribution-type: repository
@@ -142,7 +142,7 @@ runs:
       run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
     - name: Generate SBOM for archive.
-      uses: jasonpcarroll/CI-CD-Github-Actions/sbom-generator@main
+      uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
       with:
         directory: ./${{ github.event.repository.name }}
         distribution-type: archive
