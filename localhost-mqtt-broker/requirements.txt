@@ -1,2 +1,2 @@
-amqtt==0.10.1
+amqtt
 pyOpenSSL
