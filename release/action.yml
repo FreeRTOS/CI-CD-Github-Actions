@@ -241,3 +241,9 @@ runs:
         asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
         asset_content_type: application/zip
 
+    - name: Deploy GitHub pages for release.
+      uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
+      with:
+        ref: ${{ inputs.version_number }}
+        add_release: "true"
+
