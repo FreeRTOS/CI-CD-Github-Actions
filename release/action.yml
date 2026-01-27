@@ -67,6 +67,22 @@ runs:
           exit 1
         fi
 
+    - name: Verify CHANGELOG.md contains release version
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        if [ ! -f "CHANGELOG.md" ]; then
+          echo "Error: CHANGELOG.md not found"
+          exit 1
+        fi
+        
+        if ! grep -q "^## $VERSION_NUMBER" CHANGELOG.md; then
+          echo "Error: CHANGELOG.md does not contain release version $VERSION_NUMBER"
+          exit 1
+        fi
+
     - name: Configure git identity
       shell: bash
       env:
@@ -294,4 +310,14 @@ runs:
       with:
         ref: ${{ inputs.version_number }}
         add_release: "true"
+
+    - name: Delete release preparation branch
+      if: always()
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git push origin --delete release-prep-$VERSION_NUMBER || true
 
