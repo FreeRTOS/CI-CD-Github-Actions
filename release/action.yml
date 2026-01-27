@@ -75,6 +75,14 @@ runs:
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
 
+    - name: Create release preparation branch
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git checkout -b release-prep-$VERSION_NUMBER
+
     - name: Update version number in manifest.yml
       shell: bash
       env:
@@ -98,6 +106,52 @@ runs:
           git add docs/doxygen/config.doxyfile
           git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
         fi
+
+    - name: Push release preparation branch
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git push origin release-prep-$VERSION_NUMBER
+
+    - name: Create pull request
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        BRANCH: ${{ inputs.branch }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        PR_URL=$(gh pr create --base $BRANCH --head release-prep-$VERSION_NUMBER --title "Release $VERSION_NUMBER" --body "Automated release preparation for $VERSION_NUMBER")
+        echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+
+    - name: Wait for PR to be merged
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        PR_NUMBER=$(echo $PR_URL | grep -oP '\d+$')
+        while true; do
+          STATE=$(gh pr view $PR_NUMBER --json state --jq .state)
+          if [ "$STATE" = "MERGED" ]; then
+            echo "PR merged successfully"
+            break
+          elif [ "$STATE" = "CLOSED" ]; then
+            echo "Error: PR was closed without merging"
+            exit 1
+          fi
+          echo "Waiting for PR to be merged... (current state: $STATE)"
+          sleep 30
+        done
+
+    - name: Re-checkout code after merge
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}-repository
+        submodules: recursive
 
     - name: Generate SBOM for Git Repository
       uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
@@ -176,14 +230,6 @@ runs:
       run: |
         sudo apt-get install zip unzip
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
-
-    - name: Push release changes to repository.
-      shell: bash
-      env:
-        BRANCH: ${{ inputs.branch }}
-      working-directory: ${{ github.event.repository.name }}-repository
-      run: |
-        git push origin $BRANCH
 
     - name: Create and push tag for release.
       shell: bash
