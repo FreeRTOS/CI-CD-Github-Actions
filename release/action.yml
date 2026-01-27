@@ -83,7 +83,7 @@ runs:
       run: |
         git checkout -b release-prep-$VERSION_NUMBER
 
-    - name: Update version number in manifest.yml
+    - name: Update version numbers
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
@@ -92,20 +92,20 @@ runs:
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
           git add manifest.yml
-          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
         fi
-
-    - name: Update version number in doxygen
-      shell: bash
-      env:
-        VERSION_NUMBER: ${{ inputs.version_number }}
-      working-directory: ${{ github.event.repository.name }}-repository
-      run: |
+        
         if [ -f "./docs/doxygen/config.doxyfile" ]; then
           sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
           git add docs/doxygen/config.doxyfile
-          git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
         fi
+        
+        HEADER_FILE=$(find ./source/include -name "*.h" -type f | head -n 1)
+        if [ -n "$HEADER_FILE" ]; then
+          sed -i -b "s/#define [A-Z_]*LIBRARY_VERSION.*/#define $(basename ${HEADER_FILE%.h} | tr '[:lower:]' '[:upper:]' | tr '-' '_')_LIBRARY_VERSION    \"$VERSION_NUMBER\"/g" "$HEADER_FILE"
+          git add "$HEADER_FILE"
+        fi
+        
+        git commit -m '[AUTO][RELEASE]: Update version numbers'
 
     - name: Push release preparation branch
       shell: bash
