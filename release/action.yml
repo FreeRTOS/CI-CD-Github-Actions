@@ -67,6 +67,22 @@ runs:
           exit 1
         fi
 
+    - name: Verify CHANGELOG.md contains release version
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        if [ ! -f "CHANGELOG.md" ]; then
+          echo "Error: CHANGELOG.md not found"
+          exit 1
+        fi
+        
+        if ! grep -q "^## $VERSION_NUMBER" CHANGELOG.md; then
+          echo "Error: CHANGELOG.md does not contain release version $VERSION_NUMBER"
+          exit 1
+        fi
+
     - name: Configure git identity
       shell: bash
       env:
@@ -75,7 +91,15 @@ runs:
         git config --global user.name $GITHUB_ACTOR
         git config --global user.email $GITHUB_ACTOR@users.noreply.github.com
 
-    - name: Update version number in manifest.yml
+    - name: Create release preparation branch
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git checkout -b release-prep-$VERSION_NUMBER
+
+    - name: Update version numbers
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
@@ -84,20 +108,66 @@ runs:
         if [ -f "./manifest.yml" ]; then
           sed -i -b "0,/^version/s/^version.*/version: \"$VERSION_NUMBER\"/g" ./manifest.yml
           git add manifest.yml
-          git commit -m '[AUTO][RELEASE]: Update version number in manifest.yml'
         fi
+        
+        if [ -f "./docs/doxygen/config.doxyfile" ]; then
+          sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
+          git add docs/doxygen/config.doxyfile
+        fi
+        
+        HEADER_FILE=$(find ./source/include -name "*.h" -type f | head -n 1)
+        if [ -n "$HEADER_FILE" ]; then
+          sed -i -b "s/\(#define [A-Z_]*LIBRARY_VERSION[[:space:]]*\)\"[^\"]*\"/\1\"$VERSION_NUMBER\"/g" "$HEADER_FILE"
+          git add "$HEADER_FILE"
+        fi
+        
+        git commit -m '[AUTO][RELEASE]: Update version numbers'
 
-    - name: Update version number in doxygen
+    - name: Push release preparation branch
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
       working-directory: ${{ github.event.repository.name }}-repository
       run: |
-        if [ -f "./docs/doxygen/config.doxyfile" ]; then
-          sed -i -b "s/PROJECT_NUMBER *=.*/PROJECT_NUMBER         = $VERSION_NUMBER/g" ./docs/doxygen/config.doxyfile
-          git add docs/doxygen/config.doxyfile
-          git commit -m '[AUTO][RELEASE]: Update version number in doxygen'
-        fi
+        git push origin release-prep-$VERSION_NUMBER
+
+    - name: Create pull request
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        BRANCH: ${{ inputs.branch }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        PR_URL=$(gh pr create --base $BRANCH --head release-prep-$VERSION_NUMBER --title "Release $VERSION_NUMBER" --body "Automated release preparation for $VERSION_NUMBER")
+        echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+
+    - name: Wait for PR to be merged
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        PR_NUMBER=$(echo $PR_URL | grep -oP '\d+$')
+        while true; do
+          STATE=$(gh pr view $PR_NUMBER --json state --jq .state)
+          if [ "$STATE" = "MERGED" ]; then
+            echo "PR merged successfully"
+            break
+          elif [ "$STATE" = "CLOSED" ]; then
+            echo "Error: PR was closed without merging"
+            exit 1
+          fi
+          echo "Waiting for PR to be merged... (current state: $STATE)"
+          sleep 30
+        done
+
+    - name: Re-checkout code after merge
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        path: ${{ github.event.repository.name }}-repository
+        submodules: recursive
 
     - name: Generate SBOM for Git Repository
       uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
@@ -177,14 +247,6 @@ runs:
         sudo apt-get install zip unzip
         zip -r "$REPO_NAME-$VERSION_NUMBER.zip" "$ARCHIVE_DIR"
 
-    - name: Push release changes to repository.
-      shell: bash
-      env:
-        BRANCH: ${{ inputs.branch }}
-      working-directory: ${{ github.event.repository.name }}-repository
-      run: |
-        git push origin $BRANCH
-
     - name: Create and push tag for release.
       shell: bash
       env:
@@ -248,4 +310,14 @@ runs:
       with:
         ref: ${{ inputs.version_number }}
         add_release: "true"
+
+    - name: Delete release preparation branch
+      if: always()
+      shell: bash
+      env:
+        VERSION_NUMBER: ${{ inputs.version_number }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      working-directory: ${{ github.event.repository.name }}-repository
+      run: |
+        git push origin --delete release-prep-$VERSION_NUMBER || true
 
