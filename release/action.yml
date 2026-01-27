@@ -101,7 +101,7 @@ runs:
         
         HEADER_FILE=$(find ./source/include -name "*.h" -type f | head -n 1)
         if [ -n "$HEADER_FILE" ]; then
-          sed -i -b "s/#define [A-Z_]*LIBRARY_VERSION.*/#define $(basename ${HEADER_FILE%.h} | tr '[:lower:]' '[:upper:]' | tr '-' '_')_LIBRARY_VERSION    \"$VERSION_NUMBER\"/g" "$HEADER_FILE"
+          sed -i -b "s/\(#define [A-Z_]*LIBRARY_VERSION[[:space:]]*\)\"[^\"]*\"/\1\"$VERSION_NUMBER\"/g" "$HEADER_FILE"
           git add "$HEADER_FILE"
         fi
         
