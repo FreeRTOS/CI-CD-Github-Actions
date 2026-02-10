@@ -20,6 +20,10 @@ inputs:
     description: 'Command to build from root of library directory.'
     required: false
     default: 'rm -rf ../build && cmake -S . -B ../build -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release && make -C ../build all'
+  changelog_file:
+    description: 'File name containing the change-log.'
+    required: false
+    default: 'CHANGELOG.md'
 
 runs:
   using: 'composite'
@@ -71,15 +75,16 @@ runs:
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
+        CHANGELOG_FILE: ${{ inputs.changelog_file }}
       working-directory: ${{ github.event.repository.name }}-repository
       run: |
-        if [ ! -f "CHANGELOG.md" ]; then
-          echo "Error: CHANGELOG.md not found"
+        if [ ! -f "$CHANGELOG_FILE" ]; then
+          echo "Error: $CHANGELOG_FILE not found"
           exit 1
         fi
         
-        if ! grep -q "^## $VERSION_NUMBER" CHANGELOG.md; then
-          echo "Error: CHANGELOG.md does not contain release version $VERSION_NUMBER"
+        if ! grep -q "^## $VERSION_NUMBER" $CHANGELOG_FILE; then
+          echo "Error: $CHANGELOG_FILE does not contain release version $VERSION_NUMBER"
           exit 1
         fi
 
