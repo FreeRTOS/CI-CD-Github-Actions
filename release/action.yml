@@ -310,6 +310,13 @@ runs:
         asset_name: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
         asset_content_type: application/zip
 
+    - name: Backup Release Asset
+      id: backup_release_asset
+      uses: FreeRTOS/CI-CD-Github-Actions/artifact-backup@main
+      with:
+        artifact_path: ${{ github.event.repository.name }}-${{ inputs.version_number }}.zip
+        release_tag: ${{ inputs.version_number }}
+
     - name: Deploy GitHub pages for release.
       uses: FreeRTOS/CI-CD-Github-Actions/doxygen-generation@main
       with:
