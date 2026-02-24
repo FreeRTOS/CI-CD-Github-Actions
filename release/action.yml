@@ -126,7 +126,7 @@ runs:
           git add "$HEADER_FILE"
         fi
         
-        git commit -m '[AUTO][RELEASE]: Update version numbers'
+        git commit -m '[AUTO][RELEASE]: Update version numbers' || true
 
     - name: Push release preparation branch
       shell: bash
