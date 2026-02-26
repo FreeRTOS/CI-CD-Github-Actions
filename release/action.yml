@@ -83,7 +83,7 @@ runs:
           exit 1
         fi
         
-        if ! grep -q "^## $VERSION_NUMBER" $CHANGELOG_FILE; then
+        if ! grep -q "$VERSION_NUMBER" $CHANGELOG_FILE; then
           echo "Error: $CHANGELOG_FILE does not contain release version $VERSION_NUMBER"
           exit 1
         fi
@@ -122,13 +122,20 @@ runs:
         
         HEADER_FILE=$(find ./source/include -name "*.h" -type f | head -n 1)
         if [ -n "$HEADER_FILE" ]; then
-          sed -i -b "s/\(#define [A-Z_]*LIBRARY_VERSION[[:space:]]*\)\"[^\"]*\"/\1\"$VERSION_NUMBER\"/g" "$HEADER_FILE"
+          sed -i -b "s/\(#define [A-Za-z_]*VERSION_NUMBER[[:space:]]*\)\"[^\"]*\"/\1\"$VERSION_NUMBER\"/g" "$HEADER_FILE"
+          sed -i -b "s/\(#define [A-Za-z_]*LIBRARY_VERSION[[:space:]]*\)\"[^\"]*\"/\1\"$VERSION_NUMBER\"/g" "$HEADER_FILE"
           git add "$HEADER_FILE"
         fi
         
-        git commit -m '[AUTO][RELEASE]: Update version numbers'
+        if git commit -m '[AUTO][RELEASE]: Update version numbers'; then
+          echo "VERSION_UPDATED=true" >> $GITHUB_ENV
+        else
+          echo "Version numbers already up to date"
+          echo "VERSION_UPDATED=false" >> $GITHUB_ENV
+        fi
 
     - name: Push release preparation branch
+      if: env.VERSION_UPDATED == 'true'
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
@@ -137,6 +144,7 @@ runs:
         git push origin release-prep-$VERSION_NUMBER
 
     - name: Create pull request
+      if: env.VERSION_UPDATED == 'true'
       shell: bash
       env:
         VERSION_NUMBER: ${{ inputs.version_number }}
@@ -148,6 +156,7 @@ runs:
         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
 
     - name: Wait for PR to be merged
+      if: env.VERSION_UPDATED == 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
