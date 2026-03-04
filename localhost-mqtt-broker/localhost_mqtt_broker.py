@@ -42,29 +42,32 @@ config = {
             "type": "tcp",
             "bind": f"{args.host}:8883",
             "max_connections": 1000,
-            "ssl": "on",
+            "ssl": True,
             "cafile": args.root_ca_cert_path,
             "certfile": args.server_cert_path,
             "keyfile": args.server_priv_key_path,
         },
     },
-    "sys_interval": 10,
-    "auth": {
-        "allow_anonymous": True,
-        "password_file": os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "passwd"
-        ),
-        "plugins": ["auth_anonymous"],
-    },
-    "topic_check": {
-        "enabled": True,
-        "plugins": []
+    "timeout_disconnect_delay": 0,
+    "plugins": {
+        "amqtt.plugins.logging_amqtt.EventLoggerPlugin": {},
+        "amqtt.plugins.logging_amqtt.PacketLoggerPlugin": {},
+        "amqtt.plugins.authentication.AnonymousAuthPlugin": {
+            "allow_anonymous": True
+        },
+        "amqtt.plugins.authentication.FileAuthPlugin": {
+            "password_file": os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "passwd"
+            )
+        },
+        "amqtt.plugins.sys.broker.BrokerSysPlugin": {
+            "sys_interval": 10
+        },
     },
 }
 
-broker = Broker(config)
-
 async def broker_coroutine():
+    broker = Broker(config)
     await broker.start()
 
 if __name__ == "__main__":
