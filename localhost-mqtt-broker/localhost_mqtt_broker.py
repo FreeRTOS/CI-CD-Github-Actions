@@ -69,11 +69,12 @@ config = {
 async def broker_coroutine():
     broker = Broker(config)
     await broker.start()
+    # Keep the broker running indefinitely
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     formatter = "[%(asctime)s] :: %(levelname)s :: %(name)s :: %(message)s"
     logging.basicConfig(level=logging.DEBUG, format=formatter)
 
     # Start the MQTT broker
-    asyncio.get_event_loop().run_until_complete(broker_coroutine())
-    asyncio.get_event_loop().run_forever()
+    asyncio.run(broker_coroutine())
