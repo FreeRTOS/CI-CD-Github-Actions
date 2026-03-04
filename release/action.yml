@@ -24,6 +24,10 @@ inputs:
     description: 'File name containing the change-log.'
     required: false
     default: 'CHANGELOG.md'
+  remove_tests:
+    description: 'Whether the workflow should remove the test folder'
+    required: false
+    default: true
 
 runs:
   using: 'composite'
@@ -210,20 +214,23 @@ runs:
       run: |
         cp -r "$REPO_DIR" "$ARCHIVE_DIR"
 
-    - name: Remove hidden files and test directory from archive directory
+    - name: Remove hidden files
       shell: bash
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}
       run: |
         find $ARCHIVE_DIR -type f -name ".*" -delete
         find $ARCHIVE_DIR -type d -name ".*" -exec rm -rf {} + 2>/dev/null || true
-        rm -rf "$ARCHIVE_DIR/test"
+        
 
-    - name: Update README.md to remove testing information from archive directory
+    - name: Remove testing folder and update README.md to remove testing information from archive directory
+      if: ${{ inputs.remove_tests }}
       shell: bash
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}
-      run: sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
+      run: |
+        rm -rf "$ARCHIVE_DIR/test"
+        sed -i '/^## Building Unit Tests$/,/^## Reference examples$/{/^## Reference examples$/!d;} ; /^## CBMC$/,/^## Reference examples$/{/^## Reference examples$/!d;}' $ARCHIVE_DIR/README.md
 
     - name: Generate SBOM for archive.
       uses: FreeRTOS/CI-CD-Github-Actions/sbom-generator@main
