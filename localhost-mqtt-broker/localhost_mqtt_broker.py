@@ -36,12 +36,12 @@ config = {
         "default": {
             "type": "tcp",
             "bind": f"{args.host}:1883",
-            "max-connections": 1000,
+            "max_connections": 1000,
         },
         "tls": {
             "type": "tcp",
             "bind": f"{args.host}:8883",
-            "max-connections": 1000,
+            "max_connections": 1000,
             "ssl": "on",
             "cafile": args.root_ca_cert_path,
             "certfile": args.server_cert_path,
@@ -50,13 +50,13 @@ config = {
     },
     "sys_interval": 10,
     "auth": {
-        "allow-anonymous": True,
-        "password-file": os.path.join(
+        "allow_anonymous": True,
+        "password_file": os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "passwd"
         ),
         "plugins": ["auth_anonymous"],
     },
-    "topic-check": {
+    "topic_check": {
         "enabled": True,
         "plugins": []
     },
