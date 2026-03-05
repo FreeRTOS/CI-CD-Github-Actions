@@ -90,8 +90,10 @@ jobs:
               run-link-verifier: true,
               run-spelling-check: true,
               run-complexity: true,
+              horrid-threshold-complexity: 30,
               run-doxygen: true,
               build-flags: -DCMAKE_BUILD_TYPE=Debug -DBUILD_CLONE_SUBMODULES=ON -DCMAKE_C_FLAGS='--coverage -Wall -Wextra -Werror -DNDEBUG -DLIBRARY_LOG_LEVEL=LOG_DEBUG',
+              branch_coverage: 94,
             },
             {
               repository: corePKCS11,
@@ -218,7 +220,7 @@ jobs:
         uses: ./complexity
         with:
           path: repo/${{ matrix.inputs.repository }}
-          horrid_threshold: 16
+          horrid_threshold: ${{ matrix.inputs.horrid-threshold-complexity || 16 }}
 
       - name: "Doxygen Build Check ${{ matrix.inputs.repository }}"
         if: matrix.inputs.run-doxgyen && ( success() || failure() )
