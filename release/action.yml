@@ -224,7 +224,7 @@ runs:
         
 
     - name: Remove testing folder and update README.md to remove testing information from archive directory
-      if: ${{ inputs.remove_tests }}
+      if: ${{ inputs.remove_tests == true }}
       shell: bash
       env:
         ARCHIVE_DIR: ${{ github.event.repository.name }}
