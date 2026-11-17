@@ -49,14 +49,14 @@ runs:
       with:
         path: |
           ~/uncrustify
-        key: ${{ runner.os }}-uncrustify
+        key: ${{ runner.os }}-uncrustify-0.83.0
 
     - env:
         bashPass: \033[32;1mPASSED -
         bashInfo: \033[33;1mINFO -
         bashFail: \033[31;1mFAILED -
         bashEnd:  \033[0m
-        stepName: Build uncrustify version 0.69.0
+        stepName: Build uncrustify version 0.83.0
       name: ${{ env.stepName }}
       shell: bash
       if: steps.cache-uncrustify.outputs.cache-hit != 'true'
@@ -65,22 +65,22 @@ runs:
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
         mkdir -p ~/uncrustify
-        wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.69.0.tar.gz -O ~/uncrustify/uncrustify-0.69.0.tar.gz
+        wget https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.83.0.tar.gz -O ~/uncrustify/uncrustify-0.83.0.tar.gz
 
-        EXPECTED_SHA256="33bd97a07f7c4bd114874f73171aca220bf05c17108f8505a117b97374a347b6"
-        GENERATED_SHA256=$(sha256sum ~/uncrustify/uncrustify-0.69.0.tar.gz | awk '{print $1}')
+        EXPECTED_SHA256="1d4d3ab3a991c66eb24cb0a3e690573b4882fd98bc6ec64a01c283998c20dc87"
+        GENERATED_SHA256=$(sha256sum ~/uncrustify/uncrustify-0.83.0.tar.gz | awk '{print $1}')
 
         if [ "$GENERATED_SHA256" = "$EXPECTED_SHA256" ]; then
-          tar xzvf ~/uncrustify/uncrustify-0.69.0.tar.gz -C ~/uncrustify/
+          tar xzvf ~/uncrustify/uncrustify-0.83.0.tar.gz -C ~/uncrustify/
 
-          cmake -S ~/uncrustify/uncrustify-uncrustify-0.69.0 -B ~/uncrustify/build -DCMAKE_BUILD_TYPE=Release
+          cmake -S ~/uncrustify/uncrustify-uncrustify-0.83.0 -B ~/uncrustify/build -DCMAKE_BUILD_TYPE=Release
           cmake --build ~/uncrustify/build -- -j$(nproc) -s
 
           cp ~/uncrustify/build/uncrustify ~/uncrustify/
 
           echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
         else
-          echo -e "${{ env.bashFail }} SHA256 checksum verification failed for uncrustify-0.69.0.tar.gz ${{ env.bashEnd }}"
+          echo -e "${{ env.bashFail }} SHA256 checksum verification failed for uncrustify-0.83.0.tar.gz ${{ env.bashEnd }}"
           echo -e "${{ env.bashFail }} ${{ env.stepName }} ${{ env.bashEnd }}"
           exit -1
         fi
