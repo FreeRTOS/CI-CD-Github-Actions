@@ -7,6 +7,8 @@ on:
     branches: [main, v2]
   workflow_dispatch:
 
+permissions: {}
+
 env:
   # The bash escape character is \033
   bashPass:   \033[32;1mPASSED -
