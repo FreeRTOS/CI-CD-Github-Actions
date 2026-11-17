@@ -33,7 +33,7 @@ runs:
         # ${{ env.stepName }}
         echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-        sudo apt-get install clang-format fd-find dos2unix
+        sudo apt-get install clang-format-20 fd-find dos2unix
         echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
         export PATH="$PATH:$GITHUB_ACTION_PATH"
 
@@ -41,7 +41,7 @@ runs:
         fdfind --version
         echo -e "::endgroup::"
 
-        echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format --version)" ${{ env.bashEnd }}"
+        echo -e "${{ env.bashInfo }} Using clang-format Version "$(clang-format-20 --version)" ${{ env.bashEnd }}"
         echo -e "${{ env.bashPass }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
     - env:
@@ -91,8 +91,8 @@ runs:
         # Get all .c and .h files, as well as any other requested file types.
         # Then run clang-format with the common config file.
 
-        echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format -i ${{ env.bashEnd }}"
-        fdfind -e c -e h ${args} --exec clang-format --verbose -i
+        echo -e "${{ env.bashInfo }} fdfind -e c -e h ${args} --exec clang-format-20 -i ${{ env.bashEnd }}"
+        fdfind -e c -e h ${args} --exec clang-format-20 --verbose -i
 
         # Replace all trailing whitespace, exclude photo and binary files
         echo -e "${{ env.bashInfo }} Check for Trailing Whitespace ${{ env.bashEnd }}"
